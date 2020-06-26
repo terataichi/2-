@@ -2,10 +2,14 @@
 //
 
 #include <iostream>
+#include "Vector2.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    Vector2 vec(100,100);
+
+    vec += Vector2(100, 200);
+    std::cout << vec.x << "," << vec.y << std::endl;
 }
 
 // プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー

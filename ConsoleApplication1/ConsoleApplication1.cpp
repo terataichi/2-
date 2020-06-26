@@ -6,15 +6,19 @@
 
 int main()
 {
-    CSample obj1;
+    CSample *obj1 = new CSample();
+    CSample *obj2 = new CSample();
     int num;
 
-    std::cout << "整数を入力してください" << std::endl;
+    std::cout << "1つ目整数を入力してください" << std::endl;
     std::cin >> num;
-    obj1.set(num);
-    std::cout << "入力された値は" << obj1.get() << "です" << std::endl;
+    obj1->set(0,num);
 
+    std::cout << "入力された値は" << obj1->get(0) << "です\n" << std::endl;
 
+    std::cout << "呼び出された総数は" << obj2->Count() << "回です\n" << std::endl;
+    delete obj1;
+    obj1 = nullptr;
     return 0;
 }
 

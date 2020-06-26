@@ -30,6 +30,21 @@ public:
 	Vector2 operator + ()const;
 	Vector2 operator - ()const;
 };
+//// Vector2 + int
+//template<class T>
+//Vector2 operator +(const Vector2& u, const int& k);
+//// Vector2 - int
+//template<class T>
+//Vector2 operator -(const Vector2& u, const int& k);
+//// Vector2 * int
+//template<class T>
+//Vector2 operator *(const Vector2& u, const int& k);
+//// Vector2 / int
+//template<class T>
+//Vector2 operator /(const Vector2& u, const int& k);
+//// Vector2 % int
+//template<class T>
+//Vector2 operator %(const Vector2& u, const int& k);
 
 // Vector2 + int
 Vector2 operator +(const Vector2& u, const int& k);
