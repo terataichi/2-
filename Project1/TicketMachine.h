@@ -36,7 +36,7 @@ public:
 
 private:
 	bool PayCash(void);						// 現金払い処理
-	//bool PayCard(void);						// カード払い処理
+	bool PayCard(void);						// カード払い処理
 	void Clear(void);
 	void DrawBtn(void);
 	bool paySuccess;						// 支払い完了

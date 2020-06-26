@@ -72,23 +72,16 @@ bool TicketMachine::PayCash(void)
 	return false;
 }
 
-//bool TicketMachine::PayCard(void)
-//{
-//	int totalCash = 0;
-//	auto tmpCardData = cashData;
-//
-//	for (auto moneyData : tmpCashData)
-//	{
-//		totalCash += (moneyData.first * moneyData.second);
-//	}
-//
-//	if (totalCash < price_cash)
-//	{
-//		// 金額不足
-//		return false;
-//	}
-//	return false;
-//}
+bool TicketMachine::PayCard(void)
+{
+	if (cardData.first > price_card)
+	{
+		cardData.second = price_card;
+		paySuccess = true;
+		return true;
+	}
+	return false;
+}
 
 void TicketMachine::Clear(void)
 {
@@ -169,11 +162,30 @@ void TicketMachine::Run(void)
 	{
 		if (paySuccess)
 		{
-			// 決済完了
-			if (lpMySelf.MergeCash(cashDataChange))
+			// 決済処理
+			switch (payType)
 			{
-				Clear();
+			case PayType::CASH:
+				if (lpMySelf.MergeCash(cashDataChange))
+				{
+					Clear();
+				}
+				break;
+			case PayType::CARD:
+				if (lpCardServer.Payment(price_card))
+				{
+					Clear();
+				}
+				break;
+			case PayType::MAX:
+				break;
+			default:
+				TRACE("エラー：未知の支払い方法");
+				payType = PayType::MAX;
+				break;
 			}
+			// 決済完了
+
 		}
 		else
 		{
@@ -184,6 +196,7 @@ void TicketMachine::Run(void)
 				if(PayCash()) TRACE("決済成功");
 				break;
 			case PayType::CARD:
+				if (PayCard()) TRACE("決済成功");
 				break;
 			case PayType::MAX:
 				break;
@@ -238,14 +251,6 @@ void TicketMachine::Draw(void)
 	int totalMoney = 0;
 
 	SetFontSize(font_size);
-	// 切符の値段表示
-	DrawString(
-		screen_sizeX / 2 - font_size,
-		money_sizeY / 2,
-		"切符の価格 現金 : 130円 電子マネー : 124円",
-		0xffffff
-	);
-
 	switch (payType)
 	{
 	case PayType::CASH:
