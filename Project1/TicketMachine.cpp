@@ -4,6 +4,27 @@
 #include <algorithm>
 #include "MySelf.h"
 
+bool TicketMachine::InitDraw(void)
+{
+	draw.try_emplace(PayType::MAX, 
+		[]()
+	{
+		TRACE("functionのDraw:MAX\n");
+	});
+	draw.try_emplace(PayType::CASH,
+	[]()
+	{
+		TRACE("functionのDraw:Cash\n");
+	});
+	draw.try_emplace(PayType::CARD,
+	[]()
+	{
+		TRACE("functionのDraw:Card\n");
+	});
+
+	return false;
+}
+
 bool TicketMachine::PayCash(void)
 {
 	int totalCash = 0;
@@ -137,6 +158,8 @@ bool TicketMachine::Init(sharedMouse mouse)
 	images.try_emplace("act_cash", LoadGraph("image/active_cash.png"));
 	images.try_emplace("act_card", LoadGraph("image/active_card.png"));
 	btnpos = { (screen_sizeX - money_sizeX * 2) - pay_btn_sizeX ,money_sizeY * static_cast<int>(moneyType.size()) };
+
+	InitDraw();
 	return true;
 }
 
@@ -193,15 +216,15 @@ void TicketMachine::Run(void)
 			switch (payType)
 			{
 			case PayType::CASH:
-				if(PayCash()) TRACE("決済成功");
+				if(PayCash()) TRACE("決済成功\n");
 				break;
 			case PayType::CARD:
-				if (PayCard()) TRACE("決済成功");
+				if (PayCard()) TRACE("決済成功\n");
 				break;
 			case PayType::MAX:
 				break;
 			default:
-				TRACE("エラー：未知の支払い方法");
+				TRACE("エラー：未知の支払い方法\n");
 				payType = PayType::MAX;
 				break;
 			}
@@ -247,6 +270,7 @@ bool TicketMachine::InsertCard(void)
 
 void TicketMachine::Draw(void)
 {
+	draw[payType]();
 	int moneyLine = 0;
 	int totalMoney = 0;
 

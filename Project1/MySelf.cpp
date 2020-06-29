@@ -29,14 +29,14 @@ bool MySelf::Run()
 
 		if (mouse->GetClickTrg())
 		{
-			TRACE("クリックされました。\n");
+			//TRACE("クリックされました。\n");
 			Vector2 pos = mouse->GetPos();
 			const VecInt& moneyType = lpTicketMachine.GetMoneyType();
 			if (pos.x < money_sizeX)
 			{
 				if (pos.y < money_sizeY * static_cast<int>(moneyType.size()))
 				{
-					TRACE("範囲内でした\n");
+					//TRACE("範囲内でした\n");
 					int type = moneyType[pos.y / money_sizeY];
 					if (cash[type] > 0)
 					{
