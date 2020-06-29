@@ -7,18 +7,159 @@
 bool TicketMachine::InitDraw(void)
 {
 	draw.try_emplace(PayType::MAX, 
-		[]()
-	{
+	[&](){
+			DrawGraph(0, 0, images["money"], true);
+			DrawString(
+				0,
+				comment_offsetY + GetFontSize() / 2,
+				"左の枠内の現金化ICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
+				0xffffff
+			);
 		TRACE("functionのDraw:MAX\n");
 	});
+
 	draw.try_emplace(PayType::CASH,
-	[]()
-	{
-		TRACE("functionのDraw:Cash\n");
+	[&](){
+			int moneyLine = 0;
+			int totalMoney = 0;
+
+			DrawGraph(0, 0, images["act_cash"], true);
+
+			if (paySuccess)
+			{
+				DrawString(
+					0,
+					comment_offsetY + GetFontSize() / 2,
+					"決済完了\nお釣りを受け取る際は受け取りボタンを押してください",
+					0xffffff
+				);
+
+				DrawString(draw_offsetX, draw_offsetY, "投入金額", 0xffffff);
+				DrawString(draw_offsetX, draw_offsetY, "　　　　　　枚数", 0xffffff);
+
+				for (auto moneyData : cashData)
+				{
+					DrawFormatString(
+						draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
+						0xffffff, "%d円", moneyData.first
+					);
+					DrawFormatString(
+						draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
+						0xffffff, "　　　　　%d枚", moneyData.second
+					);
+
+					moneyLine++;
+					totalMoney += (moneyData.first * moneyData.second);
+				}
+
+				DrawFormatString(draw_offsetX, (draw_offsetY + GetFontSize() * 2) + moneyLine * GetFontSize(),
+					0xffffff, "合計投入額　%d円", totalMoney
+				);
+
+				DrawString(draw_offsetX * 2, draw_offsetY, "   釣銭", 0xffffff);
+				DrawString(draw_offsetX * 2, draw_offsetY, "　　　　　  枚数", 0xffffff);
+
+				int changeLine = 0;
+				for (auto data : cashDataChange)
+				{
+					DrawFormatString(
+						draw_offsetX * 2, (draw_offsetY + GetFontSize()) + changeLine * GetFontSize(),
+						0xffffff, "%5d円", data.first
+					);
+					DrawFormatString(
+						draw_offsetX * 2, (draw_offsetY + GetFontSize()) + changeLine * GetFontSize(),
+						0xffffff, "　　　　　%9d枚", data.second
+					);
+					changeLine++;
+				}
+			}
+			else
+			{
+
+				DrawString(
+					0,
+					comment_offsetY + GetFontSize() / 2,
+					"左の枠内の現金を選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
+					0xffffff
+				);
+
+				DrawString(draw_offsetX, draw_offsetY, "投入金額", 0xffffff);
+				DrawString(draw_offsetX, draw_offsetY, "　　　　　　枚数", 0xffffff);
+
+				for (auto moneyData : cashData)
+				{
+					DrawFormatString(
+						draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
+						0xffffff, "%d円", moneyData.first
+					);
+					DrawFormatString(
+						draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
+						0xffffff, "　　　　　%d枚", moneyData.second
+					);
+
+					moneyLine++;
+					totalMoney += (moneyData.first * moneyData.second);
+				}
+
+				DrawFormatString(draw_offsetX, (draw_offsetY + GetFontSize() * 2) + moneyLine * GetFontSize(),
+					0xffffff, "合計投入額　%d円", totalMoney
+				);
+
+				// お金がない
+				if (totalMoney < price_cash)
+				{
+					DrawString(draw_offsetX, (draw_offsetY + GetFontSize() * 3) + moneyLine * GetFontSize(),
+						"金額が足りません", 0xff0000, true);
+				}
+			}
+			TRACE("functionのDraw:Cash\n");
 	});
+
 	draw.try_emplace(PayType::CARD,
-	[]()
-	{
+	[&](){
+			int moneyLine = 0;
+			int totalMoney = 0;
+			DrawGraph(0, 0, images["act_card"], true);
+			if (paySuccess)
+			{
+				DrawString(
+					0,
+					comment_offsetY + GetFontSize() / 2,
+					"決済完了\nICカードを出す際は受け取りボタンを押してください",
+					0xffffff
+				);
+
+				DrawString(draw_offsetX + GetFontSize(), draw_offsetY, "電子マネー", 0xffffff);
+				DrawFormatString(
+					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + GetFontSize(),
+					0xffffff, "残高　%d円", cardData.first
+				);
+				DrawFormatString(
+					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + GetFontSize() * 2,
+					0xffffff, "引去額　%d円", cardData.second
+				);
+
+			}
+			else
+			{
+
+				DrawString(
+					0,
+					comment_offsetY + GetFontSize() / 2,
+					"左の枠内のICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
+					0xffffff
+				);
+				DrawString(draw_offsetX + GetFontSize(), draw_offsetY, "電子マネー", 0xffffff);
+				DrawFormatString(
+					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + GetFontSize(),
+					0xffffff, "残高　%d円", cardData.first
+				);
+				// お金がない
+				if (cardData.first < price_cash)
+				{
+					DrawString(draw_offsetX, (draw_offsetY + GetFontSize() * 3), "残高が足りません", 0xff0000, true);
+				}
+			}
 		TRACE("functionのDraw:Card\n");
 	});
 
@@ -270,161 +411,8 @@ bool TicketMachine::InsertCard(void)
 
 void TicketMachine::Draw(void)
 {
-	draw[payType]();
-	int moneyLine = 0;
-	int totalMoney = 0;
-
 	SetFontSize(font_size);
-	switch (payType)
-	{
-	case PayType::CASH:
-		DrawGraph(0, 0, images["act_cash"], true);
-
-		if (paySuccess)
-		{
-			DrawString(
-				0,
-				comment_offsetY + GetFontSize() / 2,
-				"決済完了\nお釣りを受け取る際は受け取りボタンを押してください",
-				0xffffff
-			);
-
-			DrawString(draw_offsetX, draw_offsetY, "投入金額", 0xffffff);
-			DrawString(draw_offsetX, draw_offsetY, "　　　　　　枚数", 0xffffff);
-
-			for (auto moneyData : cashData)
-			{
-				DrawFormatString(
-					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
-					0xffffff, "%d円", moneyData.first
-				);
-				DrawFormatString(
-					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
-					0xffffff, "　　　　　%d枚", moneyData.second
-				);
-
-				moneyLine++;
-				totalMoney += (moneyData.first * moneyData.second);
-			}
-
-			DrawFormatString(draw_offsetX, (draw_offsetY + GetFontSize() * 2) + moneyLine * GetFontSize(),
-				0xffffff, "合計投入額　%d円", totalMoney
-			);
-
-			DrawString(draw_offsetX * 2, draw_offsetY, "   釣銭", 0xffffff);
-			DrawString(draw_offsetX * 2, draw_offsetY, "　　　　　  枚数", 0xffffff);
-
-			int changeLine = 0;
-			for (auto data : cashDataChange)
-			{
-				DrawFormatString(
-					draw_offsetX * 2, (draw_offsetY + GetFontSize()) + changeLine * GetFontSize(),
-					0xffffff, "%5d円", data.first
-				);
-				DrawFormatString(
-					draw_offsetX * 2, (draw_offsetY + GetFontSize()) + changeLine * GetFontSize(),
-					0xffffff, "　　　　　%9d枚", data.second
-				);
-				changeLine++;
-			}
-		}
-		else
-		{
-
-			DrawString(
-				0,
-				comment_offsetY + GetFontSize() / 2,
-				"左の枠内の現金を選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
-				0xffffff
-			);
-
-			DrawString(draw_offsetX, draw_offsetY, "投入金額", 0xffffff);
-			DrawString(draw_offsetX, draw_offsetY, "　　　　　　枚数", 0xffffff);
-
-			for (auto moneyData : cashData)
-			{
-				DrawFormatString(
-					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
-					0xffffff, "%d円", moneyData.first
-				);
-				DrawFormatString(
-					draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + moneyLine * GetFontSize(),
-					0xffffff, "　　　　　%d枚", moneyData.second
-				);
-
-				moneyLine++;
-				totalMoney += (moneyData.first * moneyData.second);
-			}
-
-			DrawFormatString(draw_offsetX, (draw_offsetY + GetFontSize() * 2) + moneyLine * GetFontSize(),
-				0xffffff, "合計投入額　%d円", totalMoney
-			);
-
-			// お金がない
-			if (totalMoney < price_cash)
-			{
-				DrawString(draw_offsetX, (draw_offsetY + GetFontSize() * 3) + moneyLine * GetFontSize(),
-					"金額が足りません", 0xff0000, true);
-			}
-		}
-		break;
-	case PayType::CARD:
-		DrawGraph(0, 0, images["act_card"], true);
-		if (paySuccess)
-		{
-			DrawString(
-				0,
-				comment_offsetY + GetFontSize() / 2,
-				"決済完了\nICカードを出す際は受け取りボタンを押してください",
-				0xffffff
-			);
-
-			DrawString(draw_offsetX + GetFontSize(), draw_offsetY, "電子マネー", 0xffffff);
-			DrawFormatString(
-				draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + GetFontSize(),
-				0xffffff, "残高　%d円", cardData.first
-			);
-			DrawFormatString(
-				draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + GetFontSize() * 2,
-				0xffffff, "引去額　%d円", cardData.second
-			);
-
-		}
-		else
-		{
-
-			DrawString(
-				0,
-				comment_offsetY + GetFontSize() / 2,
-				"左の枠内のICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
-				0xffffff
-			);
-			DrawString(draw_offsetX + GetFontSize(), draw_offsetY, "電子マネー", 0xffffff);
-			DrawFormatString(
-				draw_offsetX + GetFontSize(), (draw_offsetY + GetFontSize()) + GetFontSize(),
-				0xffffff, "残高　%d円", cardData.first
-			);
-			// お金がない
-			if (cardData.first < price_cash)
-			{
-				DrawString(draw_offsetX, (draw_offsetY + GetFontSize() * 3),"残高が足りません", 0xff0000, true);
-			}
-		}
-		break;
-
-	case PayType::MAX:
-		DrawGraph(0, 0, images["money"], true);
-		DrawString(
-			0,
-			comment_offsetY + GetFontSize() / 2,
-			"左の枠内の現金化ICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
-			0xffffff
-		);
-		break;
-	default:
-		TRACE("エラーTicketMachine::Draw\n");
-		break;
-	}
+	draw[payType]();
 	DrawBtn();
 }
 
