@@ -15,7 +15,6 @@ bool TicketMachine::InitDraw(void)
 				"左の枠内の現金化ICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
 				0xffffff
 			);
-		TRACE("functionのDraw:MAX\n");
 	});
 
 	draw.try_emplace(PayType::CASH,
@@ -112,13 +111,10 @@ bool TicketMachine::InitDraw(void)
 						"金額が足りません", 0xff0000, true);
 				}
 			}
-			TRACE("functionのDraw:Cash\n");
 	});
 
 	draw.try_emplace(PayType::CARD,
 	[&](){
-			int moneyLine = 0;
-			int totalMoney = 0;
 			DrawGraph(0, 0, images["act_card"], true);
 			if (paySuccess)
 			{
@@ -160,9 +156,18 @@ bool TicketMachine::InitDraw(void)
 					DrawString(draw_offsetX, (draw_offsetY + GetFontSize() * 3), "残高が足りません", 0xff0000, true);
 				}
 			}
-		TRACE("functionのDraw:Card\n");
 	});
 
+	return false;
+}
+
+bool TicketMachine::InitPay(void)
+{
+	// 決済処理登録
+	std::function<bool(void)> f = PayMax();
+	pay.try_emplace(PayType::MAX, PayMax());
+	pay.try_emplace(PayType::CASH, PayCash());
+	pay.try_emplace(PayType::CARD, PayCard());
 	return false;
 }
 
@@ -242,6 +247,11 @@ bool TicketMachine::PayCard(void)
 		paySuccess = true;
 		return true;
 	}
+	return false;
+}
+
+bool TicketMachine::PayMax(void)
+{
 	return false;
 }
 
@@ -344,7 +354,7 @@ void TicketMachine::Run(void)
 			case PayType::MAX:
 				break;
 			default:
-				TRACE("エラー：未知の支払い方法");
+				TRACE("エラー：未知の支払い方法\n");
 				payType = PayType::MAX;
 				break;
 			}
@@ -353,21 +363,17 @@ void TicketMachine::Run(void)
 		}
 		else
 		{
-			// 決済処理
-			switch (payType)
+			// 例外処理
+			if (pay.find(payType) != pay.end())
 			{
-			case PayType::CASH:
-				if(PayCash()) TRACE("決済成功\n");
-				break;
-			case PayType::CARD:
-				if (PayCard()) TRACE("決済成功\n");
-				break;
-			case PayType::MAX:
-				break;
-			default:
 				TRACE("エラー：未知の支払い方法\n");
 				payType = PayType::MAX;
-				break;
+			}
+
+			// 決済処理
+			if (pay[payType]())
+			{
+				TRACE("決済成功\n");
 			}
 		}
 	}
@@ -412,7 +418,22 @@ bool TicketMachine::InsertCard(void)
 void TicketMachine::Draw(void)
 {
 	SetFontSize(font_size);
-	draw[payType]();
+
+	// C++20からcantains
+	//if (draw.contains(payType))
+	//{
+	//	draw[payType]();
+	//}
+
+	//if (draw.count(payType))
+	//{
+	//	draw[payType]();
+	//}
+
+	if (draw.find(payType) != draw.end())
+	{
+		draw[payType]();
+	}
 	DrawBtn();
 }
 
@@ -425,6 +446,7 @@ TicketMachine::TicketMachine() :
 	comment_offsetY(450), draw_offsetX(200), draw_offsetY(70), price_cash(130), price_card(124),pay_btn_sizeX(200),pay_btn_sizeY(50)
 	, screen_sizeX(800), screen_sizeY(600), money_sizeX(100), money_sizeY(50), font_size(18)
 {
+	InitPay();
 	Clear();
 	TRACE("TicketMachineを生成\n");
 }

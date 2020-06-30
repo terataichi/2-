@@ -23,9 +23,7 @@ bool MySelf::Run()
 
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
 	{
-
 		mouse->Update();
-
 
 		if (mouse->GetClickTrg())
 		{

@@ -37,8 +37,10 @@ public:
 
 private:
 	bool InitDraw(void);										// 描画を登録したり
+	bool InitPay(void);
 	bool PayCash(void);											// 現金払い処理
 	bool PayCard(void);											// カード払い処理
+	bool PayMax(void);											// 例外処理
 	void Clear(void);
 	void DrawBtn(void);
 	bool paySuccess;											// 支払い完了
@@ -57,6 +59,8 @@ private:
 	std::map<std::string, int> images;							// 画像読み込み用
 
 	std::map<PayType, std::function<void(void)>>draw;			// 描画するためのラムダ式を格納するmap
+	std::map<PayType, std::function<bool(void)>> pay;			// 決済処理用map
+	std::function<bool(void)> f;			
 
 	const int pay_btn_sizeX;									// 支払いボタンの横サイズ
 	const int pay_btn_sizeY;
