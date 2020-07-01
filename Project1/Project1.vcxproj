@@ -160,6 +160,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CardServer.h" />
+    <ClInclude Include="InsertCard.h" />
+    <ClInclude Include="InsertCash.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MouseCtl.h" />
     <ClInclude Include="MySelf.h" />

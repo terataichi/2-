@@ -164,10 +164,9 @@ bool TicketMachine::InitDraw(void)
 bool TicketMachine::InitPay(void)
 {
 	// 決済処理登録
-	std::function<bool(void)> f = PayMax();
-	pay.try_emplace(PayType::MAX, PayMax());
-	pay.try_emplace(PayType::CASH, PayCash());
-	pay.try_emplace(PayType::CARD, PayCard());
+	pay.try_emplace(PayType::MAX, &TicketMachine::PayMax);
+	pay.try_emplace(PayType::CASH,&TicketMachine::PayCash);
+	pay.try_emplace(PayType::CARD, &TicketMachine::PayCard);
 	return false;
 }
 
@@ -366,14 +365,15 @@ void TicketMachine::Run(void)
 			// 例外処理
 			if (pay.find(payType) != pay.end())
 			{
+				if ((this->*pay[payType])())
+				{
+					TRACE("決済成功\n");
+				}
+			}
+			else
+			{
 				TRACE("エラー：未知の支払い方法\n");
 				payType = PayType::MAX;
-			}
-
-			// 決済処理
-			if (pay[payType]())
-			{
-				TRACE("決済成功\n");
 			}
 		}
 	}
@@ -381,16 +381,7 @@ void TicketMachine::Run(void)
 
 bool TicketMachine::InsertCash(int cash)
 {
-
-	if (payType == PayType::MAX)
-	{
-		payType = PayType::CASH;
-	}
-
-	if (payType != PayType::CASH)
-	{
-		return false;
-	}
+	//insert = InsertCard(payType,)
 
 	// 見てなかったら要素を追加する
 	cashData.try_emplace(cash, 0);

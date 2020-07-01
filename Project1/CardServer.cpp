@@ -8,12 +8,13 @@ PairInt CardServer::GetCardState(void)
 
 bool CardServer::Payment(int price)
 {
-	if (cardData.first >= price)
+	if (cardData.first <= price)
 	{
-		cardData.first -= price;
-		cardData.second = price;
-		return true;
+		return false;
 	}
+
+	cardData.first -= price;
+	cardData.second = price;
 	return false;
 }
 
