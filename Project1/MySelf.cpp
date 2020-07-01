@@ -101,6 +101,11 @@ bool MySelf::MergeCash(MapInt& changecash)
 	return true;
 }
 
+InsFnc MySelf::Insert(InsFnc* ins)
+{
+	return insert = (*ins);
+}
+
 MySelf::MySelf() :screen_sizeX(800), screen_sizeY(600),money_sizeX(100),money_sizeY(50),font_size(18)
 {
 	mouse = nullptr;

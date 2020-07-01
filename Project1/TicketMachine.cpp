@@ -381,8 +381,6 @@ void TicketMachine::Run(void)
 
 bool TicketMachine::InsertCash(int cash)
 {
-	//insert = InsertCard(payType,)
-
 	// Œ©‚Ä‚È‚©‚Á‚½‚ç—v‘f‚ð’Ç‰Á‚·‚é
 	cashData.try_emplace(cash, 0);
 	cashData[cash]++;

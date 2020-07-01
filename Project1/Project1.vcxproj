@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CardServer.cpp" />
+    <ClCompile Include="InsertMax.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MouseCtl.cpp" />
     <ClCompile Include="MySelf.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="CardServer.h" />
     <ClInclude Include="InsertCard.h" />
     <ClInclude Include="InsertCash.h" />
+    <ClInclude Include="InsertMax.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MouseCtl.h" />
     <ClInclude Include="MySelf.h" />

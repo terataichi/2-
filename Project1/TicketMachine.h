@@ -63,7 +63,6 @@ private:
 	std::map<PayType, bool (TicketMachine::*)()> pay;								// 決済処理用map
 	std::function<bool(void)> f;			
 
-	void (TicketMachine::* insert)(PayType& payType, MapInt& cashData,PairInt cardData, int cash);	// 関数オブジェクト
 	const int pay_btn_sizeX;														// 支払いボタンの横サイズ
 	const int pay_btn_sizeY;
 	const int comment_offsetY;

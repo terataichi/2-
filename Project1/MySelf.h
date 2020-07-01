@@ -7,6 +7,8 @@
 
 #define lpMySelf MySelf::GetInstance()
 
+using InsFnc = void (*)(PayType& payType, MapInt& cashData, PairInt& cardData, int cash);	// 関数オブジェクトの宣言
+
 class MouseCtl;
 
 class MySelf
@@ -36,6 +38,7 @@ public:
 	bool Run(void);
 	void Draw(void);
 	bool MergeCash(MapInt& cash);
+	InsFnc Insert(InsFnc* ins);				// ｾｯﾄ関数
 private:
 	MySelf(void);
 	~MySelf(void);
@@ -47,9 +50,11 @@ private:
 	const int screen_sizeY;
 	const int money_sizeX;					// 画像サイズ
 	const int money_sizeY;					// 画像サイズ
-	const int font_size;					
+	const int font_size;
 
-	//std::map<std::string, int> images;		// 画像読み込み用
+	InsFnc insert;							// インサートを関数オブジェクトで管理	
+
+	//std::map<std::string, int> images;	// 画像読み込み用
 	MapInt cash;							// 持っているお金
 
 	// unique_ptr → unique_ptr のメンバー
