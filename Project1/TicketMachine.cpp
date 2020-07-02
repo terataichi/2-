@@ -3,6 +3,7 @@
 #include <DxLib.h>
 #include <algorithm>
 #include "MySelf.h"
+#include "InsertMax.h"
 
 bool TicketMachine::InitDraw(void)
 {
@@ -12,7 +13,7 @@ bool TicketMachine::InitDraw(void)
 			DrawString(
 				0,
 				comment_offsetY + GetFontSize() / 2,
-				"左の枠内の現金化ICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
+				"左の枠内の現金かICカードを選択しクリックして入力してください。\n入金が完了したら決済ボタンを押してください。",
 				0xffffff
 			);
 	});
@@ -243,6 +244,7 @@ bool TicketMachine::PayCard(void)
 	if (cardData.first > price_card)
 	{
 		cardData.second = price_card;
+		cardData.first -= price_card;
 		paySuccess = true;
 		return true;
 	}
@@ -262,6 +264,7 @@ void TicketMachine::Clear(void)
 	cashData.clear();
 	cashDataChange.clear();
 	cardData = { 0,0 };
+	lpMySelf.SetIns(InsertMax());
 }
 
 void TicketMachine::DrawBtn(void)
@@ -318,6 +321,11 @@ PayType& TicketMachine::GetPayType(void)
 	return payType;
 }
 
+void TicketMachine::SetPayType(PayType type)
+{
+	payType = type;
+}
+
 MapInt& TicketMachine::GetCashData(void)
 {
 	return cashData;
@@ -326,6 +334,11 @@ MapInt& TicketMachine::GetCashData(void)
 PairInt& TicketMachine::GetCardData(void)
 {
 	return cardData;
+}
+
+bool TicketMachine::GetPaySuccess(void)
+{
+	return paySuccess;
 }
 
 void TicketMachine::Run(void)
@@ -366,6 +379,7 @@ void TicketMachine::Run(void)
 				}
 				break;
 			case PayType::MAX:
+				TRACE("あ");
 				break;
 			default:
 				TRACE("エラー：未知の支払い方法\n");
@@ -394,35 +408,42 @@ void TicketMachine::Run(void)
 	}
 }
 
-bool TicketMachine::InsertCash(int cash)
-{
-	// 見てなかったら要素を追加する
-	cashData.try_emplace(cash, 0);
-	cashData[cash]++;
+//bool TicketMachine::InsertCash(int cash)
+//{
+//	// 見てなかったら要素を追加する
+//	cashData.try_emplace(cash, 0);
+//	cashData[cash]++;
+//
+//	return true;
+//}
 
-	return true;
-}
-
-bool TicketMachine::InsertCard(void)
-{
-	if (payType == PayType::MAX)
-	{
-		payType = PayType::CARD;
-	}
-	else
-	{
-		// カードおよび現金が未投入の場合のみ受け付けるので、それ以外は処理しない
-		return false;
-	}
-	// 情報を入れる
-	cardData = lpCardServer.GetCardState();
-	return true;
-}
+//bool TicketMachine::InsertCard(void)
+//{
+//	if (payType == PayType::MAX)
+//	{
+//		payType = PayType::CARD;
+//	}
+//	else
+//	{
+//		// カードおよび現金が未投入の場合のみ受け付けるので、それ以外は処理しない
+//		return false;
+//	}
+//	// 情報を入れる
+//	cardData = lpCardServer.GetCardState();
+//	return true;
+//}
 
 void TicketMachine::Draw(void)
 {
 	SetFontSize(font_size);
 
+	// 切符の値段表示
+	DrawString(
+		screen_sizeX / 2 - font_size,
+		money_sizeY / 2,
+		"切符の価格 現金 : 130円 電子マネー : 124円",
+		0xffffff
+		);
 	// C++20からcantains
 	//if (draw.contains(payType))
 	//{

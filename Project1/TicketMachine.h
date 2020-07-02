@@ -29,15 +29,15 @@ public:
 		return s_Instance;
 	}	
 	void Run(void);																	// メイン処理
-	bool InsertCash(int cash);														// お金が入ったかを確認
-	bool InsertCard(void);															// キャッシュカード
 	void Draw(void);
 	VecInt& GetMoneyType(void);
 	bool Init(sharedMouse mouse);
 
 	PayType& GetPayType(void);
+	void SetPayType(PayType type);
 	MapInt& GetCashData(void);
 	PairInt& GetCardData(void);
+	bool GetPaySuccess(void);
 private:
 	bool InitDraw(void);															// 描画を登録したり
 	bool InitPay(void);

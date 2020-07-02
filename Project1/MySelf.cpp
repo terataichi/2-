@@ -26,12 +26,12 @@ bool MySelf::Run()
 	{
 		mouse->Update();
 
-		if (mouse->GetClickTrg())
+		if (mouse->GetClickTrg() && !lpTicketMachine.GetPaySuccess())
 		{
 			//TRACE("クリックされました。\n");
 			Vector2 pos = mouse->GetPos();
 			const VecInt& moneyType = lpTicketMachine.GetMoneyType();
-			int type;
+			int type = 0;
 			if (pos.x < money_sizeX)
 			{
 				if (pos.y < money_sizeY * static_cast<int>(moneyType.size()))
@@ -40,8 +40,17 @@ bool MySelf::Run()
 					type = moneyType[pos.y / money_sizeY];
 					if (cash[type] > 0)
 					{
-						insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
-						cash[type]--;
+						if (lpTicketMachine.GetPayType() == PayType::MAX)
+						{
+							// 最初の一回はセットする為に呼ぶ
+							lpTicketMachine.SetPayType(PayType::CASH);
+							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+						}
+						if (lpTicketMachine.GetPayType() == PayType::CASH)
+						{
+							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+							cash[type]--;
+						}
 					}
 				}
 				else
@@ -49,9 +58,19 @@ bool MySelf::Run()
 					// 現金の範囲+１の位置がちょうど電子マネー
 					if (pos.y < money_sizeY * static_cast<int>(moneyType.size() + 1))
 					{
-						insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+						if (lpTicketMachine.GetPayType() == PayType::MAX)
+						{
+							// 最初の一回はセットする為に呼ぶ
+							lpTicketMachine.SetPayType(PayType::CARD);
+							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+						}
+						if (lpTicketMachine.GetPayType() == PayType::CARD)
+						{
+							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+						}
 					}
 				}
+				//insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
 			}
 		}
 		lpTicketMachine.Run();

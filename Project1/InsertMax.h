@@ -8,15 +8,18 @@
 
 struct InsertMax
 {
-	void operator()(PayType& payType, MapInt& cashData, PairInt& cardData, int cash)
+	bool operator()(PayType& payType, MapInt& cashData, PairInt& cardData, int cash)
 	{
 		if (payType == PayType::CARD)
 		{
 			lpMySelf.SetIns(InsertCard());
+			return true;
 		}
-		else if (payType == PayType::CASH)
+		if (payType == PayType::CASH)
 		{
 			lpMySelf.SetIns(InsertCash());
+			return true;
 		}
+		return false;
 	}
 };

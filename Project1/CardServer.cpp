@@ -15,7 +15,7 @@ bool CardServer::Payment(int price)
 
 	cardData.first -= price;
 	cardData.second = price;
-	return false;
+	return true;
 }
 
 CardServer::CardServer()

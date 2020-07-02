@@ -7,7 +7,7 @@
 
 #define lpMySelf MySelf::GetInstance()
 
-using InsFnc = std::function<void(PayType& , MapInt& , PairInt& , int )>;	// 関数オブジェクトの宣言
+using InsFnc = std::function<bool(PayType& , MapInt& , PairInt& , int )>;	// 関数オブジェクトの宣言
 
 class MouseCtl;
 
