@@ -150,7 +150,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CardServer.cpp" />
-    <ClCompile Include="InsertMax.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MouseCtl.cpp" />
     <ClCompile Include="MySelf.cpp" />

@@ -7,7 +7,7 @@
 
 #define lpMySelf MySelf::GetInstance()
 
-using InsFnc = void (*)(PayType& payType, MapInt& cashData, PairInt& cardData, int cash);	// 関数オブジェクトの宣言
+using InsFnc = std::function<void(PayType& , MapInt& , PairInt& , int )>;	// 関数オブジェクトの宣言
 
 class MouseCtl;
 
@@ -38,7 +38,7 @@ public:
 	bool Run(void);
 	void Draw(void);
 	bool MergeCash(MapInt& cash);
-	InsFnc Insert(InsFnc* ins);				// ｾｯﾄ関数
+	void SetIns(InsFnc ins);				// セット
 private:
 	MySelf(void);
 	~MySelf(void);

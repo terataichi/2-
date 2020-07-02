@@ -6,8 +6,6 @@
 #include <functional>
 #include "MouseCtl.h"
 #include "CardServer.h"
-#include "InsertCard.h"
-#include "InsertCash.h"
 
 using MapInt = std::map<int, int>;
 using VecInt = std::vector<int>;
@@ -36,6 +34,10 @@ public:
 	void Draw(void);
 	VecInt& GetMoneyType(void);
 	bool Init(sharedMouse mouse);
+
+	PayType& GetPayType(void);
+	MapInt& GetCashData(void);
+	PairInt& GetCardData(void);
 private:
 	bool InitDraw(void);															// •`‰æ‚ğ“o˜^‚µ‚½‚è
 	bool InitPay(void);
@@ -61,7 +63,6 @@ private:
 
 	std::map<PayType, std::function<void(void)>>draw;								// •`‰æ‚·‚é‚½‚ß‚Ìƒ‰ƒ€ƒ_®‚ğŠi”[‚·‚émap
 	std::map<PayType, bool (TicketMachine::*)()> pay;								// ŒˆÏˆ——pmap
-	std::function<bool(void)> f;			
 
 	const int pay_btn_sizeX;														// x•¥‚¢ƒ{ƒ^ƒ“‚Ì‰¡ƒTƒCƒY
 	const int pay_btn_sizeY;

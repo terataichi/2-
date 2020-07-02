@@ -3,6 +3,7 @@
 #include <DxLib.h>
 #include "MouseCtl.h"
 #include "TicketMachine.h"
+#include "InsertMax.h"
 
 MySelf* MySelf::s_Instance = nullptr;
 
@@ -30,18 +31,17 @@ bool MySelf::Run()
 			//TRACE("クリックされました。\n");
 			Vector2 pos = mouse->GetPos();
 			const VecInt& moneyType = lpTicketMachine.GetMoneyType();
+			int type;
 			if (pos.x < money_sizeX)
 			{
 				if (pos.y < money_sizeY * static_cast<int>(moneyType.size()))
 				{
 					//TRACE("範囲内でした\n");
-					int type = moneyType[pos.y / money_sizeY];
+					type = moneyType[pos.y / money_sizeY];
 					if (cash[type] > 0)
 					{
-						if (lpTicketMachine.InsertCash(type))
-						{
-							cash[type]--;
-						}
+						insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+						cash[type]--;
 					}
 				}
 				else
@@ -49,7 +49,7 @@ bool MySelf::Run()
 					// 現金の範囲+１の位置がちょうど電子マネー
 					if (pos.y < money_sizeY * static_cast<int>(moneyType.size() + 1))
 					{
-						lpTicketMachine.InsertCard();
+						insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
 					}
 				}
 			}
@@ -101,9 +101,9 @@ bool MySelf::MergeCash(MapInt& changecash)
 	return true;
 }
 
-InsFnc MySelf::Insert(InsFnc* ins)
+void MySelf::SetIns(InsFnc ins)
 {
-	return insert = (*ins);
+	insert = ins;
 }
 
 MySelf::MySelf() :screen_sizeX(800), screen_sizeY(600),money_sizeX(100),money_sizeY(50),font_size(18)
@@ -159,7 +159,7 @@ bool MySelf::MyInit()
 	cash.try_emplace(static_cast<int>(10000), 1);
 	//cash.try_emplace(static_cast<int>(Cash::Card), 15);
 
-
+	insert = InsertMax();
 	//TRACE("money.png:%d", images["money"]);
 	return true;
 }

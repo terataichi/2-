@@ -313,6 +313,21 @@ bool TicketMachine::Init(sharedMouse mouse)
 	return true;
 }
 
+PayType& TicketMachine::GetPayType(void)
+{
+	return payType;
+}
+
+MapInt& TicketMachine::GetCashData(void)
+{
+	return cashData;
+}
+
+PairInt& TicketMachine::GetCardData(void)
+{
+	return cardData;
+}
+
 void TicketMachine::Run(void)
 {
 	Vector2 pos = mouse->GetPos();
