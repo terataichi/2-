@@ -70,7 +70,6 @@ bool MySelf::Run()
 						}
 					}
 				}
-				//insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
 			}
 		}
 		lpTicketMachine.Run();

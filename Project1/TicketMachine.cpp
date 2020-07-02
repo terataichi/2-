@@ -272,16 +272,26 @@ void TicketMachine::DrawBtn(void)
 
 	SetFontSize(font_size * 2);
 
-	std::string btnName = (paySuccess == false ? "決済" : "受け取り");
+	std::string payName = (paySuccess == false ? "決済" : "受け取り");
+	std::string cancel = "キャンセル";
 
-	DrawGraph(btnpos.x, btnpos.y, images[btnKey], true);
+	DrawGraph(btnpos.x, btnpos.y - pay_btn_sizeY, images[btnKey], true);
+	DrawGraph(btnpos.x, btnpos.y + cancel_offSet, images[cancelKey], true);
 
 	DrawString(
-		(screen_sizeX - money_sizeX * 2) - (pay_btn_sizeX / 2) - (font_size / 2 * static_cast<int>(btnName.size())), 
-		money_sizeY * (moneyType.size()) + font_size / 2,
-		btnName.c_str(),
+		(screen_sizeX - money_sizeX * 2) - (pay_btn_sizeX / 2) - (font_size / 2 * static_cast<int>(payName.size())), 
+		money_sizeY * (moneyType.size()) + font_size / 2 - pay_btn_sizeY,
+		payName.c_str(),
 		0xfff
 	);
+
+	DrawString(
+	(screen_sizeX - money_sizeX * 2) - (pay_btn_sizeX / 2) - (font_size / 2 * static_cast<int>(cancel.size())),
+		money_sizeY * (moneyType.size()) + font_size / 2 + cancel_offSet,
+		cancel.c_str(),
+		0xf
+		);
+
 }
 
 bool TicketMachine::Init(sharedMouse mouse)
@@ -345,12 +355,12 @@ void TicketMachine::Run(void)
 {
 	Vector2 pos = mouse->GetPos();
 
-	auto checkBtn = [&]() {	
-		return (pos.x >= btnpos.x) && (pos.x < btnpos.x + pay_btn_sizeX) &&
-			(pos.y >= btnpos.y) && (pos.y < btnpos.y + pay_btn_sizeY);
+	auto checkBtn = [&](Vector2 bpos) {	
+		return (pos.x >= bpos.x) && (pos.x < bpos.x + pay_btn_sizeX) &&
+			(pos.y >= bpos.y) && (pos.y < bpos.y + pay_btn_sizeY);
 	};
 
-	if (mouse->GetClicking() && checkBtn())
+	if (mouse->GetClicking() && checkBtn(btnpos - pay_btn_sizeY))
 	{
 		btnKey = "btn_push";
 	}
@@ -359,50 +369,64 @@ void TicketMachine::Run(void)
 		btnKey = "btn";
 	}
 
-	if (mouse->GetClickTrg() && checkBtn())
+	if (mouse->GetClicking() && checkBtn(btnpos + cancel_offSet))
 	{
-		if (paySuccess)
-		{
-			// 決済処理
-			switch (payType)
-			{
-			case PayType::CASH:
-				if (lpMySelf.MergeCash(cashDataChange))
-				{
-					Clear();
-				}
-				break;
-			case PayType::CARD:
-				if (lpCardServer.Payment(price_card))
-				{
-					Clear();
-				}
-				break;
-			case PayType::MAX:
-				TRACE("あ");
-				break;
-			default:
-				TRACE("エラー：未知の支払い方法\n");
-				payType = PayType::MAX;
-				break;
-			}
-			// 決済完了
+		cancelKey = "btn_push";
+		payType == PayType::CASH ? lpMySelf.MergeCash(cashData) : lpCardServer.Payment(cardData.first + cardData.second);
+		Clear();
+	}
+	else
+	{
+		cancelKey = "btn";
+	}
 
-		}
-		else
+	if (mouse->GetClickTrg())
+	{
+		if (checkBtn(btnpos - pay_btn_sizeY))
 		{
-			// 例外処理
-			if (pay.find(payType) != pay.end())
+			if (paySuccess)
 			{
-				if ((this->*pay[payType])())
+				// 決済処理
+				switch (payType)
 				{
-					TRACE("決済成功\n");
+				case PayType::CASH:
+					if (lpMySelf.MergeCash(cashDataChange))
+					{
+						Clear();
+					}
+					break;
+				case PayType::CARD:
+					if (lpCardServer.Payment(price_card))
+					{
+						Clear();
+					}
+					break;
+				case PayType::MAX:
+					TRACE("あ");
+					break;
+				default:
+					TRACE("エラー：未知の支払い方法\n");
+					payType = PayType::MAX;
+					break;
 				}
+				// 決済完了
+
 			}
 			else
 			{
-				TRACE("エラー：未知の支払い方法\n");
-				payType = PayType::MAX;
+				// 例外処理
+				if (pay.find(payType) != pay.end())
+				{
+					if ((this->*pay[payType])())
+					{
+						TRACE("決済成功\n");
+					}
+				}
+				else
+				{
+					TRACE("エラー：未知の支払い方法\n");
+					payType = PayType::MAX;
+				}
 			}
 		}
 	}
@@ -444,6 +468,7 @@ void TicketMachine::Draw(void)
 		"切符の価格 現金 : 130円 電子マネー : 124円",
 		0xffffff
 		);
+
 	// C++20からcantains
 	//if (draw.contains(payType))
 	//{
@@ -469,7 +494,7 @@ VecInt& TicketMachine::GetMoneyType(void)
 
 TicketMachine::TicketMachine() :
 	comment_offsetY(450), draw_offsetX(200), draw_offsetY(70), price_cash(130), price_card(124),pay_btn_sizeX(200),pay_btn_sizeY(50)
-	, screen_sizeX(800), screen_sizeY(600), money_sizeX(100), money_sizeY(50), font_size(18)
+	, screen_sizeX(800), screen_sizeY(600), money_sizeX(100), money_sizeY(50), font_size(18),cancel_offSet(10)
 {
 	InitPay();
 	Clear();

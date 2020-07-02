@@ -51,6 +51,7 @@ private:
 	sharedMouse mouse;																// もらうやつ
 
 	std::string btnKey;																// 表示するボタンへのキー
+	std::string cancelKey;
 	Vector2 btnpos;																	// ボタンの座標
 		
 	std::vector<int> moneyType;														// 支払い手法
@@ -71,7 +72,7 @@ private:
 	const int draw_offsetY;
 	const int price_card;															// 現金の場合の価格
 	const int price_cash;															// 電子マネーの場合の価格
-
+	const int cancel_offSet;														// キャンセル用オフセット格納用
 //---------------
 	const int screen_sizeX;
 	const int screen_sizeY;
