@@ -54,6 +54,7 @@ private:
 
 	InsFnc insert;							// インサートを関数オブジェクトで管理	
 
+	//std::map<PayType, InsFnc> insMap;		// 関数オブジェクト管理用変数
 	//std::map<std::string, int> images;	// 画像読み込み用
 	MapInt cash;							// 持っているお金
 

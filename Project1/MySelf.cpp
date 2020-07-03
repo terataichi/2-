@@ -177,6 +177,9 @@ bool MySelf::MyInit()
 	cash.try_emplace(static_cast<int>(10000), 1);
 	//cash.try_emplace(static_cast<int>(Cash::Card), 15);
 
+	//insMap.try_emplace(PayType::MAX, InsertMax());
+	//insMap.try_emplace(PayType::CASH, InsertCash());
+	//insMap.try_emplace(PayType::CARD, InsertCard());
 	insert = InsertMax();
 	//TRACE("money.png:%d", images["money"]);
 	return true;
