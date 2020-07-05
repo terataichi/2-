@@ -39,7 +39,7 @@ private:
 	bool SysInit(void);
 	void Init(void);
 
-	Vector2 _pos = Vector2(0, 0);
+	Vector2f _pos;
 
 	void Draw(void);										// •`‰æ
 

@@ -11,6 +11,10 @@ void SceneMng::Run(void)
 		{
 			_pos.x += _pyoSize;
 		}
+		if (CheckHitKey(KEY_INPUT_A))
+		{
+			_pos.x -= _pyoSize;
+		}
 		_pos.y += _pyoSize / 32;
 
 		Draw();
@@ -48,6 +52,7 @@ bool SceneMng::SysInit(void)
 
 void SceneMng::Init(void)
 {
+	_pos = Vector2f(0, 0);
 }
 
 SceneMng::SceneMng() :

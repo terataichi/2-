@@ -77,7 +77,7 @@ template<class T>
 Vector2Template<T> abs(const Vector2Template<T>& u);
 
 using Vector2 = Vector2Template<int>;
-using Vector2dbl = Vector2Template<double>;
-using Vector2flt = Vector2Template<float>;
+using Vector2d = Vector2Template<double>;
+using Vector2f = Vector2Template<float>;
 
 #include "./detelas/Vector2.h"
