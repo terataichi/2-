@@ -1,25 +1,11 @@
 #pragma once
-#include <map>
-#include "InsertMax.h"
-#include "MySelf.h"
-#include "InsertCard.h"
-#include "InsertCash.h"
-#include "TicketMachine.h"
+#include "_debug/_DebugConOut.h"
 
 struct InsertMax
 {
-	bool operator()(PayType& payType, MapInt& cashData, PairInt& cardData, int cash)
+	bool operator()(MapInt& cashData, PairInt& cardData, int cash)
 	{
-		if (payType == PayType::CARD)
-		{
-			lpMySelf.SetIns(InsertCard());
-			return true;
-		}
-		if (payType == PayType::CASH)
-		{
-			lpMySelf.SetIns(InsertCash());
-			return true;
-		}
+		TRACE("ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ");
 		return false;
 	}
 };

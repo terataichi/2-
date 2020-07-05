@@ -4,6 +4,8 @@
 #include "MouseCtl.h"
 #include "TicketMachine.h"
 #include "InsertMax.h"
+#include "InsertCard.h"
+#include "InsertCash.h"
 
 MySelf* MySelf::s_Instance = nullptr;
 
@@ -40,15 +42,11 @@ bool MySelf::Run()
 					type = moneyType[pos.y / money_sizeY];
 					if (cash[type] > 0)
 					{
-						if (lpTicketMachine.GetPayType() == PayType::MAX)
+						// カードの時は処理できないのではじく
+						if (lpTicketMachine.GetPayType() != PayType::CARD)
 						{
-							// 最初の一回はセットする為に呼ぶ
 							lpTicketMachine.SetPayType(PayType::CASH);
-							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
-						}
-						if (lpTicketMachine.GetPayType() == PayType::CASH)
-						{
-							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+							insMap[lpTicketMachine.GetPayType()](lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
 							cash[type]--;
 						}
 					}
@@ -58,15 +56,10 @@ bool MySelf::Run()
 					// 現金の範囲+１の位置がちょうど電子マネー
 					if (pos.y < money_sizeY * static_cast<int>(moneyType.size() + 1))
 					{
-						if (lpTicketMachine.GetPayType() == PayType::MAX)
+						if (lpTicketMachine.GetPayType() != PayType::CASH)
 						{
-							// 最初の一回はセットする為に呼ぶ
 							lpTicketMachine.SetPayType(PayType::CARD);
-							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
-						}
-						if (lpTicketMachine.GetPayType() == PayType::CARD)
-						{
-							insert(lpTicketMachine.GetPayType(), lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
+							insMap[lpTicketMachine.GetPayType()](lpTicketMachine.GetCashData(), lpTicketMachine.GetCardData(), type);
 						}
 					}
 				}
@@ -117,11 +110,6 @@ bool MySelf::MergeCash(MapInt& changecash)
 		cash[data.first] += data.second;
 	}
 	return true;
-}
-
-void MySelf::SetIns(InsFnc ins)
-{
-	insert = ins;
 }
 
 MySelf::MySelf() :screen_sizeX(800), screen_sizeY(600),money_sizeX(100),money_sizeY(50),font_size(18)
@@ -177,10 +165,9 @@ bool MySelf::MyInit()
 	cash.try_emplace(static_cast<int>(10000), 1);
 	//cash.try_emplace(static_cast<int>(Cash::Card), 15);
 
-	//insMap.try_emplace(PayType::MAX, InsertMax());
-	//insMap.try_emplace(PayType::CASH, InsertCash());
-	//insMap.try_emplace(PayType::CARD, InsertCard());
-	insert = InsertMax();
+	insMap.try_emplace(PayType::MAX, InsertMax());
+	insMap.try_emplace(PayType::CASH, InsertCash());
+	insMap.try_emplace(PayType::CARD, InsertCard());
 	//TRACE("money.png:%d", images["money"]);
 	return true;
 }

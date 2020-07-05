@@ -4,9 +4,9 @@
 
 struct InsertCard
 {
-	bool operator()(PayType& payType, MapInt& cashData, PairInt& cardData, int cash)
+	bool operator()(MapInt& cashData, PairInt& cardData, int cash)
 	{
-		if (payType != PayType::CARD)
+		if (lpTicketMachine.GetPayType() != PayType::CARD)
 		{
 			return false;
 		}

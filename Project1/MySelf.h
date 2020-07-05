@@ -7,7 +7,7 @@
 
 #define lpMySelf MySelf::GetInstance()
 
-using InsFnc = std::function<bool(PayType& , MapInt& , PairInt& , int )>;	// 関数オブジェクトの宣言
+using InsFnc = std::function<bool(MapInt& , PairInt& , int )>;	// 関数オブジェクトの宣言
 
 class MouseCtl;
 
@@ -38,7 +38,6 @@ public:
 	bool Run(void);
 	void Draw(void);
 	bool MergeCash(MapInt& cash);
-	void SetIns(InsFnc ins);				// セット
 private:
 	MySelf(void);
 	~MySelf(void);
@@ -52,9 +51,7 @@ private:
 	const int money_sizeY;					// 画像サイズ
 	const int font_size;
 
-	InsFnc insert;							// インサートを関数オブジェクトで管理	
-
-	//std::map<PayType, InsFnc> insMap;		// 関数オブジェクト管理用変数
+	std::map<PayType, InsFnc> insMap;		// 関数オブジェクト管理用変数
 	//std::map<std::string, int> images;	// 画像読み込み用
 	MapInt cash;							// 持っているお金
 

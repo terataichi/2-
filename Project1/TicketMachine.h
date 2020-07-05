@@ -46,6 +46,7 @@ private:
 	bool PayMax(void);																// —áŠOˆ—
 	void Clear(void);
 	void DrawBtn(void);
+	void CheckBtn(std::function<bool(Vector2 bpos)>);								// ƒ{ƒ^ƒ“ˆ—
 	bool paySuccess;																// x•¥‚¢Š®—¹
 
 	sharedMouse mouse;																// ‚à‚ç‚¤‚â‚Â

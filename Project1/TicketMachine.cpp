@@ -264,7 +264,6 @@ void TicketMachine::Clear(void)
 	cashData.clear();
 	cashDataChange.clear();
 	cardData = { 0,0 };
-	lpMySelf.SetIns(InsertMax());
 }
 
 void TicketMachine::DrawBtn(void)
@@ -273,7 +272,7 @@ void TicketMachine::DrawBtn(void)
 	SetFontSize(font_size * 2);
 
 	std::string payName = (paySuccess == false ? "決済" : "受け取り");
-	std::string cancel = "キャンセル";
+	std::string cancel = (paySuccess == false ? "キャンセル" : "返品");
 
 	DrawGraph(btnpos.x, btnpos.y - pay_btn_sizeY, images[btnKey], true);
 	DrawGraph(btnpos.x, btnpos.y + cancel_offSet, images[cancelKey], true);
@@ -292,6 +291,29 @@ void TicketMachine::DrawBtn(void)
 		0xf
 		);
 
+}
+
+void TicketMachine::CheckBtn(std::function<bool(Vector2 bpos)> push)
+{
+	if (mouse->GetClicking() && push(btnpos - pay_btn_sizeY))
+	{
+		btnKey = "btn_push";
+	}
+	else
+	{
+		btnKey = "btn";
+	}
+
+	if (mouse->GetClicking() && push(btnpos + cancel_offSet))
+	{
+		cancelKey = "btn_push";
+		payType == PayType::CASH ? lpMySelf.MergeCash(cashData) : lpCardServer.Payment(cardData.first + cardData.second);
+		Clear();
+	}
+	else
+	{
+		cancelKey = "btn";
+	}
 }
 
 bool TicketMachine::Init(sharedMouse mouse)
@@ -360,25 +382,7 @@ void TicketMachine::Run(void)
 			(pos.y >= bpos.y) && (pos.y < bpos.y + pay_btn_sizeY);
 	};
 
-	if (mouse->GetClicking() && checkBtn(btnpos - pay_btn_sizeY))
-	{
-		btnKey = "btn_push";
-	}
-	else
-	{
-		btnKey = "btn";
-	}
-
-	if (mouse->GetClicking() && checkBtn(btnpos + cancel_offSet))
-	{
-		cancelKey = "btn_push";
-		payType == PayType::CASH ? lpMySelf.MergeCash(cashData) : lpCardServer.Payment(cardData.first + cardData.second);
-		Clear();
-	}
-	else
-	{
-		cancelKey = "btn";
-	}
+	CheckBtn(checkBtn);
 
 	if (mouse->GetClickTrg())
 	{
