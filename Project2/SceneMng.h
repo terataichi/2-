@@ -1,4 +1,7 @@
 #pragma once
+#include <memory>
+#include <vector>
+#include "Stage.h"
 #include "common/Vector2.h"
 
 #define lpSceneMng SceneMng::GetInstance()
@@ -39,10 +42,11 @@ private:
 	bool SysInit(void);
 	void Init(void);
 
-	Vector2f _pos;
+	Vector2 _pos;
 
 	void Draw(void);										// 描画
 
+	std::vector<std::unique_ptr<Stage>> _stage;				// ステージを配列で管理して人数変更を可能にする
 	static SceneMng* _sInstance;
 
 	SceneMng();

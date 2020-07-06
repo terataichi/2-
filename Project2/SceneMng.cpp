@@ -52,7 +52,8 @@ bool SceneMng::SysInit(void)
 
 void SceneMng::Init(void)
 {
-	_pos = Vector2f(0, 0);
+	_pos = Vector2(0, 0);
+	_stage.emplace_back(std::make_unique<Stage>(0,0));
 }
 
 SceneMng::SceneMng() :
