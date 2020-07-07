@@ -15,7 +15,17 @@ void SceneMng::Run(void)
 		{
 			_pos.x -= _pyoSize;
 		}
-		_pos.y += _pyoSize / 32;
+		if (CheckHitKey(KEY_INPUT_W))
+		{
+			_pos.y -= _pyoSize;
+		}
+
+		_pos.y += _pyoSize / (_pyoSize / 2);
+
+		for (auto& id : _stage)
+		{
+			id->Draw();
+		}
 
 		Draw();
 	}
@@ -26,11 +36,10 @@ void SceneMng::Draw(void)
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClearDrawScreen();
 
-
-	DrawBox(_frameSize.x, _frameSize.y, _frameSize.x + _pyoSize * 6, _pyoSize * 12, 0xfff, true);
-	DrawBox(_frameSize.x + _gameSize.x * 2, _gameOffSet.y, _frameSize.x + _gameSize.x * 2 + _pyoSize * 6, _pyoSize * 12, 0xfff, true);
-
-
+	for (auto& id : _stage)
+	{
+		DrawGraph(id->offSet().x, id->offSet().y, id->GetStageID(), true);
+	}
 	DrawCircle(_frameSize.x + _pyoRadius + _pos.x, _frameSize.y + _pyoRadius + _pos.y + (_pyoSize), _pyoRadius, 0xfffff, true);
 
 	ScreenFlip();
@@ -53,7 +62,9 @@ bool SceneMng::SysInit(void)
 void SceneMng::Init(void)
 {
 	_pos = Vector2(0, 0);
-	_stage.emplace_back(std::make_unique<Stage>(0,0));
+	_stage.emplace_back(std::make_unique<Stage>(Vector2(_gameOffSet.x, _frameSize.y / 2), Vector2(_gameSize.x, _gameSize.y)));
+	_stage.emplace_back(std::make_unique<Stage>(Vector2(_gameSize.x * 2 + _gameOffSet.x, _frameSize.y / 2), Vector2(_gameSize.x, _gameSize.y)));
+
 }
 
 SceneMng::SceneMng() :

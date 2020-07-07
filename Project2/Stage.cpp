@@ -1,15 +1,16 @@
+#include <algorithm>
 #include <DxLib.h>
 #include "Stage.h"
 #include "SceneMng.h"
 
 Stage::Stage()
 {
-	_StageID = MakeScreen(lpSceneMng._gameSize.x, lpSceneMng._gameSize.y);
+	_stageID = MakeScreen(lpSceneMng._gameSize.x, lpSceneMng._gameSize.y);
 }
 
-Stage::Stage(Vector2 pos)
+Stage::Stage(Vector2 offSet,Vector2 size) :_offSet(std::move(offSet)), _size(std::move(size))
 {
-	Init(pos);
+	Init();
 }
 
 Stage::~Stage()
@@ -18,18 +19,31 @@ Stage::~Stage()
 
 const int Stage::GetStageID(void) const
 {
-	return _StageID;
+	return Stage::_stageID;
+}
+
+const Vector2 Stage::offSet(void) const
+{
+	return Stage::_offSet;
+}
+
+const Vector2 Stage::size(void) const
+{
+	return Stage::_size;
 }
 
 void Stage::Draw(void)
 {
-	SetDrawScreen(_StageID);
+	SetDrawScreen(_stageID);
 	ClsDrawScreen();
-	DrawBox(0,0, _pos.x + lpSceneMng._gameSize.x, _pos.y + lpSceneMng._gameSize.y, 0xfff, true);
+	DrawBox(0,0,lpSceneMng._gameSize.x,lpSceneMng._gameSize.y, 0xfff, true);
 }
 
-void Stage::Init(Vector2 pos)
+void Stage::UpDate(void)
 {
-	_StageID = MakeScreen(lpSceneMng._gameSize.x, lpSceneMng._gameSize.y);
-	_pos = pos;
+}
+
+void Stage::Init()
+{
+	_stageID = MakeScreen(_size.x, _size.y);
 }

@@ -22,7 +22,7 @@ public:
 	bool operator <= (const Vector2Template& vec)const;
 	
 	// “Y‚¦Žš‰‰ŽZŽq
-	T& operator [] (T i);
+	int& operator [] (int i);
 
 	// ’P€‰‰ŽZŽq
 	Vector2Template& operator += (const Vector2Template& vec);
@@ -80,4 +80,4 @@ using Vector2 = Vector2Template<int>;
 using Vector2d = Vector2Template<double>;
 using Vector2f = Vector2Template<float>;
 
-#include "./detelas/Vector2.h"
+#include "./details/Vector2.h"
