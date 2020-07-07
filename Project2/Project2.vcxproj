@@ -154,6 +154,7 @@
     <ClInclude Include="common\detelas\Vector2.h" />
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="SceneMng.h" />
+    <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
