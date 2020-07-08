@@ -41,9 +41,6 @@ public:
 private:
 	bool SysInit(void);
 	void Init(void);
-
-	Vector2 _pos;
-
 	void Draw(void);										// 描画
 
 	std::vector<std::unique_ptr<Stage>> _stage;				// ステージを配列で管理して人数変更を可能にする

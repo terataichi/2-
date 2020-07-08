@@ -149,8 +149,12 @@
     <ClCompile Include="InputState.cpp" />
     <ClCompile Include="INPUT_ID.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Obj.cpp" />
+    <ClCompile Include="puyo.cpp" />
     <ClCompile Include="SceneMng.cpp" />
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="_debug\_DebugConOut.cpp" />
+    <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\details\Vector2.h" />
@@ -158,9 +162,13 @@
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="InputState.h" />
     <ClInclude Include="INPUT_ID.h" />
+    <ClInclude Include="Obj.h" />
+    <ClInclude Include="puyo.h" />
     <ClInclude Include="SceneMng.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stage.h" />
+    <ClInclude Include="_debug\_DebugConOut.h" />
+    <ClInclude Include="_debug\_DebugDispOut.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

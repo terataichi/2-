@@ -37,13 +37,34 @@ void Stage::Draw(void)
 	SetDrawScreen(_stageID);
 	ClsDrawScreen();
 	DrawBox(0,0,lpSceneMng._gameSize.x,lpSceneMng._gameSize.y, 0xfff, true);
+	_puyo->Draw();
 }
 
 void Stage::UpDate(void)
 {
+	_puyo->UpDate();
+	_input->UpDate();
+
+	// ˆÚ“®×ÑÀÞ
+	auto move = [](std::weak_ptr<InputState> keyData, INPUT_ID id, std::weak_ptr<puyo> pu, const Vector2 vec)
+	{
+		if (!keyData.expired() && !pu.expired())
+		{
+			if (keyData.lock()->state(id).first && !keyData.lock()->state(id).second)
+			{
+				pu.lock()->Move(vec);
+			}
+		}
+	};
+	move(_input, INPUT_ID::BUTTON_UP, _puyo, Vector2(0, -lpSceneMng._pyoSize));
+	move(_input, INPUT_ID::BUTTON_LEFT, _puyo, Vector2(-lpSceneMng._pyoSize, 0));
+	move(_input, INPUT_ID::BUTTON_RIGHT, _puyo, Vector2(lpSceneMng._pyoSize, 0));
+	Draw();
 }
 
 void Stage::Init()
 {
 	_stageID = MakeScreen(_size.x, _size.y);
+	_input = std::make_shared<InputState>();
+	_puyo = std::make_shared<puyo>();
 }

@@ -1,5 +1,8 @@
 #pragma once
+#include <memory>
 #include "common/Vector2.h"
+#include "InputState.h"
+#include "puyo.h"
 
 class Stage
 {
@@ -16,8 +19,12 @@ public:
 	void UpDate(void);									// 更新.
 private:
 	void Init();
-	Vector2 _offSet;								// ステージ画面のオフセット
+	Vector2 _offSet;									// ステージ画面のオフセット
 	Vector2 _size;
 	int _stageID;										// ステージの描画用スクリーンID
+
+	std::shared_ptr<InputState> _input;					// キーの入力管理
+
+	std::shared_ptr<puyo> _puyo;
 };
 
