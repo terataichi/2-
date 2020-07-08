@@ -5,7 +5,7 @@ class Stage
 {
 public:
 	Stage();
-	Stage(Vector2 offSet, Vector2 size);
+	Stage(Vector2&& offSet, Vector2&& size);
 	~Stage();
 
 	const int GetStageID(void)const;					// ステージID書き込み用

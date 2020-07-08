@@ -8,7 +8,7 @@ Stage::Stage()
 	_stageID = MakeScreen(lpSceneMng._gameSize.x, lpSceneMng._gameSize.y);
 }
 
-Stage::Stage(Vector2 offSet,Vector2 size) :_offSet(std::move(offSet)), _size(std::move(size))
+Stage::Stage(Vector2&& offSet,Vector2&& size) :_offSet(std::move(offSet)), _size(std::move(size))
 {
 	Init();
 }
