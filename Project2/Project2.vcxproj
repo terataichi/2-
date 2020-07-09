@@ -148,8 +148,10 @@
   <ItemGroup>
     <ClCompile Include="InputState.cpp" />
     <ClCompile Include="INPUT_ID.cpp" />
+    <ClCompile Include="KeyState.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Obj.cpp" />
+    <ClCompile Include="PadState.cpp" />
     <ClCompile Include="puyo.cpp" />
     <ClCompile Include="SceneMng.cpp" />
     <ClCompile Include="Stage.cpp" />
@@ -162,7 +164,9 @@
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="InputState.h" />
     <ClInclude Include="INPUT_ID.h" />
+    <ClInclude Include="KeyState.h" />
     <ClInclude Include="Obj.h" />
+    <ClInclude Include="PadState.h" />
     <ClInclude Include="puyo.h" />
     <ClInclude Include="SceneMng.h" />
     <ClInclude Include="Singleton.h" />

@@ -8,7 +8,7 @@ void SceneMng::Run(void)
 {
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
 	{
-		for (auto& id : _stage)
+		for (auto&& id : _stage)
 		{
 			id->UpDate();
 		}
@@ -22,7 +22,7 @@ void SceneMng::Draw(void)
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClearDrawScreen();
 
-	for (auto& id : _stage)
+	for (auto&& id : _stage)
 	{
 		DrawGraph(id->offSet().x, id->offSet().y, id->GetStageID(), true);
 	}

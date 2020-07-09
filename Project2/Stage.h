@@ -14,7 +14,6 @@ public:
 	const int GetStageID(void)const;					// ステージID書き込み用
 	const Vector2 offSet(void)const;
 	const Vector2 size(void) const;
-
 	void Draw(void);									// 各スクリーンに描画する
 	void UpDate(void);									// 更新.
 private:
@@ -26,5 +25,8 @@ private:
 	std::shared_ptr<InputState> _input;					// キーの入力管理
 
 	std::shared_ptr<puyo> _puyo;
+
+	static int playCnt;									// 複数人いた場合人数でｷｰを変えれるように
+	int _id;
 };
 

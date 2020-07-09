@@ -2,6 +2,10 @@
 #include <DxLib.h>
 #include "Stage.h"
 #include "SceneMng.h"
+#include "KeyState.h"
+#include "PadState.h"
+
+int Stage::playCnt = 1;
 
 Stage::Stage()
 {
@@ -15,6 +19,7 @@ Stage::Stage(Vector2&& offSet,Vector2&& size) :_offSet(std::move(offSet)), _size
 
 Stage::~Stage()
 {
+	playCnt--;
 }
 
 const int Stage::GetStageID(void) const
@@ -46,7 +51,7 @@ void Stage::UpDate(void)
 	_input->UpDate();
 
 	// ˆÚ“®×ÑÀÞ
-	auto move = [](std::weak_ptr<InputState> keyData, INPUT_ID id, std::weak_ptr<puyo> pu, const Vector2 vec)
+	auto move = [](std::weak_ptr<InputState> keyData, INPUT_ID id, std::weak_ptr<puyo> pu,Vector2&& vec)
 	{
 		if (!keyData.expired() && !pu.expired())
 		{
@@ -59,12 +64,16 @@ void Stage::UpDate(void)
 	move(_input, INPUT_ID::BUTTON_UP, _puyo, Vector2(0, -lpSceneMng._pyoSize));
 	move(_input, INPUT_ID::BUTTON_LEFT, _puyo, Vector2(-lpSceneMng._pyoSize, 0));
 	move(_input, INPUT_ID::BUTTON_RIGHT, _puyo, Vector2(lpSceneMng._pyoSize, 0));
+	move(_input, INPUT_ID::BUTTON_DOWN, _puyo, Vector2(0, lpSceneMng._pyoSize));
+
 	Draw();
 }
 
 void Stage::Init()
 {
 	_stageID = MakeScreen(_size.x, _size.y);
-	_input = std::make_shared<InputState>();
+	_input = std::make_shared<PadState>(playCnt);
 	_puyo = std::make_shared<puyo>();
+	_id = playCnt;
+	playCnt++;
 }
