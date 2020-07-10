@@ -1,22 +1,42 @@
 #pragma once
 #include <vector>
+#include <array>
 #include <map>
 #include "INPUT_ID.h"
 
-using KeyPair = std::pair<int, int>;
-using KeyMap = std::map<INPUT_ID, KeyPair>;
-
-class InputState
+enum class CntType
 {
-public:
-	InputState();
-	~InputState();
-	virtual void UpDate(void) = 0;
-	const KeyPair& state(INPUT_ID id)const;		// キー情報を返す
-	bool state(INPUT_ID id, int data);			// newセット関数
-	void SetOld(void);							// oldセット関数
-private:
+	Key,
+	Pad,
+	Mouse
+};
 
-	KeyMap _keyState;							// それぞれのkeyのnew と oldの情報格納
+enum class Trg
+{
+	Now,
+	Old,
+	Max
+};
+
+using TrgBool = std::array<bool, static_cast<size_t>(Trg::Max)>;
+using TrgData = std::map<INPUT_ID, TrgBool>;
+
+struct InputState
+{
+	void operator()()
+	{
+		UpDate();
+	}
+
+	const TrgData& GetTrgData(void);			// データのゲット関数
+	virtual CntType GetCntType(void) = 0;		// 自分がいま何を使っているのかを返す
+	virtual bool SetUp(int no) = 0;
+
+private:
+	virtual void UpDate(void) = 0;
+
+protected:
+
+	TrgData _state;							// それぞれのkeyのnew と oldの情報格納
 };
 

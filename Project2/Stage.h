@@ -7,7 +7,6 @@
 class Stage
 {
 public:
-	Stage();
 	Stage(Vector2&& offSet, Vector2&& size);
 	~Stage();
 

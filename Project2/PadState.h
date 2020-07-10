@@ -4,13 +4,13 @@ class PadState :
 	public InputState
 {
 public:
-	PadState(int id);
-	~PadState();
+	virtual CntType GetCntType(void) override;		// ©•ª‚ª‚¢‚Ü‰½‚ğg‚Á‚Ä‚¢‚é‚Ì‚©‚ğ•Ô‚·
+	virtual bool SetUp(int no) override;			// ‰Šú‰»
+	virtual void UpDate(void) override;
 
-	void UpDate(void) override;
 private:
-	std::vector<int> _keyCon;					// ƒL[‚Ì“o˜^
-	std::vector<int> _keyConDef;				//
+	std::map<INPUT_ID, int> _keyCon;					// ƒL[‚Ì“o˜^
+	std::map<INPUT_ID, int> _keyConDef;					//
 	int _padID;
 };
 

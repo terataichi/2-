@@ -5,16 +5,13 @@
 #include "KeyState.h"
 #include "PadState.h"
 
-int Stage::playCnt = 1;
-
-Stage::Stage()
-{
-	_stageID = MakeScreen(lpSceneMng._gameSize.x, lpSceneMng._gameSize.y);
-}
+int Stage::playCnt = 0;
 
 Stage::Stage(Vector2&& offSet,Vector2&& size) :_offSet(std::move(offSet)), _size(std::move(size))
 {
+	_id = playCnt;
 	Init();
+	playCnt++;
 }
 
 Stage::~Stage()
@@ -47,24 +44,16 @@ void Stage::Draw(void)
 
 void Stage::UpDate(void)
 {
-	_puyo->UpDate();
-	_input->UpDate();
-
-	// ˆÚ“®×ÑÀÞ
-	auto move = [](std::weak_ptr<InputState> keyData, INPUT_ID id, std::weak_ptr<puyo> pu,Vector2&& vec)
+	(*_input)();
+	for (auto data : _input->GetTrgData())
 	{
-		if (!keyData.expired() && !pu.expired())
+		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
 		{
-			if (keyData.lock()->state(id).first && !keyData.lock()->state(id).second)
-			{
-				pu.lock()->Move(vec);
-			}
+			_puyo->Move(data.first);
 		}
-	};
-	move(_input, INPUT_ID::BUTTON_UP, _puyo, Vector2(0, -lpSceneMng._pyoSize));
-	move(_input, INPUT_ID::BUTTON_LEFT, _puyo, Vector2(-lpSceneMng._pyoSize, 0));
-	move(_input, INPUT_ID::BUTTON_RIGHT, _puyo, Vector2(lpSceneMng._pyoSize, 0));
-	move(_input, INPUT_ID::BUTTON_DOWN, _puyo, Vector2(0, lpSceneMng._pyoSize));
+	}
+	_puyo->UpDate();
+
 
 	Draw();
 }
@@ -72,8 +61,7 @@ void Stage::UpDate(void)
 void Stage::Init()
 {
 	_stageID = MakeScreen(_size.x, _size.y);
-	_input = std::make_shared<PadState>(playCnt);
+	_input = std::make_shared<PadState>();
+	_input->SetUp(_id);
 	_puyo = std::make_shared<puyo>();
-	_id = playCnt;
-	playCnt++;
 }

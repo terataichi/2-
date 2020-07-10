@@ -1,39 +1,47 @@
 #include "KeyState.h"
 #include <DxLib.h>
 
-KeyState::KeyState(int id)
+CntType KeyState::GetCntType(void)
 {
-	if (id == 1)
-	{
-		_keyConDef.emplace_back(KEY_INPUT_A);
-		_keyConDef.emplace_back(KEY_INPUT_W);
-		_keyConDef.emplace_back(KEY_INPUT_D);
-		_keyConDef.emplace_back(KEY_INPUT_S);
-		_keyConDef.emplace_back(KEY_INPUT_Z);
-	}
-	if (id == 2)
-	{
-		_keyConDef.emplace_back(KEY_INPUT_LEFT);
-		_keyConDef.emplace_back(KEY_INPUT_UP);
-		_keyConDef.emplace_back(KEY_INPUT_RIGHT);
-		_keyConDef.emplace_back(KEY_INPUT_DOWN);
-		_keyConDef.emplace_back(KEY_INPUT_RETURN);
-	}
-
-	_keyCon = _keyConDef;
+	return CntType::Key;
 }
 
-KeyState::~KeyState()
+bool KeyState::SetUp(int no)
 {
+	if (no == 0)
+	{
+		_keyConDef = {
+			{INPUT_ID::BUTTON_LEFT,KEY_INPUT_A},
+			{INPUT_ID::BUTTON_UP,KEY_INPUT_W},
+			{INPUT_ID::BUTTON_RIGHT,KEY_INPUT_D},
+			{INPUT_ID::BUTTON_DOWN,KEY_INPUT_S},
+			{INPUT_ID::BUTTON_ROTA,KEY_INPUT_Z},
+		};
+	}
+	else if (no == 1)
+	{
+		_keyConDef = 
+		{
+			{INPUT_ID::BUTTON_LEFT,KEY_INPUT_LEFT},
+			{INPUT_ID::BUTTON_UP,KEY_INPUT_UP},
+			{INPUT_ID::BUTTON_RIGHT,KEY_INPUT_RIGHT},
+			{INPUT_ID::BUTTON_DOWN,KEY_INPUT_DOWN},
+			{INPUT_ID::BUTTON_ROTA,KEY_INPUT_RETURN},
+		};
+	}
+
+
+	_keyCon = _keyConDef;
+	return false;
 }
 
 void KeyState::UpDate(void)
 {
-	SetOld();								// oldの設定
-	GetHitKeyStateAll(_buf);				// キーボードの情報取得
+	GetHitKeyStateAll(_buf.data());																// キーボードの情報取得
 
-	for (auto id : INPUT_ID())				// nowのセット
+	for (auto id : INPUT_ID())
 	{
-		state(id, static_cast<int>(_buf[_keyCon[static_cast<int>(id)]]));
+		_state[id][static_cast<int>(Trg::Old)] = _state[id][static_cast<int>(Trg::Now)];		// oldのセット
+		_state[id][static_cast<int>(Trg::Now)] = _buf[_keyCon[id]];								// nowのセット
 	}
 }

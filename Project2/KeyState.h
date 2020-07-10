@@ -1,15 +1,20 @@
 #pragma once
+#include <array>
+#include <map>
 #include "InputState.h"
-class KeyState :
+#include "INPUT_ID.h"
+
+struct KeyState :
 	public InputState
 {
 public:
-	KeyState(int id);
-	~KeyState();
-	void UpDate(void) override;
+	virtual CntType GetCntType(void) override;		// 自分がいま何を使っているのかを返す
+	virtual bool SetUp(int no) override;
+	virtual void UpDate(void) override;
+
 private:
-	char _buf[256];								// キーボード情報取得用
-	std::vector<int> _keyCon;					// キーの登録
-	std::vector<int> _keyConDef;				//
+	std::array<char, 256> _buf;							// キーボード情報取得用
+	std::map<INPUT_ID, int> _keyCon;						// キーの登録
+	std::map<INPUT_ID, int> _keyConDef;					//
 };
 

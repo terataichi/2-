@@ -1,35 +1,39 @@
 #include "PadState.h"
 #include <DxLib.h>
 
-PadState::PadState(int id)
+CntType PadState::GetCntType(void)
 {
-	if (id == 1)
+	return CntType::Pad;
+}
+
+bool PadState::SetUp(int no)
+{
+	if (no == 0)
 	{
 		_padID = DX_INPUT_PAD1;
 	}
-	if (id == 2)
+	if (no == 1)
 	{
 		_padID = DX_INPUT_PAD2;
 	}
-	_keyConDef.emplace_back(PAD_INPUT_LEFT);
-	_keyConDef.emplace_back(PAD_INPUT_UP);
-	_keyConDef.emplace_back(PAD_INPUT_RIGHT);
-	_keyConDef.emplace_back(PAD_INPUT_DOWN);
-	_keyConDef.emplace_back(PAD_INPUT_DOWN);
+	_keyConDef = {
+	{INPUT_ID::BUTTON_LEFT,PAD_INPUT_LEFT},
+	{INPUT_ID::BUTTON_UP,PAD_INPUT_UP},
+	{INPUT_ID::BUTTON_RIGHT,PAD_INPUT_RIGHT},
+	{INPUT_ID::BUTTON_DOWN,PAD_INPUT_DOWN},
+	{INPUT_ID::BUTTON_ROTA,PAD_INPUT_DOWN},
+	};
 
 	_keyCon = _keyConDef;
-}
-
-PadState::~PadState()
-{
+	return true;
 }
 
 void PadState::UpDate(void)
 {
-	SetOld();								// oldの設定
 
 	for (auto id : INPUT_ID())				// nowのセット
 	{
-		state(id, static_cast<int>(	GetJoypadInputState(_padID)& _keyCon[static_cast<int>(id)]));
+		_state[id][static_cast<int>(Trg::Old)] = _state[id][static_cast<int>(Trg::Now)];		// oldのセット
+		_state[id][static_cast<int>(Trg::Now)] = (GetJoypadInputState(_padID) & _keyCon[id]);								// nowのセット
 	}
 }

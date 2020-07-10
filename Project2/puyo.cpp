@@ -14,29 +14,24 @@ puyo::~puyo()
 
 void puyo::UpDate(void)
 {
-	//_pos.y += 2;
+	_pos.y += 2;
 }
 
-void puyo::Move(const Vector2& vec)
+void puyo::Move(INPUT_ID id)
 {
-	_pos += vec;
-
-	if (_pos.x + vec.x < 0)
+	// ‰æ–ÊŠO‚És‚Á‚½ê‡‚ÌC³
+	auto OutPos = [&](bool check, Vector2&& fix)
 	{
-		_pos.x = _rad.x;
-	}
-	if (_pos.y + vec.y < 0)
-	{
-		_pos.y = _rad.y;
-	}
-	if (_pos.x + vec.x > lpSceneMng._gameSize.x)
-	{
-		_pos.x = lpSceneMng._gameSize.x - _rad.x;
-	}
-	if (_pos.y + vec.y > lpSceneMng._gameSize.y)
-	{
-		_pos.y = lpSceneMng._gameSize.y - _rad.y;
-	}
+		if (check)
+		{
+			_pos = fix;
+		}
+	};
+	_pos += _vec[id];
+	OutPos(_pos.x < 0, Vector2(_rad.x, _pos.y));
+	OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
+	OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
+	OutPos(_pos.y > lpSceneMng._gameSize.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
 }
 
 void puyo::Draw(void)
@@ -44,13 +39,15 @@ void puyo::Draw(void)
 	DrawCircle(_pos.x, _pos.y, lpSceneMng._pyoRadius, 0xfffff, true);
 }
 
-bool puyo::IsCheckPos(void)
-{
-
-	return false;
-}
-
 void puyo::Init(void)
 {
 	_pos = Vector2(32, 32);
+	_vec =
+	{
+		{INPUT_ID::BUTTON_LEFT,Vector2(-_size.x, 0)},
+		{INPUT_ID::BUTTON_UP,Vector2(0, -_size.y)},
+		{INPUT_ID::BUTTON_RIGHT,Vector2(_size.x, 0)},
+		{INPUT_ID::BUTTON_DOWN,Vector2(0,_size.y)},
+		{INPUT_ID::BUTTON_ROTA,Vector2(0,0)},
+	};
 }
