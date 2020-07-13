@@ -2,8 +2,9 @@
 #include <DxLib.h>
 #include "Stage.h"
 #include "SceneMng.h"
-#include "KeyState.h"
-#include "PadState.h"
+#include "Input/KeyState.h"
+#include "Input/PadState.h"
+#include "Input/MouseState.h"
 
 int Stage::playCnt = 0;
 
@@ -61,7 +62,7 @@ void Stage::UpDate(void)
 void Stage::Init()
 {
 	_stageID = MakeScreen(_size.x, _size.y);
-	_input = std::make_shared<PadState>();
+	_input = std::make_shared<MouseState>();
 	_input->SetUp(_id);
 	_puyo = std::make_shared<puyo>();
 }

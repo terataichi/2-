@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 #include "common/Vector2.h"
-#include "INPUT_ID.h"
+#include "Input/INPUT_ID.h"
 
 class puyo
 {

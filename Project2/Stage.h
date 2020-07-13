@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "common/Vector2.h"
-#include "InputState.h"
+#include "Input/InputState.h"
 #include "puyo.h"
 
 class Stage

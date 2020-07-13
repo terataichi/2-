@@ -1,7 +1,6 @@
 #include <DxLib.h>
 #include "puyo.h"
 #include "SceneMng.h"
-#include "INPUT_ID.h"
 
 puyo::puyo() :_size(64, 64), _rad(_size / 2)
 {
@@ -31,7 +30,7 @@ void puyo::Move(INPUT_ID id)
 	OutPos(_pos.x < 0, Vector2(_rad.x, _pos.y));
 	OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
 	OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
-	OutPos(_pos.y > lpSceneMng._gameSize.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
+	OutPos(_pos.y > lpSceneMng._gameSize.y - _size.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
 }
 
 void puyo::Draw(void)
