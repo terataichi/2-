@@ -46,15 +46,35 @@ void Stage::Draw(void)
 
 void Stage::UpDate(void)
 {
+	// ‰æ–ÊŠO‚È‚Ì‚©‚Ç‚¤‚©
+	//auto OutPos = [](INPUT_ID id, bool check)
+	//{
+	//	if (check)
+	//	{
+	//		
+	//	}
+	//};
+
 	(*_input)();
+	_puyo->UpDate();
+
+	Vector2 tmp = (_puyo->pos() / _puyo->size());
+	_moveFlg[INPUT_ID::BUTTON_LEFT] = tmp.x - 1 < 0;
+	_moveFlg[INPUT_ID::BUTTON_RIGHT] = tmp.x + 1 > static_cast<int>(STAGE_X - 1);
+	_moveFlg[INPUT_ID::BUTTON_UP] = tmp.y - 1 < 0;
+	_moveFlg[INPUT_ID::BUTTON_DOWN] = tmp.y + 1 > static_cast<int>(STAGE_Y - 1);
+
+
 	for (auto data : _input->GetTrgData())
 	{
-		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
+		if (!_moveFlg[data.first])
 		{
-			_puyo->Move(data.first);
+			if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
+			{
+				_puyo->Move(data.first);
+			}
 		}
 	}
-	_puyo->UpDate();
 
 	Draw();
 }
@@ -71,7 +91,7 @@ void Stage::Init()
 	//	_data[j] = &_dataBase[j * STAGE_X];
 	//}
 
-	_dataBase[0] = 500;
+	//_dataBase[0] = 500;
 	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
 	{
 		_data.emplace_back(&_dataBase[j * STAGE_X]);
@@ -84,7 +104,7 @@ void Stage::Init()
 	}
 
 
-	_input = std::make_shared<MouseState>();
+	_input = std::make_shared<KeyState>();
 	_input->SetUp(_id);
 	_puyo = std::make_shared<puyo>();
 }

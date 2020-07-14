@@ -21,19 +21,19 @@ void puyo::UpDate(void)
 
 void puyo::Move(INPUT_ID id)
 {
-	// 画面外に行った場合の修正
-	auto OutPos = [&](bool check, Vector2&& fix)
-	{
-		if (check)
-		{
-			_pos = fix;
-		}
-	};
+	//// 画面外に行った場合の修正
+	//auto OutPos = [&](bool check, Vector2&& fix)
+	//{
+	//	if (check)
+	//	{
+	//		_pos = fix;
+	//	}
+	//};
 	_pos += _vec[id];
-	OutPos(_pos.x < 0, Vector2(_rad.x, _pos.y));
-	OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
-	OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
-	OutPos(_pos.y > lpSceneMng._gameSize.y - _size.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
+	//OutPos(_pos.x < 0, Vector2(_rad.x, _pos.y));
+	//OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
+	//OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
+	//OutPos(_pos.y > lpSceneMng._gameSize.y - _size.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
 }
 
 void puyo::Draw(void)
@@ -44,6 +44,11 @@ void puyo::Draw(void)
 const Vector2 puyo::pos() const
 {
 	return _pos;
+}
+
+const Vector2 puyo::size(void) const
+{
+	return _size;
 }
 
 void puyo::Init(void)

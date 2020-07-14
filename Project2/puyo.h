@@ -11,7 +11,8 @@ public:
 	void UpDate(void);
 	void Move(INPUT_ID id);
 	void Draw(void);
-	const Vector2 pos()const;
+	const Vector2 pos(void)const;
+	const Vector2 size(void)const;
 private:
 	void Init(void);
 
