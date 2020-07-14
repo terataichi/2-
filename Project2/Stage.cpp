@@ -46,23 +46,15 @@ void Stage::Draw(void)
 
 void Stage::UpDate(void)
 {
-	// ‰æ–ÊŠO‚È‚Ì‚©‚Ç‚¤‚©
-	//auto OutPos = [](INPUT_ID id, bool check)
-	//{
-	//	if (check)
-	//	{
-	//		
-	//	}
-	//};
 
 	(*_input)();
 	_puyo->UpDate();
 
-	Vector2 tmp = (_puyo->pos() / _puyo->size());
-	_moveFlg[INPUT_ID::BUTTON_LEFT] = tmp.x - 1 < 0;
-	_moveFlg[INPUT_ID::BUTTON_RIGHT] = tmp.x + 1 > static_cast<int>(STAGE_X - 1);
-	_moveFlg[INPUT_ID::BUTTON_UP] = tmp.y - 1 < 0;
-	_moveFlg[INPUT_ID::BUTTON_DOWN] = tmp.y + 1 > static_cast<int>(STAGE_Y - 1);
+	Vector2 tmpPos = (_puyo->pos() / _puyo->size());
+	_moveFlg[INPUT_ID::BUTTON_LEFT] = tmpPos.x - 1 < 0;
+	_moveFlg[INPUT_ID::BUTTON_RIGHT] = tmpPos.x + 1 > static_cast<int>(STAGE_X - 1);
+	_moveFlg[INPUT_ID::BUTTON_UP] = tmpPos.y - 1 < 0;
+	_moveFlg[INPUT_ID::BUTTON_DOWN] = tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1);
 
 
 	for (auto data : _input->GetTrgData())

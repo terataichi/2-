@@ -51,6 +51,11 @@ const Vector2 puyo::size(void) const
 	return _size;
 }
 
+const Vector2 puyo::rad(void) const
+{
+	return _rad;
+}
+
 void puyo::Init(void)
 {
 	_pos = Vector2(32, 32);
