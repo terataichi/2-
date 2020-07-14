@@ -13,7 +13,10 @@ puyo::~puyo()
 
 void puyo::UpDate(void)
 {
-	_pos.y += 2;
+	if (lpSceneMng._gameSize.y - _rad.y > _pos.y)
+	{
+		_pos.y += 2;
+	}
 }
 
 void puyo::Move(INPUT_ID id)
@@ -36,6 +39,11 @@ void puyo::Move(INPUT_ID id)
 void puyo::Draw(void)
 {
 	DrawCircle(_pos.x, _pos.y, lpSceneMng._pyoRadius, 0xfffff, true);
+}
+
+const Vector2 puyo::pos() const
+{
+	return _pos;
 }
 
 void puyo::Init(void)

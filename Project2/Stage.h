@@ -1,8 +1,13 @@
 #pragma once
 #include <memory>
+#include <vector>
+#include <map>
 #include "common/Vector2.h"
 #include "Input/InputState.h"
 #include "puyo.h"
+
+#define STAGE_X 6
+#define STAGE_Y 13
 
 class Stage
 {
@@ -20,6 +25,11 @@ private:
 	Vector2 _offSet;									// ステージ画面のオフセット
 	Vector2 _size;
 	int _stageID;										// ステージの描画用スクリーンID
+
+	std::vector<int> _dataBase;							// ステージ全体のマス管理用
+	std::vector<int*> _data;							// dataBaseのポインターを入れて
+
+	std::map<INPUT_ID, bool> _moveFlg;					// 移動していいか。true : ロック
 
 	std::shared_ptr<InputState> _input;					// キーの入力管理
 

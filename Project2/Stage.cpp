@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <DxLib.h>
+#include "_debug/_DebugConOut.h"
 #include "Stage.h"
 #include "SceneMng.h"
 #include "Input/KeyState.h"
@@ -55,13 +56,34 @@ void Stage::UpDate(void)
 	}
 	_puyo->UpDate();
 
-
 	Draw();
 }
 
 void Stage::Init()
 {
 	_stageID = MakeScreen(_size.x, _size.y);
+
+	_dataBase.resize(STAGE_Y * STAGE_X);							// 全体のサイズを作る
+
+	//_data.resize(STAGE_Y);										// Yのサイズを確保してそこにXを格納していく
+	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
+	//{
+	//	_data[j] = &_dataBase[j * STAGE_X];
+	//}
+
+	_dataBase[0] = 500;
+	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
+	{
+		_data.emplace_back(&_dataBase[j * STAGE_X]);
+	}
+	TRACE("%d\n", _data[0][0]);
+
+	for (auto id : INPUT_ID())
+	{
+		_moveFlg.try_emplace(id, false);
+	}
+
+
 	_input = std::make_shared<MouseState>();
 	_input->SetUp(_id);
 	_puyo = std::make_shared<puyo>();
