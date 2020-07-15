@@ -18,24 +18,35 @@ void puyo::UpDate(void)
 
 	if (lpSceneMng._gameSize.y - _rad.y > _pos.y)
 	{
+
 	}
 }
 
 void puyo::Move(INPUT_ID id)
 {
 	//// âÊñ äOÇ…çsÇ¡ÇΩèÍçáÇÃèCê≥
-	auto OutPos = [&](DirUnion check, Vector2&& fix)
+	switch (id)
 	{
-		if (check)
-		{
-			_pos = fix;
-		}
-	};
-	_pos += _vec[id];
-	OutPos(_dirFlg, Vector2(_rad.x, _pos.y));
-	OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
-	OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
-	OutPos(_pos.y > lpSceneMng._gameSize.y - _size.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
+	case INPUT_ID::BUTTON_LEFT:
+		if (!_dirFlg.bit.left) { _pos.x -= _size.x; }
+		break;
+	case INPUT_ID::BUTTON_UP:
+		if (!_dirFlg.bit.up) { _pos.y -= _size.x; }
+		break;
+	case INPUT_ID::BUTTON_RIGHT:
+		if (!_dirFlg.bit.right) { _pos.x += _size.x; }
+		break;
+	case INPUT_ID::BUTTON_DOWN:
+		if (!_dirFlg.bit.down) { _pos.y += _size.y; }
+		break;
+	case INPUT_ID::BUTTON_ROTA:
+		break;
+	case INPUT_ID::MAX:
+		break;
+	default:
+		break;
+	}
+
 }
 
 void puyo::Draw(void)
@@ -67,12 +78,4 @@ const Vector2 puyo::rad(void) const
 void puyo::Init(void)
 {
 	_pos = Vector2(32, 32);
-	_vec =
-	{
-		{INPUT_ID::BUTTON_LEFT,Vector2(-_size.x, 0)},
-		{INPUT_ID::BUTTON_UP,Vector2(0, -_size.y)},
-		{INPUT_ID::BUTTON_RIGHT,Vector2(_size.x, 0)},
-		{INPUT_ID::BUTTON_DOWN,Vector2(0,_size.y)},
-		{INPUT_ID::BUTTON_ROTA,Vector2(0,0)},
-	};
 }

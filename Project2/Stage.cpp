@@ -53,8 +53,8 @@ void Stage::UpDate(void)
 	DirUnion _dirFlg;									// ˆÚ“®‚µ‚Ä‚¢‚¢‚©‚Ç‚¤‚©‚Ìî•ñ‚ðì‚é
 	Vector2 tmpPos = (_puyo->pos() / _puyo->size());
 	_dirFlg.bit = { tmpPos.x - 1 < 0 ,
-					tmpPos.x + 1 > static_cast<int>(STAGE_X - 1) ,
 					tmpPos.y - 1 < 0,
+					tmpPos.x + 1 > static_cast<int>(STAGE_X - 1) ,
 					tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1) };
 
 	//_moveFlg[INPUT_ID::BUTTON_LEFT] = tmpPos.x - 1 < 0;

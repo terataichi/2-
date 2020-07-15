@@ -45,7 +45,6 @@ private:
 
 	const Vector2 _size;				// ぷよのサイズ
 	const Vector2 _rad;					// ぷよの半径
-	std::map<INPUT_ID, Vector2> _vec;	// キーに対しての移動量格納
 	Vector2 _pos;
 	DirUnion _dirFlg;					// 移動していいのかどうかの情報をセットする
 };
