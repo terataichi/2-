@@ -13,32 +13,40 @@ puyo::~puyo()
 
 void puyo::UpDate(void)
 {
+
+	_pos.y += 2;
+
 	if (lpSceneMng._gameSize.y - _rad.y > _pos.y)
 	{
-		_pos.y += 2;
 	}
 }
 
 void puyo::Move(INPUT_ID id)
 {
 	//// âÊñ äOÇ…çsÇ¡ÇΩèÍçáÇÃèCê≥
-	//auto OutPos = [&](bool check, Vector2&& fix)
-	//{
-	//	if (check)
-	//	{
-	//		_pos = fix;
-	//	}
-	//};
+	auto OutPos = [&](DirUnion check, Vector2&& fix)
+	{
+		if (check)
+		{
+			_pos = fix;
+		}
+	};
 	_pos += _vec[id];
-	//OutPos(_pos.x < 0, Vector2(_rad.x, _pos.y));
-	//OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
-	//OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
-	//OutPos(_pos.y > lpSceneMng._gameSize.y - _size.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
+	OutPos(_dirFlg, Vector2(_rad.x, _pos.y));
+	OutPos(_pos.y < 0, Vector2(_pos.x, _rad.y));
+	OutPos(_pos.x > lpSceneMng._gameSize.x, Vector2(lpSceneMng._gameSize.x - _rad.x, _pos.y));
+	OutPos(_pos.y > lpSceneMng._gameSize.y - _size.y, Vector2(_pos.x, lpSceneMng._gameSize.y - _rad.y));
 }
 
 void puyo::Draw(void)
 {
 	DrawCircle(_pos.x, _pos.y, lpSceneMng._pyoRadius, 0xfffff, true);
+}
+
+bool puyo::SetDirFlg(DirUnion flg)
+{
+	_dirFlg = flg;
+	return true;
 }
 
 const Vector2 puyo::pos() const

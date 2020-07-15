@@ -50,21 +50,25 @@ void Stage::UpDate(void)
 	(*_input)();
 	_puyo->UpDate();
 
+	DirUnion _dirFlg;									// ˆÚ“®‚µ‚Ä‚¢‚¢‚©‚Ç‚¤‚©‚Ìî•ñ‚ðì‚é
 	Vector2 tmpPos = (_puyo->pos() / _puyo->size());
-	_moveFlg[INPUT_ID::BUTTON_LEFT] = tmpPos.x - 1 < 0;
-	_moveFlg[INPUT_ID::BUTTON_RIGHT] = tmpPos.x + 1 > static_cast<int>(STAGE_X - 1);
-	_moveFlg[INPUT_ID::BUTTON_UP] = tmpPos.y - 1 < 0;
-	_moveFlg[INPUT_ID::BUTTON_DOWN] = tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1);
+	_dirFlg.bit = { tmpPos.x - 1 < 0 ,
+					tmpPos.x + 1 > static_cast<int>(STAGE_X - 1) ,
+					tmpPos.y - 1 < 0,
+					tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1) };
+
+	//_moveFlg[INPUT_ID::BUTTON_LEFT] = tmpPos.x - 1 < 0;
+	//_moveFlg[INPUT_ID::BUTTON_RIGHT] = tmpPos.x + 1 > static_cast<int>(STAGE_X - 1);
+	//_moveFlg[INPUT_ID::BUTTON_UP] = tmpPos.y - 1 < 0;
+	//_moveFlg[INPUT_ID::BUTTON_DOWN] = tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1);
 
 
 	for (auto data : _input->GetTrgData())
 	{
-		if (!_moveFlg[data.first])
+		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
 		{
-			if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
-			{
-				_puyo->Move(data.first);
-			}
+			_puyo->SetDirFlg(_dirFlg);
+			_puyo->Move(data.first);
 		}
 	}
 
