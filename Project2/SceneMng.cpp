@@ -46,13 +46,13 @@ bool SceneMng::SysInit(void)
 
 void SceneMng::Init(void)
 {
-	_stage.emplace_back(std::make_unique<Stage>(Vector2(_gameOffSet.x, _frameSize.y / 2), Vector2(_gameSize.x, _gameSize.y)));
-	_stage.emplace_back(std::make_unique<Stage>(Vector2(_gameSize.x * 2 + _gameOffSet.x, _frameSize.y / 2), Vector2(_gameSize.x, _gameSize.y)));
+	_stage.emplace_back(std::make_unique<Stage>(Vector2(gameOffSet_.x, _frameSize.y / 2), Vector2(gameSize_.x, gameSize_.y)));
+	_stage.emplace_back(std::make_unique<Stage>(Vector2(gameSize_.x * (_stage.size() + 1)+ gameOffSet_.x, _frameSize.y / 2), Vector2(gameSize_.x, gameSize_.y)));
 }
 
 SceneMng::SceneMng() :
-	_pyoSize(64), _pyoRadius(_pyoSize / 2), _gameSize(Vector2(_pyoSize * 6, _pyoSize * 13)), _gameOffSet(Vector2(66, 66)),
-	_frameSize(Vector2(64, 66)), _screenSize(Vector2(_gameSize.x * 3 + _frameSize.x * 2, _gameSize.y + _gameOffSet.y))
+	pyoSize_(64), pyoRadius_(pyoSize_ / 2), gameSize_(Vector2(pyoSize_ * 6, pyoSize_ * 13)), gameOffSet_(Vector2(66, 66)),
+	_frameSize(Vector2(64, 66)), _screenSize(Vector2(gameSize_.x * 3 + _frameSize.x * 2, gameSize_.y + gameOffSet_.y))
 {
 	TRACE("シーンマネージャーの生成\n");
 	if (!SysInit())

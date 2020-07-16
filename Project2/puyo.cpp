@@ -2,7 +2,7 @@
 #include "puyo.h"
 #include "SceneMng.h"
 
-puyo::puyo() :_size(64, 64), _rad(_size / 2)
+puyo::puyo() :size_(64), rad_(size_ / 2)
 {
 	Init();
 }
@@ -13,12 +13,9 @@ puyo::~puyo()
 
 void puyo::UpDate(void)
 {
-
-	_pos.y += 2;
-
-	if (lpSceneMng._gameSize.y - _rad.y > _pos.y)
+	if (lpSceneMng.gameSize_.y - rad_ < pos_.y)
 	{
-
+		pos_.y = lpSceneMng.gameSize_.y - rad_;
 	}
 }
 
@@ -28,16 +25,16 @@ void puyo::Move(INPUT_ID id)
 	switch (id)
 	{
 	case INPUT_ID::BUTTON_LEFT:
-		if (!_dirFlg.bit.left) { _pos.x -= _size.x; }
+		if (!dirFlg_.bit.left) { pos_.x -= size_; }
 		break;
 	case INPUT_ID::BUTTON_UP:
-		if (!_dirFlg.bit.up) { _pos.y -= _size.x; }
+		if (!dirFlg_.bit.up) { pos_.y -= size_; }
 		break;
 	case INPUT_ID::BUTTON_RIGHT:
-		if (!_dirFlg.bit.right) { _pos.x += _size.x; }
+		if (!dirFlg_.bit.right) { pos_.x += size_; }
 		break;
 	case INPUT_ID::BUTTON_DOWN:
-		if (!_dirFlg.bit.down) { _pos.y += _size.y; }
+		if (!dirFlg_.bit.down) { pos_.y += size_; }
 		break;
 	case INPUT_ID::BUTTON_ROTA:
 		break;
@@ -51,31 +48,42 @@ void puyo::Move(INPUT_ID id)
 
 void puyo::Draw(void)
 {
-	DrawCircle(_pos.x, _pos.y, lpSceneMng._pyoRadius, 0xfffff, true);
+	DrawCircle(pos_.x, pos_.y, rad_, 0xfffff, true);
 }
 
 bool puyo::SetDirFlg(DirUnion flg)
 {
-	_dirFlg = flg;
+	dirFlg_ = flg;
 	return true;
 }
 
-const Vector2 puyo::pos() const
+const Vector2& puyo::pos() const
 {
-	return _pos;
+	return pos_;
 }
 
-const Vector2 puyo::size(void) const
+const int puyo::size(void) const
 {
-	return _size;
+	return size_;
 }
 
-const Vector2 puyo::rad(void) const
+const int puyo::rad(void) const
 {
-	return _rad;
+	return rad_;
+}
+
+const PuyoID puyo::id(void) const
+{
+	return id_;
+}
+
+const Vector2 puyo::GetGrid(int size)
+{
+	return Vector2(pos_.x / size, pos_.y / size);
 }
 
 void puyo::Init(void)
 {
-	_pos = Vector2(32, 32);
+	pos_ = Vector2(rad_ + size_ * 3, rad_);
+	id_ = PuyoID::Green;
 }

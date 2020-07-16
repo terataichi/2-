@@ -32,10 +32,10 @@ public:
 
 	void Run(void);
 
-	const int _pyoSize;										// ぷよの大きさ
-	const int _pyoRadius;									// ぷよの半径
-	const Vector2 _gameOffSet;								// オフセット
-	const Vector2 _gameSize;								// ゲーム画面のみのサイズ
+	const int pyoSize_;										// ぷよの大きさ
+	const int pyoRadius_;									// ぷよの半径
+	const Vector2 gameOffSet_;								// オフセット
+	const Vector2 gameSize_;								// ゲーム画面のみのサイズ
 	const Vector2 _frameSize;								// ゲーム画面の周りのフレームのサイズ
 	const Vector2 _screenSize;								// スクリーンサイズ
 private:

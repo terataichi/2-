@@ -11,6 +11,18 @@ enum class PuyoState
 	Max
 };
 
+enum class PuyoID
+{
+	Non,
+	red,
+	Green,
+	Bule,
+	Yellow,
+	Purple,
+	Wall,
+	Max,
+};
+
 // 方向の入力のビットフィールド
 struct DirBits
 {
@@ -36,16 +48,20 @@ public:
 	void Draw(void);
 	
 	bool SetDirFlg(DirUnion flg);
+
 	// ------ゲット関数
-	const Vector2 pos(void)const;
-	const Vector2 size(void)const;
-	const Vector2 rad(void)const;
+	const Vector2& pos(void)const;
+	const int size(void)const;
+	const int rad(void)const;
+	const PuyoID id(void)const;
+	const Vector2 GetGrid(int size);							// 現在のマス目の取得			
 private:
 	void Init(void);
 
-	const Vector2 _size;				// ぷよのサイズ
-	const Vector2 _rad;					// ぷよの半径
-	Vector2 _pos;
-	DirUnion _dirFlg;					// 移動していいのかどうかの情報をセットする
+	const int size_;							// ぷよのサイズ
+	const int rad_;								// ぷよの半径
+	Vector2 pos_;
+	DirUnion dirFlg_;							// 移動していいのかどうかの情報をセットする
+	PuyoID id_;									// 自分のぷよの識別用
 };
 

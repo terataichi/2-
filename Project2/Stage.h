@@ -6,8 +6,8 @@
 #include "Input/InputState.h"
 #include "puyo.h"
 
-#define STAGE_X 6
-#define STAGE_Y 13
+#define STAGE_X 8
+#define STAGE_Y 15
 
 class Stage
 {
@@ -22,20 +22,21 @@ public:
 	void UpDate(void);									// 更新.
 private:
 	void Init();
-	Vector2 _offSet;									// ステージ画面のオフセット
-	Vector2 _size;
-	int _stageID;										// ステージの描画用スクリーンID
+	Vector2 offSet_;									// ステージ画面のオフセット
+	Vector2 size_;
+	int blockSize_;
+	int stageID_;										// ステージの描画用スクリーンID
 
-	std::vector<int> _dataBase;							// ステージ全体のマス管理用
-	std::vector<int*> _data;							// dataBaseのポインターを入れて
+	std::vector<PuyoID> dataBase_;						// ステージ全体のマス管理用
+	std::vector<PuyoID*> data_;							// dataBaseのポインターを入れて
 
-	std::map<INPUT_ID, bool> _moveFlg;					// 移動していいか。true : ロック
+	std::map<INPUT_ID, bool> moveFlg_;					// 移動していいか。true : ロック
 
-	std::shared_ptr<InputState> _input;					// キーの入力管理
+	std::shared_ptr<InputState> input_;					// キーの入力管理
 
-	std::shared_ptr<puyo> _puyo;
+	std::vector<std::shared_ptr<puyo>> puyo_;
 
-	static int playCnt;									// 複数人いた場合人数でｷｰを変えれるように
-	int _id;
+	static int playCnt_;								// 複数人いた場合人数でｷｰを変えれるように
+	int id_;
 };
 

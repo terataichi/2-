@@ -7,79 +7,81 @@
 #include "Input/PadState.h"
 #include "Input/MouseState.h"
 
-int Stage::playCnt = 0;
+int Stage::playCnt_ = 0;
 
-Stage::Stage(Vector2&& offSet,Vector2&& size) :_offSet(std::move(offSet)), _size(std::move(size))
+Stage::Stage(Vector2&& offSet,Vector2&& size) :offSet_(std::move(offSet)), size_(std::move(size))
 {
-	_id = playCnt;
+	id_ = playCnt_;
 	Init();
-	playCnt++;
+	playCnt_++;
 }
 
 Stage::~Stage()
 {
-	playCnt--;
+	playCnt_--;
 }
 
 const int Stage::GetStageID(void) const
 {
-	return Stage::_stageID;
+	return Stage::stageID_;
 }
 
 const Vector2 Stage::offSet(void) const
 {
-	return Stage::_offSet;
+	return Stage::offSet_;
 }
 
 const Vector2 Stage::size(void) const
 {
-	return Stage::_size;
+	return Stage::size_;
 }
 
 void Stage::Draw(void)
 {
-	SetDrawScreen(_stageID);
+	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0,0,lpSceneMng._gameSize.x,lpSceneMng._gameSize.y, 0xfff, true);
-	_puyo->Draw();
+	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0xfff, true);
+	for (auto puyo : puyo_)
+	{
+		puyo->Draw();
+	}
 }
 
 void Stage::UpDate(void)
 {
-
-	(*_input)();
-	_puyo->UpDate();
-
-	DirUnion _dirFlg;									// 移動していいかどうかの情報を作る
-	Vector2 tmpPos = (_puyo->pos() / _puyo->size());
-	_dirFlg.bit = { tmpPos.x - 1 < 0 ,
-					tmpPos.y - 1 < 0,
-					tmpPos.x + 1 > static_cast<int>(STAGE_X - 1) ,
-					tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1) };
-
-	//_moveFlg[INPUT_ID::BUTTON_LEFT] = tmpPos.x - 1 < 0;
-	//_moveFlg[INPUT_ID::BUTTON_RIGHT] = tmpPos.x + 1 > static_cast<int>(STAGE_X - 1);
-	//_moveFlg[INPUT_ID::BUTTON_UP] = tmpPos.y - 1 < 0;
-	//_moveFlg[INPUT_ID::BUTTON_DOWN] = tmpPos.y + 1 > static_cast<int>(STAGE_Y - 1);
+	(*input_)();
 
 
-	for (auto data : _input->GetTrgData())
+	DirUnion _dirFlg;												// 移動していいかどうかの情報を作る
+	Vector2 grid = puyo_[0]->GetGrid(blockSize_) + 1;
+	_dirFlg.bit = { data_[grid.y][grid.x - 1] != PuyoID::Non,
+					data_[grid.y - 1][grid.x] != PuyoID::Non,
+					data_[grid.y][grid.x + 1] != PuyoID::Non,
+					data_[grid.y + 1][grid.x] != PuyoID::Non };
+	if (_dirFlg.bit.down)
+	{
+		puyo_.emplace(puyo_.begin(), std::make_shared<puyo>());
+		data_[grid.y][grid.x] = puyo_[0]->id();
+	}
+	puyo_[0]->SetDirFlg(_dirFlg);
+	for (auto data : input_->GetTrgData())
 	{
 		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
 		{
-			_puyo->SetDirFlg(_dirFlg);
-			_puyo->Move(data.first);
+			puyo_[0]->Move(data.first);
 		}
 	}
 
+
+	puyo_[0]->UpDate();
 	Draw();
 }
 
 void Stage::Init()
 {
-	_stageID = MakeScreen(_size.x, _size.y);
+	stageID_ = MakeScreen(size_.x, size_.y);
 
-	_dataBase.resize(STAGE_Y * STAGE_X);							// 全体のサイズを作る
+	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 
 	//_data.resize(STAGE_Y);										// Yのサイズを確保してそこにXを格納していく
 	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
@@ -90,17 +92,25 @@ void Stage::Init()
 	//_dataBase[0] = 500;
 	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
 	{
-		_data.emplace_back(&_dataBase[j * STAGE_X]);
+		data_.emplace_back(&dataBase_[j * STAGE_X]);
+		for (int i = 0; i < static_cast<int>(STAGE_X); i++)
+		{
+			if (i == 0 || i == static_cast<int>(STAGE_X - 1)||
+				j == 0 || j == static_cast<int>(STAGE_Y - 1))
+			{
+				data_[j][i] = PuyoID::Wall;
+			}
+		}
 	}
-	TRACE("%d\n", _data[0][0]);
+	TRACE("%d\n", data_[0][0]);
 
 	for (auto id : INPUT_ID())
 	{
-		_moveFlg.try_emplace(id, false);
+		moveFlg_.try_emplace(id, false);
 	}
 
-
-	_input = std::make_shared<KeyState>();
-	_input->SetUp(_id);
-	_puyo = std::make_shared<puyo>();
+	blockSize_ = 64;
+	input_ = std::make_shared<KeyState>();
+	input_->SetUp(id_);
+	puyo_.emplace(puyo_.begin(), std::make_shared<puyo>());
 }
