@@ -121,5 +121,5 @@ void puyo::Init(void)
 	id_ = PuyoID::Green;
 	softCntMax_ = 20;
 	softCnt_ = 0;
-	alive_ = false;
+	alive_ = true;
 }
