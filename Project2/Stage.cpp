@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <functional>
 #include <DxLib.h>
 #include "_debug/_DebugConOut.h"
 #include "Stage.h"
@@ -36,12 +37,46 @@ const Vector2 Stage::size(void) const
 	return Stage::size_;
 }
 
+bool Stage::SetErase(void)
+{
+	memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// サイズを作って中に0(PuyoID::Non)をいれる
+	//memset(erasedata_.data(), 0, erasedata_.size() * sizeof(PuyoID));				// 
+
+	Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);								// 起点のマスを設定
+	int count = 0;																	// 隣に同じIDが見つかればプラス
+
+	// 再起関数
+	std::function<void(PuyoID, Vector2)> erasePuyo = [&](PuyoID id, Vector2 vec)
+	{
+		if (erasedata_[vec.y][vec.x] == PuyoID::Non)
+		{
+			if (data_[vec.y][vec.x] == id)
+			{
+				erasedata_[vec.y][vec.x] = data_[vec.y][vec.x];
+				count++;
+				erasePuyo(id, Vector2(vec.x - 1, vec.y));
+				erasePuyo(id, Vector2(vec.x, vec.y - 1));
+				erasePuyo(id, Vector2(vec.x + 1, -vec.y));
+				erasePuyo(id, Vector2(vec.x, vec.y + 1));
+			}
+		}
+	};
+	erasePuyo(puyoVec_[0]->id(), grid);
+
+	if (count < 4)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void Stage::Draw(void)
 {
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
 	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0xfff, true);
-	for (auto puyo : puyo_)
+	for (auto puyo : puyoVec_)
 	{
 		puyo->Draw();
 	}
@@ -50,30 +85,41 @@ void Stage::Draw(void)
 void Stage::UpDate(void)
 {
 	(*input_)();
-
-
+	
 	DirUnion _dirFlg;												// 移動していいかどうかの情報を作る
-	Vector2 grid = puyo_[0]->GetGrid(blockSize_) + 1;
+	Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
 	_dirFlg.bit = { data_[grid.y][grid.x - 1] != PuyoID::Non,
 					data_[grid.y - 1][grid.x] != PuyoID::Non,
 					data_[grid.y][grid.x + 1] != PuyoID::Non,
 					data_[grid.y + 1][grid.x] != PuyoID::Non };
-	if (_dirFlg.bit.down)
+	puyoVec_[0]->SetDirFlg(_dirFlg);
+
+	if (puyoVec_[0]->UpDate())
 	{
-		puyo_.emplace(puyo_.begin(), std::make_shared<puyo>());
-		data_[grid.y][grid.x] = puyo_[0]->id();
+		data_[grid.y][grid.x] = puyoVec_[0]->id();
+		if (SetErase())
+		{
+			data_[grid.y][grid.x] = puyoVec_[0]->id();
+
+			return;
+		}
+		puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>());
 	}
-	puyo_[0]->SetDirFlg(_dirFlg);
+
+	if (input_->GetTrgData().at(INPUT_ID::BUTTON_DOWN)[static_cast<int>(Trg::Now)])
+	{
+		puyoVec_[0]->SoftDrop();
+	}
 	for (auto data : input_->GetTrgData())
 	{
 		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
 		{
-			puyo_[0]->Move(data.first);
+			puyoVec_[0]->Move(data.first);
 		}
 	}
 
 
-	puyo_[0]->UpDate();
+
 	Draw();
 }
 
@@ -82,6 +128,7 @@ void Stage::Init()
 	stageID_ = MakeScreen(size_.x, size_.y);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
+	eraseDataBase_.resize(STAGE_Y * STAGE_X);							// 全体のサイズを作る
 
 	//_data.resize(STAGE_Y);										// Yのサイズを確保してそこにXを格納していく
 	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
@@ -93,12 +140,14 @@ void Stage::Init()
 	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
 	{
 		data_.emplace_back(&dataBase_[j * STAGE_X]);
+		erasedata_.emplace_back(&dataBase_[j * STAGE_X]);
 		for (int i = 0; i < static_cast<int>(STAGE_X); i++)
 		{
 			if (i == 0 || i == static_cast<int>(STAGE_X - 1)||
 				j == 0 || j == static_cast<int>(STAGE_Y - 1))
 			{
 				data_[j][i] = PuyoID::Wall;
+				erasedata_[j][i] = PuyoID::Wall;
 			}
 		}
 	}
@@ -112,5 +161,5 @@ void Stage::Init()
 	blockSize_ = 64;
 	input_ = std::make_shared<KeyState>();
 	input_->SetUp(id_);
-	puyo_.emplace(puyo_.begin(), std::make_shared<puyo>());
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>());
 }

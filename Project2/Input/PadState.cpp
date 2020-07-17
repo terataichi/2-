@@ -34,6 +34,6 @@ void PadState::UpDate(void)
 	for (auto id : INPUT_ID())				// nowのセット
 	{
 		_state[id][static_cast<int>(Trg::Old)] = _state[id][static_cast<int>(Trg::Now)];		// oldのセット
-		_state[id][static_cast<int>(Trg::Now)] = (GetJoypadInputState(_padID) & _keyCon[id]);								// nowのセット
+		_state[id][static_cast<int>(Trg::Now)] = (GetJoypadInputState(_padID) & _keyCon[id]);	// nowのセット
 	}
 }
