@@ -90,7 +90,7 @@ void Stage::Draw(void)
 {
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0xfff, true);
+	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0xffffff, true);
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->Draw();

@@ -1,4 +1,5 @@
 #include <DxLib.h>
+#include <random>
 #include "puyo.h"
 #include "SceneMng.h"
 
@@ -111,14 +112,18 @@ const bool puyo::alive(void) const
 
 void puyo::Init(void)
 {
-	puyoCor_.try_emplace(PuyoID::Red, 0xff);
-	puyoCor_.try_emplace(PuyoID::Bule,0xf);
-	puyoCor_.try_emplace(PuyoID::Green,0xffff);
-	puyoCor_.try_emplace(PuyoID::Yellow,0xffff);
-	puyoCor_.try_emplace(PuyoID::Purple,0xfffff);
+	puyoCor_.try_emplace(PuyoID::Red, 0xff0000);
+	puyoCor_.try_emplace(PuyoID::Bule,0x0000ff);
+	puyoCor_.try_emplace(PuyoID::Green,0x00ff00);
+	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
+	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
+
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>( PuyoID::Purple));
 
 	pos_ = Vector2(rad_ + size_ * 3, rad_);
-	id_ = PuyoID::Green;
+	id_ = static_cast<PuyoID>(puyoRand(mt));
 	softCntMax_ = 20;
 	softCnt_ = 0;
 	alive_ = true;
