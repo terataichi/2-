@@ -166,4 +166,5 @@ void Stage::Init()
 	puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
 
 	playUnit_ = std::make_unique<PlayUnit>(*this);
+	stgMode_ = StgMode::Drop;
 }
