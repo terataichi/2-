@@ -9,6 +9,8 @@
 #define STAGE_X 8
 #define STAGE_Y 15
 
+using UniPuyo = std::unique_ptr<puyo>;
+
 class Stage
 {
 public:
@@ -22,11 +24,15 @@ public:
 	void Draw(void);									// 各スクリーンに描画する
 	void UpDate(void);									// 更新.
 private:
+	friend class PlayUnit;
+
 	void Init();
 	Vector2 offSet_;									// ステージ画面のオフセット
 	Vector2 size_;
 	int blockSize_;
 	int stageID_;										// ステージの描画用スクリーンID
+
+	std::unique_ptr<PlayUnit> playUnit_;				// ﾌﾟﾚｲﾔｰに関する処理をフレンドでもらって管理
 
 	std::vector<PuyoID> dataBase_;						// ステージ全体のマス管理用
 	std::vector<PuyoID*> data_;							// dataBaseのポインターを入れて
@@ -38,9 +44,10 @@ private:
 
 	std::shared_ptr<InputState> input_;					// キーの入力管理
 
-	std::vector<std::unique_ptr<puyo>> puyoVec_;
+	std::vector<UniPuyo> puyoVec_;
 
 	static int playCnt_;								// 複数人いた場合人数でｷｰを変えれるように
 	int id_;
+
 };
 

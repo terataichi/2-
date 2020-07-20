@@ -120,17 +120,7 @@ void Stage::UpDate(void)
 		puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
 	}
 
-	if (input_->GetTrgData().at(INPUT_ID::BUTTON_DOWN)[static_cast<int>(Trg::Now)])
-	{
-		puyoVec_[0]->SoftDrop();
-	}
-	for (auto data : input_->GetTrgData())
-	{
-		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
-		{
-			puyoVec_[0]->Move(data.first);
-		}
-	}
+
 
 	Draw();
 }
@@ -173,4 +163,6 @@ void Stage::Init()
 	input_ = std::make_shared<KeyState>();
 	input_->SetUp(id_);
 	puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
+
+	playUnit_ = std::make_unique<PlayUnit>(*this);
 }
