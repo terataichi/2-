@@ -9,7 +9,15 @@
 #define STAGE_X 8
 #define STAGE_Y 15
 
+class PlayUnit;
+
 using UniPuyo = std::unique_ptr<puyo>;
+
+enum class StgMode
+{
+	Drop,
+	Rensa
+};
 
 class Stage
 {
@@ -24,7 +32,7 @@ public:
 	void Draw(void);									// 各スクリーンに描画する
 	void UpDate(void);									// 更新.
 private:
-	friend class PlayUnit;
+	friend  PlayUnit;
 
 	void Init();
 	Vector2 offSet_;									// ステージ画面のオフセット
@@ -48,6 +56,7 @@ private:
 
 	static int playCnt_;								// 複数人いた場合人数でｷｰを変えれるように
 	int id_;
+	StgMode stgMode_;
 
 };
 

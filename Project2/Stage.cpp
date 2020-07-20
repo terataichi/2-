@@ -7,6 +7,7 @@
 #include "Input/KeyState.h"
 #include "Input/PadState.h"
 #include "Input/MouseState.h"
+#include "PlayUnit.h"
 
 int Stage::playCnt_ = 0;
 
@@ -120,7 +121,7 @@ void Stage::UpDate(void)
 		puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
 	}
 
-
+	playUnit_->UpDate();											// ˆÚ“®ˆ—‚Æ‚©‚ÌUpDate
 
 	Draw();
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include "Stage.h"
 
 class PlayUnit
@@ -11,6 +10,6 @@ public:
 	void UpDate(void);
 
 private:
-	Stage stage_;
+	Stage& stage_;
 };
 
