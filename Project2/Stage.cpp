@@ -38,7 +38,7 @@ const Vector2 Stage::size(void) const
 	return Stage::size_;
 }
 
-bool Stage::SetErase(void)
+bool Stage::SetErase(UniPuyo& puyo, Vector2 vec)
 {
 	memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// サイズを作って中に0(PuyoID::Non)をいれる
 
@@ -102,24 +102,57 @@ void Stage::UpDate(void)
 {
 	(*input_)();
 	
-	DirUnion _dirFlg;												// 移動していいかどうかの情報を作る
-	Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
-	_dirFlg.bit = { data_[grid.y][grid.x - 1] != PuyoID::Non,
-					data_[grid.y - 1][grid.x] != PuyoID::Non,
-					data_[grid.y][grid.x + 1] != PuyoID::Non,
-					data_[grid.y + 1][grid.x] != PuyoID::Non };
-	puyoVec_[0]->SetDirFlg(_dirFlg);
+	bool next = true;
+	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](UniPuyo& uniPuyo)
+		{
+			// まだ動いていいかチェックをかける
+			next &= CheckMove(uniPuyo);
+		});
 
-	if (puyoVec_[0]->UpDate())
+	bool rensa = true;
+	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](UniPuyo& uniPuyo)
+		{
+			if (!uniPuyo->UpDate())
+			{
+				// falseだったらまだ動いてるから連鎖にいかない 
+				rensa = false;
+			}
+		});
+
+	if (rensa)
 	{
-		data_[grid.y][grid.x] = puyoVec_[0]->id();
-		if (SetErase())
+		stgMode_ = StgMode::Rensa;
+		bool delet = false;
+
+		for (auto&& pvec : puyoVec_)
+		{
+			delet |= SetErase(pvec, pvec->GetGrid(blockSize_));
+			Vector2 grid = pvec->GetGrid(blockSize_);
+			data_[grid.y][grid.x] = pvec->id();					// データの書き込み
+		}
+
+		if (delet)
 		{
 			auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::unique_ptr<puyo>& puyo) {return !(puyo->alive()); });
 			puyoVec_.erase(itr, puyoVec_.end());
 		}
-		puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
+		else
+		{
+			puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
+			stgMode_ = StgMode::Drop;
+		}
 	}
+
+	//if (puyoVec_[0]->UpDate())
+	//{
+	//	Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
+	//	data_[grid.y][grid.x] = puyoVec_[0]->id();
+	//	if (SetErase(puyoVec_[0], grid))
+	//	{
+	//		auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::unique_ptr<puyo>& puyo) {return !(puyo->alive()); });
+	//		puyoVec_.erase(itr, puyoVec_.end());
+	//	}
+	//}
 
 	playUnit_->UpDate();											// 移動処理とかのUpDate
 
@@ -167,4 +200,23 @@ void Stage::Init()
 
 	playUnit_ = std::make_unique<PlayUnit>(*this);
 	stgMode_ = StgMode::Drop;
+}
+
+bool Stage::CheckMove(UniPuyo& vec)
+{
+	bool next = true;
+	DirUnion dirFlg;												// 移動していいかどうかの情報を作る
+	Vector2 grid = vec->GetGrid(blockSize_);
+	dirFlg.bit = { data_[grid.y][grid.x - 1] != PuyoID::Non,
+					data_[grid.y - 1][grid.x] != PuyoID::Non,
+					data_[grid.y][grid.x + 1] != PuyoID::Non,
+					data_[grid.y + 1][grid.x] != PuyoID::Non };
+
+	if (dirFlg.bit.down)
+	{
+		next = false;
+	}
+
+	vec->SetDirFlg(dirFlg);
+	return next;
 }

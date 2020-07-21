@@ -28,13 +28,14 @@ public:
 	const int GetStageID(void)const;					// ステージID書き込み用
 	const Vector2 offSet(void)const;
 	const Vector2 size(void) const;
-	bool SetErase(void);								// ぷよを消すのをセット
+	bool SetErase(UniPuyo& puyo, Vector2 vec);			// ぷよを消すのをセット
 	void Draw(void);									// 各スクリーンに描画する
 	void UpDate(void);									// 更新.
 private:
 	friend  PlayUnit;
 
-	void Init();
+	void Init(void);
+	bool CheckMove(UniPuyo& vec);								// 上下左右動いていいか
 	Vector2 offSet_;									// ステージ画面のオフセット
 	Vector2 size_;
 	int blockSize_;
