@@ -42,7 +42,7 @@ bool Stage::SetErase(UniPuyo& puyo, Vector2 vec)
 {
 	memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// サイズを作って中に0(PuyoID::Non)をいれる
 
-	Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);								// 起点のマスを設定
+	Vector2 grid = puyo->GetGrid(blockSize_);								// 起点のマスを設定
 	int count = 0;																	// 隣に同じIDが見つかればプラス
 
 	// 再起関数
@@ -61,7 +61,7 @@ bool Stage::SetErase(UniPuyo& puyo, Vector2 vec)
 			}
 		}
 	};
-	erasePuyo(puyoVec_[0]->id(), grid);
+	erasePuyo(puyo->id(), grid);
 
 	if (count < 4)
 	{
@@ -91,7 +91,7 @@ void Stage::Draw(void)
 {
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0xffffff, true);
+	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0x778899, true);
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->Draw();
@@ -102,11 +102,11 @@ void Stage::UpDate(void)
 {
 	(*input_)();
 	
-	bool next = true;
+	bool nextFlg = true;
 	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](UniPuyo& uniPuyo)
 		{
 			// まだ動いていいかチェックをかける
-			next &= CheckMove(uniPuyo);
+			nextFlg &= CheckMove(uniPuyo);
 		});
 
 	bool rensa = true;
@@ -115,23 +115,39 @@ void Stage::UpDate(void)
 			if (!uniPuyo->UpDate())
 			{
 				// falseだったらまだ動いてるから連鎖にいかない 
+				Vector2 grid = uniPuyo->GetGrid(blockSize_);
+				data_[grid.y][grid.x] = PuyoID::Non;
 				rensa = false;
 			}
+			else
+			{
+				Vector2 grid = uniPuyo->GetGrid(blockSize_);
+				data_[grid.y][grid.x] = uniPuyo->id();
+			}
 		});
+
+	if (stgMode_ == StgMode::Rensa)
+	{
+		for (auto&& pvec : puyoVec_)
+		{
+			pvec->SoftDrop();
+		}
+	}
 
 	if (rensa)
 	{
 		stgMode_ = StgMode::Rensa;
-		bool delet = false;
+		bool deleteFlg = false;
+
+		Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
+		data_[grid.y][grid.x] = puyoVec_[0]->id();
 
 		for (auto&& pvec : puyoVec_)
 		{
-			delet |= SetErase(pvec, pvec->GetGrid(blockSize_));
-			Vector2 grid = pvec->GetGrid(blockSize_);
-			data_[grid.y][grid.x] = pvec->id();					// データの書き込み
+			deleteFlg |= SetErase(pvec, pvec->GetGrid(blockSize_));
 		}
 
-		if (delet)
+		if (deleteFlg)
 		{
 			auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::unique_ptr<puyo>& puyo) {return !(puyo->alive()); });
 			puyoVec_.erase(itr, puyoVec_.end());
@@ -164,7 +180,7 @@ void Stage::Init()
 	stageID_ = MakeScreen(size_.x, size_.y);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
-	eraseDataBase_.resize(STAGE_Y * STAGE_X);							// 全体のサイズを作る
+	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る
 
 	//_data.resize(STAGE_Y);										// Yのサイズを確保してそこにXを格納していく
 	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
