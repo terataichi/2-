@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <functional>
+#include <random>
 #include <DxLib.h>
 #include "_debug/_DebugConOut.h"
 #include "Stage.h"
@@ -38,26 +39,34 @@ const Vector2 Stage::size(void) const
 	return Stage::size_;
 }
 
-bool Stage::SetErase(UniPuyo& puyo, Vector2 vec)
+bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 {
-	memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// サイズを作って中に0(PuyoID::Non)をいれる
+	//memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// サイズを作って中に0(PuyoID::Non)をいれる
 
-	Vector2 grid = puyo->GetGrid(blockSize_);								// 起点のマスを設定
+	for (auto& puyo : eraseDataBase_)
+	{
+		puyo.reset();
+	}
+
+	Vector2 grid = puyo->GetGrid(blockSize_);										// 起点のマスを設定
 	int count = 0;																	// 隣に同じIDが見つかればプラス
 
 	// 再起関数
 	std::function<void(PuyoID, Vector2)> erasePuyo = [&](PuyoID id, Vector2 vec)
 	{
-		if (erasedata_[vec.y][vec.x] == PuyoID::Non)
+		if (!erasedata_[vec.y][vec.x])
 		{
-			if (data_[vec.y][vec.x] == id)
+			if (data_[vec.y][vec.x])
 			{
-				erasedata_[vec.y][vec.x] = data_[vec.y][vec.x];
-				count++;
-				erasePuyo(id, Vector2(vec.x - 1, vec.y));
-				erasePuyo(id, Vector2(vec.x, vec.y - 1));
-				erasePuyo(id, Vector2(vec.x + 1, vec.y));
-				erasePuyo(id, Vector2(vec.x, vec.y + 1));
+				if (data_[vec.y][vec.x]->id() == id)
+				{
+					erasedata_[vec.y][vec.x] = data_[vec.y][vec.x];
+					count++;
+					erasePuyo(id, Vector2(vec.x - 1, vec.y));
+					erasePuyo(id, Vector2(vec.x, vec.y - 1));
+					erasePuyo(id, Vector2(vec.x + 1, vec.y));
+					erasePuyo(id, Vector2(vec.x, vec.y + 1));
+				}
 			}
 		}
 	};
@@ -65,12 +74,9 @@ bool Stage::SetErase(UniPuyo& puyo, Vector2 vec)
 
 	if (count < 4)
 	{
-		for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
+		for (auto& puyo : eraseDataBase_)
 		{
-			for (int i = 0; i < static_cast<int>(STAGE_X); i++)
-			{
-				erasedata_[j][i] = PuyoID::Non;
-			}
+			puyo.reset();
 		}
 		return false;
 	}
@@ -78,10 +84,14 @@ bool Stage::SetErase(UniPuyo& puyo, Vector2 vec)
 	for (auto&& puyo : puyoVec_)
 	{
 		Vector2 gri = puyo->GetGrid(blockSize_);
-		if (erasedata_[gri.y][gri.x] == puyo->id())
+
+		if (erasedata_[gri.y][gri.x])
 		{
-			puyo->alive(false);
-			data_[gri.y][gri.x] = PuyoID::Non;
+			if (erasedata_[gri.y][gri.x]->id() == puyo->id())
+			{
+				puyo->alive(false);
+				data_[gri.y][gri.x].reset();
+			}
 		}
 	}
 	return true;
@@ -103,26 +113,26 @@ void Stage::UpDate(void)
 	(*input_)();
 	
 	bool nextFlg = true;
-	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](UniPuyo& uniPuyo)
+	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 		{
 			// まだ動いていいかチェックをかける
 			nextFlg &= CheckMove(uniPuyo);
 		});
 
 	bool rensa = true;
-	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](UniPuyo& uniPuyo)
+	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 		{
 			if (!uniPuyo->UpDate())
 			{
 				// falseだったらまだ動いてるから連鎖にいかない 
 				Vector2 grid = uniPuyo->GetGrid(blockSize_);
-				data_[grid.y][grid.x] = PuyoID::Non;
+				data_[grid.y][grid.x].reset();
 				rensa = false;
 			}
 			else
 			{
 				Vector2 grid = uniPuyo->GetGrid(blockSize_);
-				data_[grid.y][grid.x] = uniPuyo->id();
+				data_[grid.y][grid.x] = uniPuyo;
 			}
 		});
 
@@ -140,7 +150,7 @@ void Stage::UpDate(void)
 		bool deleteFlg = false;
 
 		Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
-		data_[grid.y][grid.x] = puyoVec_[0]->id();
+		data_[grid.y][grid.x] = puyoVec_[0];
 
 		for (auto&& pvec : puyoVec_)
 		{
@@ -149,12 +159,12 @@ void Stage::UpDate(void)
 
 		if (deleteFlg)
 		{
-			auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::unique_ptr<puyo>& puyo) {return !(puyo->alive()); });
+			auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::shared_ptr<puyo>& puyo) {return !(puyo->alive()); });
 			puyoVec_.erase(itr, puyoVec_.end());
 		}
 		else
 		{
-			puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
+			InstancePuyo();
 			stgMode_ = StgMode::Drop;
 		}
 	}
@@ -189,6 +199,7 @@ void Stage::Init()
 	//}
 
 	//_dataBase[0] = 500;
+
 	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
 	{
 		data_.emplace_back(&dataBase_[j * STAGE_X]);
@@ -198,11 +209,11 @@ void Stage::Init()
 			if (i == 0 || i == static_cast<int>(STAGE_X - 1)||
 				j == 0 || j == static_cast<int>(STAGE_Y - 1))
 			{
-				data_[j][i] = PuyoID::Wall;
+				data_[j][i] = std::make_shared<puyo>(PuyoID::Wall);
 			}
 		}
 	}
-	TRACE("%d\n", data_[0][0]);
+	//TRACE("%d\n", data_[0][0]);
 
 	for (auto id : INPUT_ID())
 	{
@@ -212,21 +223,35 @@ void Stage::Init()
 	blockSize_ = 64;
 	input_ = std::make_shared<KeyState>();
 	input_->SetUp(id_);
-	puyoVec_.emplace(puyoVec_.begin(), std::make_unique<puyo>());
+	InstancePuyo();
 
 	playUnit_ = std::make_unique<PlayUnit>(*this);
 	stgMode_ = StgMode::Drop;
 }
 
-bool Stage::CheckMove(UniPuyo& vec)
+bool Stage::CheckMove(SharePuyo& vec)
 {
 	bool next = true;
 	DirUnion dirFlg;												// 移動していいかどうかの情報を作る
 	Vector2 grid = vec->GetGrid(blockSize_);
-	dirFlg.bit = { data_[grid.y][grid.x - 1] != PuyoID::Non,
-					data_[grid.y - 1][grid.x] != PuyoID::Non,
-					data_[grid.y][grid.x + 1] != PuyoID::Non,
-					data_[grid.y + 1][grid.x] != PuyoID::Non };
+	dirFlg.bit = {1,1,1,1};
+
+	if (!data_[grid.y][grid.x - 1])
+	{
+		dirFlg.bit.left = 0;
+	}
+	if (!data_[grid.y - 1][grid.x])
+	{
+		dirFlg.bit.up = 0;
+	}
+	if (!data_[grid.y][grid.x + 1])
+	{
+		dirFlg.bit.right = 0;
+	}
+	if (!data_[grid.y + 1][grid.x])
+	{
+		dirFlg.bit.down = 0;
+	}
 
 	if (dirFlg.bit.down)
 	{
@@ -235,4 +260,14 @@ bool Stage::CheckMove(UniPuyo& vec)
 
 	vec->SetDirFlg(dirFlg);
 	return next;
+}
+
+void Stage::InstancePuyo()
+{
+	std::random_device rnd;
+	std::mt19937 mt(rnd());
+	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>(PuyoID::Purple));
+
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(static_cast<PuyoID>(puyoRand(mt))));
+
 }

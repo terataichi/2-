@@ -41,11 +41,12 @@ union DirUnion
 class puyo
 {
 public:
-	puyo();
+	puyo(PuyoID id);
 	~puyo();
 	bool UpDate(void);
-	void Move(INPUT_ID id);
-	void SoftDrop();
+	void Move(INPUT_ID id);										// 移動関数
+	void SoftDrop();											// ソフトドロップ
+	void SetSpeed(int spped);									// 連鎖とかでスピードを変える
 	void Draw(void);
 	
 	bool SetDirFlg(DirUnion flg);
@@ -59,7 +60,7 @@ public:
 	const Vector2 GetGrid(int size);							// 現在のマス目の取得
 	const bool alive(void)const;
 private:
-	void Init(void);
+	void Init(PuyoID id);
 
 	const int size_;											// ぷよのサイズ
 	const int rad_;												// ぷよの半径

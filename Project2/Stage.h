@@ -11,7 +11,7 @@
 
 class PlayUnit;
 
-using UniPuyo = std::unique_ptr<puyo>;
+using SharePuyo = std::shared_ptr<puyo>;
 
 enum class StgMode
 {
@@ -28,14 +28,15 @@ public:
 	const int GetStageID(void)const;					// ステージID書き込み用
 	const Vector2 offSet(void)const;
 	const Vector2 size(void) const;
-	bool SetErase(UniPuyo& puyo, Vector2 vec);			// ぷよを消すのをセット
+	bool SetErase(SharePuyo& puyo, Vector2 vec);			// ぷよを消すのをセット
 	void Draw(void);									// 各スクリーンに描画する
 	void UpDate(void);									// 更新.
 private:
 	friend  PlayUnit;
 
 	void Init(void);
-	bool CheckMove(UniPuyo& vec);								// 上下左右動いていいか
+	bool CheckMove(SharePuyo& vec);						// 上下左右動いていいか
+	void InstancePuyo();								// 新しいプヨ
 	Vector2 offSet_;									// ステージ画面のオフセット
 	Vector2 size_;
 	int blockSize_;
@@ -43,17 +44,17 @@ private:
 
 	std::unique_ptr<PlayUnit> playUnit_;				// ﾌﾟﾚｲﾔｰに関する処理をフレンドでもらって管理
 
-	std::vector<PuyoID> dataBase_;						// ステージ全体のマス管理用
-	std::vector<PuyoID*> data_;							// dataBaseのポインターを入れて
+	std::vector<SharePuyo> dataBase_;						// ステージ全体のマス管理用
+	std::vector<SharePuyo*> data_;							// dataBaseのポインターを入れて
 
-	std::vector<PuyoID> eraseDataBase_;					// ステージ全体のマスで４つ揃ったら消える
-	std::vector<PuyoID*> erasedata_;					// eraseDataBaseのポインターを入れて
+	std::vector<SharePuyo> eraseDataBase_;					// ステージ全体のマスで４つ揃ったら消える
+	std::vector<SharePuyo*> erasedata_;					// eraseDataBaseのポインターを入れて
 
 	std::map<INPUT_ID, bool> moveFlg_;					// 移動していいか。true : ロック
 
 	std::shared_ptr<InputState> input_;					// キーの入力管理
 
-	std::vector<UniPuyo> puyoVec_;
+	std::vector<SharePuyo> puyoVec_;
 
 	static int playCnt_;								// 複数人いた場合人数でｷｰを変えれるように
 	int id_;

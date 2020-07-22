@@ -3,9 +3,9 @@
 #include "puyo.h"
 #include "SceneMng.h"
 
-puyo::puyo() :size_(64), rad_(size_ / 2)
+puyo::puyo(PuyoID id) :size_(64), rad_(size_ / 2)
 {
-	Init();
+	Init(id);
 }
 
 puyo::~puyo()
@@ -64,6 +64,10 @@ void puyo::SoftDrop()
 	softCnt_ = softCntMax_;
 }
 
+void puyo::SetSpeed(int spped)
+{
+}
+
 void puyo::Draw(void)
 {
 	DrawCircle(pos_.x, pos_.y, rad_, puyoCor_[id_], true);
@@ -110,7 +114,7 @@ const bool puyo::alive(void) const
 	return alive_;
 }
 
-void puyo::Init(void)
+void puyo::Init(PuyoID id)
 {
 	puyoCor_.try_emplace(PuyoID::Red, 0xff0000);
 	puyoCor_.try_emplace(PuyoID::Bule,0x0000ff);
@@ -118,12 +122,8 @@ void puyo::Init(void)
 	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
 	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
 
-	std::random_device rnd;
-	std::mt19937 mt(rnd());
-	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>( PuyoID::Purple));
-
 	pos_ = Vector2(rad_ + size_ * 3, rad_);
-	id_ = static_cast<PuyoID>(puyoRand(mt));
+	id_ = id;
 	softCntMax_ = 20;
 	softCnt_ = 0;
 	alive_ = true;
