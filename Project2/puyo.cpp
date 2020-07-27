@@ -66,8 +66,18 @@ void puyo::SoftDrop()
 
 void puyo::SetSpeed(int spped, int interval)
 {
-	softCnt_ = interval;
+	softCntMax_ = interval;
 	speed_ = spped;
+}
+
+void puyo::SetPuyon()
+{
+	puyonCnt_ = 0;
+}
+
+bool puyo::CheckPuyon()
+{
+	return 0 < puyonCnt_;
 }
 
 void puyo::Draw(void)

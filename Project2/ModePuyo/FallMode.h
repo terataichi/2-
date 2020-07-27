@@ -32,7 +32,7 @@ struct FallMode
 
 		if (rensa)
 		{
-			stage.stgMode_ = StgMode::Rensa;
+			stage.stgMode_ = StgMode::Puyon;
 		}
 	}
 };

@@ -19,7 +19,11 @@ struct RensaMode
 		{
 			auto itr = std::remove_if(stage.puyoVec_.begin(), stage.puyoVec_.end(), [](std::shared_ptr<puyo>& puyo) {return !(puyo->alive()); });
 			stage.puyoVec_.erase(itr, stage.puyoVec_.end());
-			stage
+
+			std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
+				{
+					uniPuyo->SetSpeed(8, 0);
+				});
 			stage.stgMode_ = StgMode::FALL;
 		}
 		else
