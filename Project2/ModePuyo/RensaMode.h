@@ -22,7 +22,7 @@ struct RensaMode
 
 			std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 				{
-					uniPuyo->SetSpeed(8, 0);
+					uniPuyo->SetSpeed(1, 0);
 				});
 			stage.stgMode_ = StgMode::FALL;
 		}

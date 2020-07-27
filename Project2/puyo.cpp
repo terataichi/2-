@@ -1,9 +1,10 @@
 #include <DxLib.h>
+#include <math.h>
 #include <random>
 #include "puyo.h"
 #include "SceneMng.h"
 
-puyo::puyo(PuyoID id) :size_(64), rad_(size_ / 2)
+puyo::puyo(PuyoID id) :size_(64), rad_(size_ / 2, size_ / 2)
 {
 	Init(id);
 }
@@ -72,17 +73,30 @@ void puyo::SetSpeed(int spped, int interval)
 
 void puyo::SetPuyon()
 {
-	puyonCnt_ = 0;
+	puyonCnt_ = 360;
+}
+
+void puyo::SetWidth(int width)
+{
+	width_ = width;
 }
 
 bool puyo::CheckPuyon()
 {
-	return 0 < puyonCnt_;
+	return 0 <= puyonCnt_;
 }
 
 void puyo::Draw(void)
 {
-	DrawCircle(pos_.x, pos_.y, rad_, puyoCor_[id_], true);
+	auto puyonRad = rad_.y + 12 * sinf(puyonCnt_ * 0.02f);
+	auto puyonPos = pos_.y + (10 + width_) * sinf(puyonCnt_ * 0.02f);
+
+	if (puyonCnt_ > 0)
+	{
+		puyonCnt_-= 30;
+	}
+
+	DrawOval(pos_.x, puyonPos, rad_.x, puyonRad, puyoCor_[id_], true);
 }
 
 bool puyo::SetDirFlg(DirUnion flg)
@@ -106,7 +120,7 @@ const int puyo::size(void) const
 	return size_;
 }
 
-const int puyo::rad(void) const
+const Vector2 puyo::rad(void) const
 {
 	return rad_;
 }
@@ -118,7 +132,7 @@ const PuyoID puyo::id(void) const
 
 const Vector2 puyo::GetGrid(int size)
 {
-	return Vector2((pos_.x + rad_) / size, (pos_.y + rad_) / size);
+	return Vector2((pos_.x + rad_.x) / size, (pos_.y + rad_.y) / size);
 }
 
 const bool puyo::alive(void) const
@@ -134,10 +148,12 @@ void puyo::Init(PuyoID id)
 	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
 	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
 
-	pos_ = Vector2(rad_ + size_ * 3, rad_);
+	pos_ = Vector2(rad_.x + size_ * 3, rad_.y);
 	id_ = id;
 	softCntMax_ = 20;
 	softCnt_ = 0;
 	alive_ = true;
 	speed_ = size_ / 4;
+	puyonCnt_ = 0;
+	width_ = 0;
 }

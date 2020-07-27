@@ -48,6 +48,7 @@ public:
 	void SoftDrop();											// ソフトドロップ
 	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
 	void SetPuyon();											// 呼んだらぷよん開始
+	void SetWidth(int width);									// 下の方が深い
 	bool CheckPuyon();											// まだぷよんしてるか確認する
 	void Draw(void);
 	
@@ -57,7 +58,7 @@ public:
 	// ------ゲット関数
 	const Vector2& pos(void)const;
 	const int size(void)const;
-	const int rad(void)const;
+	const Vector2 rad(void)const;
 	const PuyoID id(void)const;
 	const Vector2 GetGrid(int size);							// 現在のマス目の取得
 	const bool alive(void)const;
@@ -65,7 +66,7 @@ private:
 	void Init(PuyoID id);
 
 	const int size_;											// ぷよのサイズ
-	const int rad_;												// ぷよの半径
+	const Vector2 rad_;											// ぷよの半径
 	Vector2 pos_;
 	DirUnion dirFlg_;											// 移動していいのかどうかの情報をセットする
 	PuyoID id_;													// 自分のぷよの識別用
@@ -74,7 +75,8 @@ private:
 	bool alive_;												// 生きてるかどうか
 	int speed_;													// ぷよの速さ
 	
-	int puyonCnt_;
+	int width_;													// ぷよんするときの振れ幅
+	int puyonCnt_;												// ぷよんカウント
 
 	std::map<PuyoID, int> puyoCor_;
 };
