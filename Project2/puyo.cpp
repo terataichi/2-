@@ -64,8 +64,10 @@ void puyo::SoftDrop()
 	softCnt_ = softCntMax_;
 }
 
-void puyo::SetSpeed(int spped)
+void puyo::SetSpeed(int spped, int interval)
 {
+	softCnt_ = interval;
+	speed_ = spped;
 }
 
 void puyo::Draw(void)
@@ -127,4 +129,5 @@ void puyo::Init(PuyoID id)
 	softCntMax_ = 20;
 	softCnt_ = 0;
 	alive_ = true;
+	speed_ = size_ / 4;
 }

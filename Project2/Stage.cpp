@@ -9,6 +9,11 @@
 #include "Input/PadState.h"
 #include "Input/MouseState.h"
 #include "PlayUnit.h"
+#include "ModePuyo/DropMode.h"
+#include "ModePuyo/FallMode.h"
+#include "ModePuyo/PuyonMode.h"
+#include "ModePuyo/RensaMode.h"
+
 
 int Stage::playCnt_ = 0;
 
@@ -111,82 +116,19 @@ void Stage::Draw(void)
 void Stage::UpDate(void)
 {
 	(*input_)();
-	
-	bool nextFlg = true;
-	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](SharePuyo& uniPuyo)
-		{
-			// まだ動いていいかチェックをかける
-			nextFlg &= CheckMove(uniPuyo);
-		});
-
-	bool rensa = true;
-	std::for_each(puyoVec_.rbegin(), puyoVec_.rend(), [&](SharePuyo& uniPuyo)
-		{
-			if (!uniPuyo->UpDate())
-			{
-				// falseだったらまだ動いてるから連鎖にいかない 
-				Vector2 grid = uniPuyo->GetGrid(blockSize_);
-				data_[grid.y][grid.x].reset();
-				rensa = false;
-			}
-			else
-			{
-				Vector2 grid = uniPuyo->GetGrid(blockSize_);
-				data_[grid.y][grid.x] = uniPuyo;
-			}
-		});
-
-	if (stgMode_ == StgMode::Rensa)
-	{
-		for (auto&& pvec : puyoVec_)
-		{
-			pvec->SoftDrop();
-		}
-	}
-
-	if (rensa)
-	{
-		stgMode_ = StgMode::Rensa;
-		bool deleteFlg = false;
-
-		Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
-		data_[grid.y][grid.x] = puyoVec_[0];
-
-		for (auto&& pvec : puyoVec_)
-		{
-			deleteFlg |= SetErase(pvec, pvec->GetGrid(blockSize_));
-		}
-
-		if (deleteFlg)
-		{
-			auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::shared_ptr<puyo>& puyo) {return !(puyo->alive()); });
-			puyoVec_.erase(itr, puyoVec_.end());
-		}
-		else
-		{
-			InstancePuyo();
-			stgMode_ = StgMode::Drop;
-		}
-	}
-
-	//if (puyoVec_[0]->UpDate())
-	//{
-	//	Vector2 grid = puyoVec_[0]->GetGrid(blockSize_);
-	//	data_[grid.y][grid.x] = puyoVec_[0]->id();
-	//	if (SetErase(puyoVec_[0], grid))
-	//	{
-	//		auto itr = std::remove_if(puyoVec_.begin(), puyoVec_.end(), [](std::unique_ptr<puyo>& puyo) {return !(puyo->alive()); });
-	//		puyoVec_.erase(itr, puyoVec_.end());
-	//	}
-	//}
-
-	playUnit_->UpDate();											// 移動処理とかのUpDate
-
+	modeMap_[stgMode_](*this);
 	Draw();
 }
 
 void Stage::Init()
 {
+
+	modeMap_.try_emplace(StgMode::Drop, DropMode());
+	modeMap_.try_emplace(StgMode::FALL, FallMode());
+	modeMap_.try_emplace(StgMode::Puyon, PuyonMode());
+	modeMap_.try_emplace(StgMode::Rensa, RensaMode());
+
+
 	stageID_ = MakeScreen(size_.x, size_.y);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る

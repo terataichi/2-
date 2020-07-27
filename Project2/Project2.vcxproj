@@ -170,6 +170,10 @@
     <ClInclude Include="Input\KeyState.h" />
     <ClInclude Include="Input\MouseState.h" />
     <ClInclude Include="Input\PadState.h" />
+    <ClInclude Include="ModePuyo\DropMode.h" />
+    <ClInclude Include="ModePuyo\FallMode.h" />
+    <ClInclude Include="ModePuyo\PuyonMode.h" />
+    <ClInclude Include="ModePuyo\RensaMode.h" />
     <ClInclude Include="PlayUnit.h" />
     <ClInclude Include="puyo.h" />
     <ClInclude Include="SceneMng.h" />

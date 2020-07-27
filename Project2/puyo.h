@@ -46,7 +46,7 @@ public:
 	bool UpDate(void);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
-	void SetSpeed(int spped);									// 連鎖とかでスピードを変える
+	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
 	void Draw(void);
 	
 	bool SetDirFlg(DirUnion flg);
@@ -70,6 +70,7 @@ private:
 	int softCnt_;												// 自動落下用
 	int softCntMax_;											// 自動落下の最大
 	bool alive_;												// 生きてるかどうか
+	int speed_;													// ぷよの速さ
 	
 	std::map<PuyoID, int> puyoCor_;
 };
