@@ -49,7 +49,6 @@ void puyo::Move(INPUT_ID id)
 		if (!dirFlg_.bit.right) { pos_.x += size_; }
 		break;
 	case INPUT_ID::BUTTON_DOWN:
-		//if (!dirFlg_.bit.down) { SoftDrop(); }
 		break;
 	case INPUT_ID::BUTTON_ROTA_L:
 		break;

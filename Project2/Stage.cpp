@@ -197,6 +197,7 @@ bool Stage::CheckMove(SharePuyo& vec)
 
 	if (dirFlg.bit.down)
 	{
+		data_[grid.y][grid.x] = vec;
 		next = false;
 	}
 

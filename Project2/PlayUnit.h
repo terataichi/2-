@@ -8,8 +8,9 @@ public:
 	~PlayUnit();
 
 	void UpDate(void);
-
+	void Init(void);
 private:
 	Stage& stage_;
+	bool target;
 };
 
