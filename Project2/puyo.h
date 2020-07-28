@@ -46,14 +46,16 @@ public:
 	bool UpDate(void);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
-	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
 	void SetPuyon();											// 呼んだらぷよん開始
-	void SetWidth(int width);									// 下の方が深い
 	bool CheckPuyon();											// まだぷよんしてるか確認する
 	void Draw(void);
 	
+	// ------ セット関数
 	bool SetDirFlg(DirUnion flg);
 	void alive(bool flg);
+	void SetWidth(int width);									// 下の方が深い
+	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
+	void pos(Vector2& vec);										// 座標
 
 	// ------ゲット関数
 	const Vector2& pos(void)const;
@@ -63,7 +65,7 @@ public:
 	const Vector2 GetGrid(int size);							// 現在のマス目の取得
 	const bool alive(void)const;
 private:
-	void Init(PuyoID id);
+	void Init(Vector2& pos,PuyoID id);
 
 	const int size_;											// ぷよのサイズ
 	const Vector2 rad_;											// ぷよの半径

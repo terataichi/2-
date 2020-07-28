@@ -4,9 +4,9 @@
 #include "puyo.h"
 #include "SceneMng.h"
 
-puyo::puyo(Vector2&& pos,PuyoID id) :pos_(std::move(pos)),size_(64), rad_(size_ / 2, size_ / 2)
+puyo::puyo(Vector2&& pos,PuyoID id) :size_(64), rad_(size_ / 2, size_ / 2)
 {
-	Init(id);
+	Init(pos, id);
 }
 
 puyo::~puyo()
@@ -15,6 +15,7 @@ puyo::~puyo()
 
 bool puyo::UpDate(void)
 {
+
 	if (softCnt_ < softCntMax_)
 	{
 		softCnt_++;
@@ -48,9 +49,9 @@ void puyo::Move(INPUT_ID id)
 		if (!dirFlg_.bit.right) { pos_.x += size_; }
 		break;
 	case INPUT_ID::BUTTON_DOWN:
-		if (!dirFlg_.bit.down) { SoftDrop(); }
+		//if (!dirFlg_.bit.down) { SoftDrop(); }
 		break;
-	case INPUT_ID::BUTTON_ROTA:
+	case INPUT_ID::BUTTON_ROTA_L:
 		break;
 	case INPUT_ID::MAX:
 		break;
@@ -71,9 +72,14 @@ void puyo::SetSpeed(int spped, int interval)
 	speed_ = spped;
 }
 
+void puyo::pos(Vector2& vec)
+{
+	pos_ = vec;
+}
+
 void puyo::SetPuyon()
 {
-	puyonCnt_ = 360;
+	puyonCnt_ = 180;
 }
 
 void puyo::SetWidth(int width)
@@ -86,6 +92,7 @@ bool puyo::CheckPuyon()
 	return 0 <= puyonCnt_;
 }
 
+
 void puyo::Draw(void)
 {
 	auto puyonRad = rad_.y + 12 * sinf(puyonCnt_ * 0.02f);
@@ -93,7 +100,7 @@ void puyo::Draw(void)
 
 	if (puyonCnt_ > 0)
 	{
-		puyonCnt_-= 30;
+		puyonCnt_-= 15;
 	}
 
 	DrawOval(pos_.x, puyonPos, rad_.x, puyonRad, puyoCor_[id_], true);
@@ -140,7 +147,7 @@ const bool puyo::alive(void) const
 	return alive_;
 }
 
-void puyo::Init(PuyoID id)
+void puyo::Init(Vector2& pos,PuyoID id)
 {
 	puyoCor_.try_emplace(PuyoID::Red, 0xff0000);
 	puyoCor_.try_emplace(PuyoID::Bule,0x0000ff);
@@ -148,7 +155,7 @@ void puyo::Init(PuyoID id)
 	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
 	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
 
-	pos_ = Vector2(rad_.x + size_ * 3, rad_.y);
+	pos_ = pos;
 	id_ = id;
 	softCntMax_ = 20;
 	softCnt_ = 0;

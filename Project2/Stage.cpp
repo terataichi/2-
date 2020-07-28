@@ -151,7 +151,7 @@ void Stage::Init()
 			if (i == 0 || i == static_cast<int>(STAGE_X - 1)||
 				j == 0 || j == static_cast<int>(STAGE_Y - 1))
 			{
-				data_[j][i] = std::make_shared<puyo>(PuyoID::Wall);
+				data_[j][i] = std::make_shared<puyo>(Vector2(blockSize_ * i, blockSize_ * j), PuyoID::Wall);
 			}
 		}
 	}
@@ -210,9 +210,6 @@ void Stage::InstancePuyo()
 	std::mt19937 mt(rnd());
 	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>(PuyoID::Purple));
 
-	//Vector2 tmp;
-	//tmp = Vector2(blockSize_ / 2 + size_.x * 3, blockSize_ / 2);
-	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + size_.x * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
-	//tmp = Vector2(blockSize_ / 2 + size_.x * 3, 0);
-	//puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(static_cast<PuyoID>(puyoRand(mt)), tmp));
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ + blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
 }
