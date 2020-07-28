@@ -210,6 +210,9 @@ void Stage::InstancePuyo()
 	std::mt19937 mt(rnd());
 	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>(PuyoID::Purple));
 
-	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(static_cast<PuyoID>(puyoRand(mt))));
-
+	//Vector2 tmp;
+	//tmp = Vector2(blockSize_ / 2 + size_.x * 3, blockSize_ / 2);
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + size_.x * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
+	//tmp = Vector2(blockSize_ / 2 + size_.x * 3, 0);
+	//puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(static_cast<PuyoID>(puyoRand(mt)), tmp));
 }

@@ -4,7 +4,7 @@
 #include "puyo.h"
 #include "SceneMng.h"
 
-puyo::puyo(PuyoID id) :size_(64), rad_(size_ / 2, size_ / 2)
+puyo::puyo(Vector2&& pos,PuyoID id) :pos_(std::move(pos)),size_(64), rad_(size_ / 2, size_ / 2)
 {
 	Init(id);
 }

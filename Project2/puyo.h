@@ -41,7 +41,7 @@ union DirUnion
 class puyo
 {
 public:
-	puyo(PuyoID id);
+	puyo(Vector2&& pos,PuyoID id);
 	~puyo();
 	bool UpDate(void);
 	void Move(INPUT_ID id);										// ˆÚ“®ŠÖ”
