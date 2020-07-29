@@ -8,6 +8,7 @@ struct FallMode
 		bool nextFlg = true;
 		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 			{
+				uniPuyo->SetOldDirFlg();
 				// まだ動いていいかチェックをかける
 				nextFlg &= stage.CheckMove(uniPuyo);
 			});

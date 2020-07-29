@@ -111,6 +111,12 @@ bool puyo::SetDirFlg(DirUnion flg)
 	return true;
 }
 
+bool puyo::SetOldDirFlg(void)
+{
+	oldDirFlg_ = dirFlg_;
+	return true;
+}
+
 void puyo::alive(bool flg)
 {
 	alive_ =  flg;
@@ -121,9 +127,14 @@ const Vector2& puyo::pos() const
 	return pos_;
 }
 
-const DirUnion& puyo::GetDirFlg()
+const DirUnion& puyo::GetDirFlg()const
 {
 	return dirFlg_;
+}
+
+const DirUnion& puyo::GetOldDirFlg(void)const
+{
+	return oldDirFlg_;
 }
 
 const int puyo::size(void) const

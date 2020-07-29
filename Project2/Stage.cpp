@@ -174,7 +174,10 @@ bool Stage::CheckMove(SharePuyo& vec)
 	Vector2 grid = vec->GetGrid(blockSize_);
 	dirFlg.bit = {1,1,1,1};
 
-	if (!data_[grid.y][grid.x - 1])
+	// ’†“r”¼’[‚ÈŽž‚ÉˆÚ“®‚·‚é‚Æ‚ß‚èž‚Þ‚Ì‚Å—]‚è‚ªo‚½‚ç‚à‚¤ˆêŒÂ‰º‚ðŒ©‚é
+	int set = (vec->pos().y + vec->rad().y) % blockSize_ != 0;
+
+	if (!data_[grid.y + set][grid.x - 1])
 	{
 		dirFlg.bit.left = 0;
 	}
@@ -182,7 +185,7 @@ bool Stage::CheckMove(SharePuyo& vec)
 	{
 		dirFlg.bit.up = 0;
 	}
-	if (!data_[grid.y][grid.x + 1])
+	if (!data_[grid.y + set][grid.x + 1])
 	{
 		dirFlg.bit.right = 0;
 	}

@@ -52,6 +52,7 @@ public:
 	
 	// ------ セット関数
 	bool SetDirFlg(DirUnion flg);
+	bool SetOldDirFlg(void);
 	void alive(bool flg);
 	void SetWidth(int width);									// 下の方が深い
 	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
@@ -59,7 +60,8 @@ public:
 
 	// ------ゲット関数
 	const Vector2& pos(void)const;
-	const DirUnion& GetDirFlg();
+	const DirUnion& GetDirFlg(void)const;
+	const DirUnion& GetOldDirFlg(void)const;
 	const int size(void)const;
 	const Vector2 rad(void)const;
 	const PuyoID id(void)const;
@@ -73,6 +75,7 @@ private:
 	const Vector2 rad_;											// ぷよの半径
 	Vector2 pos_;
 	DirUnion dirFlg_;											// 移動していいのかどうかの情報をセットする
+	DirUnion oldDirFlg_;										// 前の情報
 	PuyoID id_;													// 自分のぷよの識別用
 	int softCnt_;												// 自動落下用
 	int softCntMax_;											// 自動落下の最大

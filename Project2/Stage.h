@@ -61,7 +61,7 @@ private:
 
 	std::map<StgMode, std::function<void(Stage&)>> modeMap_;			// モード別関数オブジェクト
 
-	static int playCnt_;												// 複数人いた場合人数でｷｰを変えれるように
+	static int playCnt_;												// 複数人いた場合人数でキーを変えれるように
 	int id_;
 	StgMode stgMode_;
 

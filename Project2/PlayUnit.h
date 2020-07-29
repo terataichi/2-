@@ -13,8 +13,7 @@ public:
 	void SetTarget(void);
 private:
 	void Init(void);
-	bool LRMove(INPUT_ID id);
-	bool RotateMove(INPUT_ID id);											// ¶‰E‰ñ“]—p
+	void InitFunc(void);
 	std::map<INPUT_ID, std::function<bool(INPUT_ID id)>> keyFunc_;			// “ü—Í‚É‚æ‚Á‚Äˆ—‚ªˆá‚¤‚Ì‚Å
 	Stage& stage_;
 	bool target;
