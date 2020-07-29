@@ -29,8 +29,8 @@ struct RensaMode
 		else
 		{
 			stage.InstancePuyo();
-			stage.CheckMove(stage.puyoVec_[0]);
 			stage.CheckMove(stage.puyoVec_[1]);
+			stage.CheckMove(stage.puyoVec_[0]);
 			stage.stgMode_ = StgMode::Drop;
 		}
 	}

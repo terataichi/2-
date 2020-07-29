@@ -59,10 +59,12 @@ public:
 
 	// ------ゲット関数
 	const Vector2& pos(void)const;
+	const DirUnion& GetDirFlg();
 	const int size(void)const;
 	const Vector2 rad(void)const;
 	const PuyoID id(void)const;
 	const Vector2 GetGrid(int size);							// 現在のマス目の取得
+	const Vector2 GetGrid(Vector2 pos, int size);				// 指定した場所のマス目の取得
 	const bool alive(void)const;
 private:
 	void Init(Vector2& pos,PuyoID id);

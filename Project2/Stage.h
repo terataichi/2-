@@ -31,6 +31,7 @@ public:
 	const int GetStageID(void)const;									// ステージID書き込み用
 	const Vector2 offSet(void)const;
 	const Vector2 size(void) const;
+	const Vector2 GetGrid(Vector2 pos);									// 指定した座標のマス目を取得;
 	bool SetErase(SharePuyo& puyo, Vector2 vec);						// ぷよを消すのをセット
 	void Draw(void);													// 各スクリーンに描画する
 	void UpDate(void);													// 更新.

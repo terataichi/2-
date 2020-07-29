@@ -44,6 +44,11 @@ const Vector2 Stage::size(void) const
 	return Stage::size_;
 }
 
+const Vector2 Stage::GetGrid(Vector2 pos)
+{
+	return Vector2((pos.x + blockSize_ / 2) / blockSize_, (pos.y + blockSize_ / 2) / blockSize_);
+}
+
 bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 {
 	//memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// サイズを作って中に0(PuyoID::Non)をいれる
@@ -134,14 +139,6 @@ void Stage::Init()
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る
 
-	//_data.resize(STAGE_Y);										// Yのサイズを確保してそこにXを格納していく
-	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
-	//{
-	//	_data[j] = &_dataBase[j * STAGE_X];
-	//}
-
-	//_dataBase[0] = 500;
-
 	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
 	{
 		data_.emplace_back(&dataBase_[j * STAGE_X]);
@@ -155,7 +152,6 @@ void Stage::Init()
 			}
 		}
 	}
-	//TRACE("%d\n", data_[0][0]);
 
 	for (auto id : INPUT_ID())
 	{
@@ -165,9 +161,9 @@ void Stage::Init()
 	blockSize_ = 64;
 	input_ = std::make_shared<KeyState>();
 	input_->SetUp(id_);
+	playUnit_ = std::make_unique<PlayUnit>(*this);
 	InstancePuyo();
 
-	playUnit_ = std::make_unique<PlayUnit>(*this);
 	stgMode_ = StgMode::Drop;
 }
 
@@ -211,6 +207,7 @@ void Stage::InstancePuyo()
 	std::mt19937 mt(rnd());
 	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>(PuyoID::Purple));
 
-	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
 	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ + blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
+	playUnit_->SetTarget();
 }

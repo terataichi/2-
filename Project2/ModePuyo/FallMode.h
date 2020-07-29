@@ -15,10 +15,11 @@ struct FallMode
 		bool rensa = true;
 		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 			{
-
 				if (!uniPuyo->UpDate())
 				{
 					// false‚¾‚Á‚½‚ç‚Ü‚¾“®‚¢‚Ä‚é‚©‚ç˜A½‚É‚¢‚©‚È‚¢ 
+					Vector2 grid = uniPuyo->GetGrid(stage.blockSize_);
+					stage.data_[grid.y][grid.x].reset();
 					rensa = false;
 				}
 			});

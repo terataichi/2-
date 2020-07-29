@@ -121,6 +121,11 @@ const Vector2& puyo::pos() const
 	return pos_;
 }
 
+const DirUnion& puyo::GetDirFlg()
+{
+	return dirFlg_;
+}
+
 const int puyo::size(void) const
 {
 	return size_;
@@ -139,6 +144,11 @@ const PuyoID puyo::id(void) const
 const Vector2 puyo::GetGrid(int size)
 {
 	return Vector2((pos_.x + rad_.x) / size, (pos_.y + rad_.y) / size);
+}
+
+const Vector2 puyo::GetGrid(Vector2 pos, int size)
+{
+	return Vector2((pos.x + rad_.x) / size, (pos.y + rad_.y) / size);
 }
 
 const bool puyo::alive(void) const
