@@ -13,6 +13,7 @@
 #include "ModePuyo/FallMode.h"
 #include "ModePuyo/PuyonMode.h"
 #include "ModePuyo/RensaMode.h"
+#include "ModePuyo/MunyonMode.h"
 
 
 int Stage::playCnt_ = 0;
@@ -111,11 +112,25 @@ void Stage::Draw(void)
 {
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0,0,lpSceneMng.gameSize_.x,lpSceneMng.gameSize_.y, 0x778899, true);
+	DrawBox(0, 0, lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y, 0x778899, true);
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->Draw();
 	}
+
+	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
+	//{
+	//	for (int i = 0; i < static_cast<int>(STAGE_X); i++)
+	//	{
+	//		if (data_[j][i])
+	//		{
+	//			if (data_[j][i]->id() == PuyoID::Wall)
+	//			{
+	//				DrawBox(i * blockSize_, j * blockSize_, i * blockSize_ + blockSize_, j * blockSize_ + blockSize_, 0xf, false);
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void Stage::UpDate(void)
@@ -132,7 +147,7 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::FALL, FallMode());
 	modeMap_.try_emplace(StgMode::Puyon, PuyonMode());
 	modeMap_.try_emplace(StgMode::Rensa, RensaMode());
-
+	modeMap_.try_emplace(StgMode::Munyon, MunyonMode());
 
 	stageID_ = MakeScreen(size_.x, size_.y);
 
@@ -198,8 +213,10 @@ bool Stage::CheckMove(SharePuyo& vec)
 	{
 		data_[grid.y][grid.x] = vec;
 		next = false;
+		vec->SetDirFlg(dirFlg);
+		return next;
 	}
-
+	vec->SetOldDirFlg();
 	vec->SetDirFlg(dirFlg);
 	return next;
 }

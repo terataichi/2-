@@ -1,6 +1,7 @@
 #include <DxLib.h>
 #include "SceneMng.h"
 #include "_debug/_DebugConOut.h"
+#include "_debug/_DebugDispOut.h"
 
 SceneMng* SceneMng::_sInstance;
 
@@ -8,6 +9,7 @@ void SceneMng::Run(void)
 {
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
 	{
+		_dbgStartDraw();
 		for (auto&& id : _stage)
 		{
 			id->UpDate();
@@ -19,6 +21,8 @@ void SceneMng::Run(void)
 
 void SceneMng::Draw(void)
 {
+	_dbgAddDraw();
+
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClearDrawScreen();
 
@@ -40,7 +44,8 @@ bool SceneMng::SysInit(void)
 	{
 		return false;
 	}
-
+	_dbgSetup(255,255,255);
+	_dbgSetAlpha(255);
 	return true;
 }
 

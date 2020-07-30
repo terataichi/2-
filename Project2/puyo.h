@@ -46,9 +46,8 @@ public:
 	bool UpDate(void);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
-	void SetPuyon();											// 呼んだらぷよん開始
 	bool CheckPuyon();											// まだぷよんしてるか確認する
-	void Draw(void);
+	void Draw(void);											// 描画
 	
 	// ------ セット関数
 	bool SetDirFlg(DirUnion flg);
@@ -56,7 +55,10 @@ public:
 	void alive(bool flg);
 	void SetWidth(int width);									// 下の方が深い
 	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
+	void SetPuyon(void);										// 呼んだらぷよん開始
+	void SetMunyon(void);										// 呼んだらむにょん開始
 	void pos(Vector2& vec);										// 座標
+	void UpSpeed();												// 加速させる
 
 	// ------ゲット関数
 	const Vector2& pos(void)const;
@@ -82,6 +84,8 @@ private:
 	bool alive_;												// 生きてるかどうか
 	int speed_;													// ぷよの速さ
 	
+	bool up_ = false;
+
 	int width_;													// ぷよんするときの振れ幅
 	int puyonCnt_;												// ぷよんカウント
 

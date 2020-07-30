@@ -18,6 +18,7 @@ enum class StgMode
 {
 	Drop,
 	Puyon,
+	Munyon,
 	Rensa,
 	FALL
 };
@@ -70,6 +71,7 @@ private:
 	friend struct RensaMode;
 	friend struct PuyonMode;
 	friend struct DropMode;
+	friend struct MunyonMode;
 
 };
 

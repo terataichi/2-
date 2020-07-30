@@ -172,6 +172,7 @@
     <ClInclude Include="Input\PadState.h" />
     <ClInclude Include="ModePuyo\DropMode.h" />
     <ClInclude Include="ModePuyo\FallMode.h" />
+    <ClInclude Include="ModePuyo\MunyonMode.h" />
     <ClInclude Include="ModePuyo\PuyonMode.h" />
     <ClInclude Include="ModePuyo\RensaMode.h" />
     <ClInclude Include="PlayUnit.h" />

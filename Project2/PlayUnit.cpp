@@ -21,7 +21,9 @@ void PlayUnit::UpDate(void)
 	if (stage_.puyoVec_[target]->GetDirFlg().bit.down || stage_.puyoVec_[target ^ 1]->GetDirFlg().bit.down)
 	{
 		stage_.puyoVec_[target]->SetSpeed(8, 0);
+		stage_.puyoVec_[target]->UpSpeed();
 		stage_.puyoVec_[target ^ 1]->SetSpeed(8, 0);
+		stage_.puyoVec_[target ^ 1]->UpSpeed();
 		stage_.stgMode_ = StgMode::FALL;
 		return;
 	}
@@ -90,12 +92,15 @@ void PlayUnit::InitFunc(void)
 
 			// ’†“r”¼’[‚ÈŽž‚ÉˆÚ“®‚·‚é‚Æ‚ß‚èž‚Þ‚Ì‚Å—]‚è‚ªo‚½‚ç‚à‚¤ˆêŒÂ‰º‚ðŒ©‚é
 			int set = (pos.y + stage_.blockSize_ / 2) % stage_.blockSize_ != 0;
+			
+			set = stage_.puyoVec_[target]->pos().y < pos.y;
 
 			if (flg)
 			{
 				if (!stage_.data_[grid.y + set][grid.x])
 				{
 					stage_.puyoVec_[target ^ 1]->pos(pos);
+
 					return true;
 				}
 			}

@@ -3,6 +3,7 @@
 #include <random>
 #include "puyo.h"
 #include "SceneMng.h"
+#include "_debug/_DebugDispOut.h"
 
 puyo::puyo(Vector2&& pos,PuyoID id) :size_(64), rad_(size_ / 2, size_ / 2)
 {
@@ -21,13 +22,27 @@ bool puyo::UpDate(void)
 		softCnt_++;
 		return false;
 	}
+
 	if (!dirFlg_.bit.down) 
 	{
-		pos_.y += size_ / 4; 
+		if (up_)	// ©“®—‰º’†‚Í­‚µ‚¸‚Â‘‚­‚È‚é
+		{
+			if (speed_ < size_ / 4)
+			{
+				speed_ += 2;
+			}
+		}
+		pos_.y += speed_;
 		softCnt_ = 0;
 	}
 	else
 	{
+		// ’…’n‚µ‚½‚Æ‚«‚É‚ ‚Ü‚è‚ªo‚½‚çˆø‚«–ß‚·
+		auto amari = (pos_.y + rad_.y) % size_;
+		if (amari != 0)
+		{
+			pos_.y -= amari;
+		}
 		return true;
 	}
 
@@ -76,9 +91,18 @@ void puyo::pos(Vector2& vec)
 	pos_ = vec;
 }
 
+void puyo::UpSpeed()
+{
+	up_ = true;
+}
+
 void puyo::SetPuyon()
 {
 	puyonCnt_ = 180;
+}
+
+void puyo::SetMunyon(void)
+{
 }
 
 void puyo::SetWidth(int width)
@@ -94,8 +118,8 @@ bool puyo::CheckPuyon()
 
 void puyo::Draw(void)
 {
-	auto puyonRad = rad_.y + 12 * sinf(puyonCnt_ * 0.02f);
-	auto puyonPos = pos_.y + (10 + width_) * sinf(puyonCnt_ * 0.02f);
+	auto puyonRad = rad_.y - 12 * sinf(puyonCnt_ * 0.02f);
+	auto puyonPos = pos_.y + (12 + width_) * sinf(puyonCnt_ * 0.01f);
 
 	if (puyonCnt_ > 0)
 	{
