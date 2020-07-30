@@ -25,11 +25,12 @@ bool puyo::UpDate(void)
 
 	if (!dirFlg_.bit.down) 
 	{
-		if (up_)	// é©ìÆóéâ∫íÜÇÕè≠ÇµÇ∏Ç¬ëÅÇ≠Ç»ÇÈ
+		// é©ìÆóéâ∫íÜÇÕè≠ÇµÇ∏Ç¬ëÅÇ≠Ç»ÇÈ
+		if (up_)
 		{
-			if (speed_ < size_ / 4)
+			if (speed_ < size_ / 2)
 			{
-				speed_ += 2;
+				speed_ += 1;
 			}
 		}
 		pos_.y += speed_;
@@ -98,35 +99,62 @@ void puyo::UpSpeed()
 
 void puyo::SetPuyon()
 {
-	puyonCnt_ = 180;
+	puyonCnt_ = 12;
 }
 
-void puyo::SetMunyon(void)
+void puyo::SetMunyon(int cnt)
 {
+	munyonCnt_ = cnt;
 }
 
-void puyo::SetWidth(int width)
+void puyo::SetCnt(int cnt)
 {
-	width_ = width;
+	puyonOffset_ = cnt;
 }
 
-bool puyo::CheckPuyon()
+bool puyo::CheckPuyon(void)
 {
-	return 0 <= puyonCnt_;
+	return 0 >= puyonCnt_;
+}
+
+bool puyo::CheckMunyon(void)
+{
+	return 0 >= munyonCnt_;
 }
 
 
 void puyo::Draw(void)
 {
-	auto puyonRad = rad_.y - 12 * sinf(puyonCnt_ * 0.02f);
-	auto puyonPos = pos_.y + (12 + width_) * sinf(puyonCnt_ * 0.01f);
+	auto puyonPos = abs(((puyonCnt_ + 6 )) % (12) - (6));
 
 	if (puyonCnt_ > 0)
 	{
-		puyonCnt_-= 15;
+		puyonCnt_--;
 	}
 
-	DrawOval(pos_.x, puyonPos, rad_.x, puyonRad, puyoCor_[id_], true);
+	DrawOval(pos_.x, pos_.y + puyonPos + (puyonOffset_ * puyonPos * 2), rad_.x + puyonPos, rad_.y - puyonPos, puyoCor_[id_], true);
+
+	if (munyonCnt_ > 0)
+	{
+		munyonCnt_--;
+	}
+
+	if (mnyonFlg_.bit.left)
+	{
+		DrawBox(pos_.x, pos_.y - rad_.y, pos_.x - rad_.x, pos_.y + rad_.y , puyoCor_[id_], true);
+	}
+	if (mnyonFlg_.bit.right)
+	{
+		DrawBox(pos_.x, pos_.y - rad_.y, pos_.x + rad_.x, pos_.y + rad_.y , puyoCor_[id_], true);
+	}
+	if (mnyonFlg_.bit.up)
+	{
+		DrawBox(pos_.x - rad_.x, pos_.y, pos_.x + rad_.x, pos_.y - rad_.y , puyoCor_[id_], true);
+	}
+	if (mnyonFlg_.bit.down)
+	{
+		DrawBox(pos_.x - rad_.x, pos_.y, pos_.x + rad_.x, pos_.y + rad_.y, puyoCor_[id_], true);
+	}
 }
 
 bool puyo::SetDirFlg(DirUnion flg)
@@ -138,6 +166,12 @@ bool puyo::SetDirFlg(DirUnion flg)
 bool puyo::SetOldDirFlg(void)
 {
 	oldDirFlg_ = dirFlg_;
+	return true;
+}
+
+bool puyo::SetMnyonFlg(DirUnion flg)
+{
+	mnyonFlg_ = flg;
 	return true;
 }
 
@@ -199,6 +233,7 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
 	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
 
+	mnyonFlg_ = { 0,0,0,0 };
 	pos_ = pos;
 	id_ = id;
 	softCntMax_ = 20;
@@ -206,5 +241,5 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	alive_ = true;
 	speed_ = size_ / 4;
 	puyonCnt_ = 0;
-	width_ = 0;
+	puyonOffset_ = 0;
 }

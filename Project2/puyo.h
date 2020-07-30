@@ -46,17 +46,19 @@ public:
 	bool UpDate(void);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
-	bool CheckPuyon();											// まだぷよんしてるか確認する
+	bool CheckPuyon(void);										// まだぷよんしてるか確認する
+	bool CheckMunyon(void);										// むにょんカウントチェックー
 	void Draw(void);											// 描画
 	
 	// ------ セット関数
-	bool SetDirFlg(DirUnion flg);
-	bool SetOldDirFlg(void);
+	bool SetDirFlg(DirUnion flg);								// 移動フラグセット用
+	bool SetOldDirFlg(void);									// 移動フラグの前の情報を格納
+	bool SetMnyonFlg(DirUnion flg);								// むにょんしていいかの情報をセット
 	void alive(bool flg);
-	void SetWidth(int width);									// 下の方が深い
+	void SetCnt(int cnt);										// 下の方が深い
 	void SetSpeed(int spped, int interval);						// 連鎖とかでスピードを変える
 	void SetPuyon(void);										// 呼んだらぷよん開始
-	void SetMunyon(void);										// 呼んだらむにょん開始
+	void SetMunyon(int cnt);									// 呼んだらむにょん開始
 	void pos(Vector2& vec);										// 座標
 	void UpSpeed();												// 加速させる
 
@@ -78,6 +80,7 @@ private:
 	Vector2 pos_;
 	DirUnion dirFlg_;											// 移動していいのかどうかの情報をセットする
 	DirUnion oldDirFlg_;										// 前の情報
+	DirUnion mnyonFlg_;											// むにょんフラグ、trueだったら横に伸ばす
 	PuyoID id_;													// 自分のぷよの識別用
 	int softCnt_;												// 自動落下用
 	int softCntMax_;											// 自動落下の最大
@@ -86,8 +89,10 @@ private:
 	
 	bool up_ = false;
 
-	int width_;													// ぷよんするときの振れ幅
+	int puyonOffset_;													// ぷよんするときの振れ幅
 	int puyonCnt_;												// ぷよんカウント
+
+	int munyonCnt_;												// むにょんカウント
 
 	std::map<PuyoID, int> puyoCor_;
 };
