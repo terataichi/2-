@@ -3,6 +3,7 @@
 #include <random>
 #include <DxLib.h>
 #include "_debug/_DebugConOut.h"
+#include "_debug/_DebugDispOut.h"
 #include "Stage.h"
 #include "SceneMng.h"
 #include "Input/KeyState.h"
@@ -14,6 +15,7 @@
 #include "ModePuyo/PuyonMode.h"
 #include "ModePuyo/RensaMode.h"
 #include "ModePuyo/MunyonMode.h"
+#include "ModePuyo/GameOver.h"
 
 
 int Stage::playCnt_ = 0;
@@ -69,7 +71,7 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (data_[vec.y][vec.x])
 			{
-				if (data_[vec.y][vec.x]->id() == id)
+				if (data_[vec.y][vec.x]->id() == id && id != PuyoID::Wall)
 				{
 					erasedata_[vec.y][vec.x] = data_[vec.y][vec.x];
 					count++;
@@ -118,16 +120,13 @@ void Stage::Draw(void)
 		puyo->Draw();
 	}
 
-	//for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
+	//for (auto data : data_)
 	//{
-	//	for (int i = 0; i < static_cast<int>(STAGE_X); i++)
+	//	if ((*data))
 	//	{
-	//		if (data_[j][i])
+	//		if ((*data)->id() == PuyoID::Wall)
 	//		{
-	//			if (data_[j][i]->id() == PuyoID::Wall)
-	//			{
-	//				DrawBox(i * blockSize_, j * blockSize_, i * blockSize_ + blockSize_, j * blockSize_ + blockSize_, 0xf, false);
-	//			}
+	//			DrawBox((*data)->pos().x, (*data)->pos().x, (*data)->pos().x + blockSize_, (*data)->pos().y + blockSize_, 0xf, false);
 	//		}
 	//	}
 	//}
@@ -148,6 +147,7 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::Puyon, PuyonMode());
 	modeMap_.try_emplace(StgMode::Rensa, RensaMode());
 	modeMap_.try_emplace(StgMode::Munyon, MunyonMode());
+	modeMap_.try_emplace(StgMode::GameOver, GameOver());
 
 	stageID_ = MakeScreen(size_.x, size_.y);
 

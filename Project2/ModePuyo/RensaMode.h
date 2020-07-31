@@ -1,5 +1,6 @@
 #pragma once
 #include "../Stage.h"
+#include "../_debug/_DebugConOut.h"
 
 struct RensaMode
 {
@@ -31,6 +32,15 @@ struct RensaMode
 		}
 		else
 		{
+
+			if (stage.data_[1][4])
+			{
+				TRACE("ÉvÉåÉCÉÑÅ[%d", stage.id_ + 1);
+				TRACE("GAME OVER\n");
+
+				stage.stgMode_ = StgMode::GameOver;
+				return;
+			}
 
 			auto punyonBit = [&](PuyoID id, Vector2 vec)
 			{

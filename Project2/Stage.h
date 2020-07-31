@@ -20,7 +20,8 @@ enum class StgMode
 	Puyon,
 	Munyon,
 	Rensa,
-	FALL
+	FALL,
+	GameOver
 };
 
 class Stage
@@ -72,6 +73,6 @@ private:
 	friend struct PuyonMode;
 	friend struct DropMode;
 	friend struct MunyonMode;
-
+	friend struct GameOver;
 };
 

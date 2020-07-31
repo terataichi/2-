@@ -86,7 +86,7 @@ void PlayUnit::InitFunc(void)
 	std::function<bool(INPUT_ID id)> RotateMove = [&](INPUT_ID id)
 	{
 		// ƒf[ƒ^‚ðŒ©‚Ä‰½‚à‚È‚©‚Á‚½‚ç‰ñ“]‚µ‚Ä‚¢‚¢‚æ
-		auto rota = [&](bool flg, Vector2&& pos)
+		auto rota = [&](bool flg, Vector2&& pos, Vector2&& offset, Vector2&& off)
 		{
 			Vector2 grid = stage_.GetGrid(pos);
 
@@ -94,13 +94,24 @@ void PlayUnit::InitFunc(void)
 			int set = (pos.y + stage_.blockSize_ / 2) % stage_.blockSize_ != 0;
 			
 			set = stage_.puyoVec_[target]->pos().y < pos.y;
-
+			 
 			if (flg)
 			{
 				if (!stage_.data_[grid.y + set][grid.x])
 				{
 					stage_.puyoVec_[target ^ 1]->pos(pos);
 
+					return true;
+				}
+				else
+				{
+					if (!stage_.data_[grid.y + set + offset.y][grid.x + offset.x])
+					{
+						pos -= Vector2{ 64 * off.x ,64 * off.y};
+						stage_.puyoVec_[target ^ 1]->pos(pos);
+						pos -= Vector2{ 64 * off.x ,64 * off.y };
+						stage_.puyoVec_[target]->pos(pos);
+					}
 					return true;
 				}
 			}
@@ -118,16 +129,17 @@ void PlayUnit::InitFunc(void)
 		auto pos2 = stage_.puyoVec_[target ^ 1]->pos();
 		auto size = stage_.blockSize_;
 
-		rota(pos1.x > pos2.x, pos2 + Vector2(size, -size * rotate));
-		rota(pos1.x < pos2.x, pos2 + Vector2(-size, size * rotate));
-		rota(pos1.y > pos2.y, pos2 + Vector2(size * rotate, size));
-		rota(pos1.y < pos2.y, pos2 + Vector2(-size * rotate, -size));
+		int a = 2;
+		rota(pos1.x > pos2.x, pos2 + Vector2(size, -size * rotate), Vector2(0, a * rotate), Vector2(0, -1 * rotate));
+		rota(pos1.x < pos2.x, pos2 + Vector2(-size, size * rotate), Vector2(0, -a * rotate), Vector2(0, 1 * rotate));
+		rota(pos1.y > pos2.y, pos2 + Vector2(size * rotate, size), Vector2(-a * rotate, 0), Vector2(1 * rotate, 0));
+		rota(pos1.y < pos2.y, pos2 + Vector2(-size * rotate, -size), Vector2(a * rotate, 0), Vector2(-1* rotate, 0));
 
 		if (stage_.puyoVec_[0]->pos().y > stage_.puyoVec_[1]->pos().y)
 		{
 			std::swap(stage_.puyoVec_[0], stage_.puyoVec_[1]);
 			target = target ^ 1;
-			TRACE("%d", target);
+			TRACE("%d\n", target);
 		}
 		return true;
 	};
