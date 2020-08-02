@@ -19,6 +19,7 @@ enum class PuyoID
 	Bule,
 	Yellow,
 	Purple,
+	Ojama,
 	Wall,
 	Max,
 };
@@ -41,9 +42,10 @@ union DirUnion
 class puyo
 {
 public:
-	puyo(Vector2&& pos,PuyoID id);
+	puyo();
+	puyo(Vector2&& pos,PuyoID id) ;
 	~puyo();
-	bool UpDate(void);
+	virtual bool UpDate(void);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
 	bool CheckPuyon(void);										// まだぷよんしてるか確認する
@@ -72,7 +74,7 @@ public:
 	const Vector2 GetGrid(int size);							// 現在のマス目の取得
 	const Vector2 GetGrid(Vector2 pos, int size);				// 指定した場所のマス目の取得
 	const bool alive(void)const;
-private:
+protected:
 	void Init(Vector2& pos,PuyoID id);
 
 	const int size_;											// ぷよのサイズ
@@ -87,9 +89,9 @@ private:
 	bool alive_;												// 生きてるかどうか
 	int speed_;													// ぷよの速さ
 	
-	bool up_ = false;
+	bool speedUp_;
 
-	int puyonOffset_;													// ぷよんするときの振れ幅
+	int puyonOffset_;											// ぷよんするときの振れ幅
 	int puyonCnt_;												// ぷよんカウント
 
 	int munyonCnt_;												// むにょんカウント

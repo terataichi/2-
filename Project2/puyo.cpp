@@ -4,6 +4,12 @@
 #include "puyo.h"
 #include "SceneMng.h"
 #include "_debug/_DebugDispOut.h"
+#include "_debug/_DebugConOut.h"
+
+puyo::puyo() :size_(64), rad_(size_ / 2, size_ / 2)
+{
+	//TRACE("基底のデフォルトコンストラクタ\n");
+}
 
 puyo::puyo(Vector2&& pos,PuyoID id) :size_(64), rad_(size_ / 2, size_ / 2)
 {
@@ -26,7 +32,7 @@ bool puyo::UpDate(void)
 	if (!dirFlg_.bit.down) 
 	{
 		// 自動落下中は少しずつ早くなる
-		if (up_)
+		if (speedUp_)
 		{
 			if (speed_ < size_ / 2)
 			{
@@ -94,7 +100,7 @@ void puyo::pos(Vector2& vec)
 
 void puyo::UpSpeed()
 {
-	up_ = true;
+	speedUp_ = true;
 }
 
 void puyo::SetPuyon()
@@ -232,6 +238,7 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	puyoCor_.try_emplace(PuyoID::Green,0x00ff00);
 	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
 	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
+	puyoCor_.try_emplace(PuyoID::Ojama, 0xf);
 
 	mnyonFlg_ = { 0,0,0,0 };
 	pos_ = pos;
@@ -239,6 +246,7 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	softCntMax_ = 20;
 	softCnt_ = 0;
 	alive_ = true;
+	speedUp_ = false;
 	speed_ = size_ / 4;
 	puyonCnt_ = 0;
 	puyonOffset_ = 0;

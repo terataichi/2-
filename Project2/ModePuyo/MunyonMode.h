@@ -15,6 +15,8 @@ struct MunyonMode
 
 		if (flg)
 		{
+			stage.InstanceOjama();
+			stage.ResetRensa();							// 連鎖のリセット
 			stage.InstancePuyo();
 			stage.CheckMove(stage.puyoVec_[1]);
 			stage.CheckMove(stage.puyoVec_[0]);

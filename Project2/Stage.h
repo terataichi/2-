@@ -21,6 +21,7 @@ enum class StgMode
 	Munyon,
 	Rensa,
 	FALL,
+	Delete,
 	GameOver
 };
 
@@ -30,22 +31,30 @@ public:
 	Stage(Vector2&& offSet, Vector2&& size);
 	~Stage();
 
-	const int GetStageID(void)const;									// ステージID書き込み用
-	const Vector2 offSet(void)const;
-	const Vector2 size(void) const;
-	const Vector2 GetGrid(Vector2 pos);									// 指定した座標のマス目を取得;
-	bool SetErase(SharePuyo& puyo, Vector2 vec);						// ぷよを消すのをセット
 	void Draw(void);													// 各スクリーンに描画する
 	void UpDate(void);													// 更新.
+
+	// ------ Set
+	bool SetErase(SharePuyo& puyo, Vector2 vec);						// ぷよを消すのをセット
+	void ResetRensa(void);												// 連鎖が終わるときに使う
+	void AddRensa(void);												// 連鎖を増やす
+	// ------ Get
+	const int GetStageID(void)const;									// ステージID書き込み用
+	const Vector2 offSet(void)const;									// ステージのオフセット
+	const Vector2 size(void) const;										// サイズの取得
+	const int rensa(void)const;											// 連鎖の取得
+	const Vector2 GetGrid(Vector2 pos);									// 指定した座標のマス目を取得;
 private:
 
 	void Init(void);
 	bool CheckMove(SharePuyo& vec);										// 上下左右動いていいか
 	void InstancePuyo();												// 新しいプヨ
+	void InstanceOjama();												// お邪魔プヨの生成
 	Vector2 offSet_;													// ステージ画面のオフセット
 	Vector2 size_;
 	int blockSize_;
 	int stageID_;														// ステージの描画用スクリーンID
+	int rensa_;															// 今何連鎖
 
 	std::unique_ptr<PlayUnit> playUnit_;								// ﾌﾟﾚｲﾔｰに関する処理をフレンドでもらって管理
 
@@ -74,5 +83,6 @@ private:
 	friend struct DropMode;
 	friend struct MunyonMode;
 	friend struct GameOver;
+	friend struct DeleteMode;
 };
 

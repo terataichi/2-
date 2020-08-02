@@ -10,12 +10,14 @@
 #include "Input/PadState.h"
 #include "Input/MouseState.h"
 #include "PlayUnit.h"
+#include "OjamaPuyo.h"
 #include "ModePuyo/DropMode.h"
 #include "ModePuyo/FallMode.h"
 #include "ModePuyo/PuyonMode.h"
 #include "ModePuyo/RensaMode.h"
 #include "ModePuyo/MunyonMode.h"
 #include "ModePuyo/GameOver.h"
+#include "ModePuyo/DeleteMode.h"
 
 
 int Stage::playCnt_ = 0;
@@ -47,6 +49,11 @@ const Vector2 Stage::size(void) const
 	return Stage::size_;
 }
 
+const int Stage::rensa(void) const
+{
+	return rensa_;
+}
+
 const Vector2 Stage::GetGrid(Vector2 pos)
 {
 	return Vector2((pos.x + blockSize_ / 2) / blockSize_, (pos.y + blockSize_ / 2) / blockSize_);
@@ -71,7 +78,7 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (data_[vec.y][vec.x])
 			{
-				if (data_[vec.y][vec.x]->id() == id && id != PuyoID::Wall)
+				if (data_[vec.y][vec.x]->id() == id && id != PuyoID::Wall && id != PuyoID::Ojama)
 				{
 					erasedata_[vec.y][vec.x] = data_[vec.y][vec.x];
 					count++;
@@ -79,6 +86,10 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 					erasePuyo(id, Vector2(vec.x, vec.y - 1));
 					erasePuyo(id, Vector2(vec.x + 1, vec.y));
 					erasePuyo(id, Vector2(vec.x, vec.y + 1));
+				}
+				if (data_[vec.y][vec.x]->id() == PuyoID::Ojama)
+				{
+					erasedata_[vec.y][vec.x] = data_[vec.y][vec.x];
 				}
 			}
 		}
@@ -107,7 +118,18 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 			}
 		}
 	}
+
 	return true;
+}
+
+void Stage::ResetRensa(void)
+{
+	rensa_ = 0;
+}
+
+void Stage::AddRensa(void)
+{
+	rensa_++;
 }
 
 void Stage::Draw(void)
@@ -148,6 +170,7 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::Rensa, RensaMode());
 	modeMap_.try_emplace(StgMode::Munyon, MunyonMode());
 	modeMap_.try_emplace(StgMode::GameOver, GameOver());
+	modeMap_.try_emplace(StgMode::Delete, DeleteMode());
 
 	stageID_ = MakeScreen(size_.x, size_.y);
 
@@ -173,6 +196,7 @@ void Stage::Init()
 		moveFlg_.try_emplace(id, false);
 	}
 
+	rensa_ = 0;
 	blockSize_ = 64;
 	input_ = std::make_shared<KeyState>();
 	input_->SetUp(id_);
@@ -230,4 +254,9 @@ void Stage::InstancePuyo()
 	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ + blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
 	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
 	playUnit_->SetTarget();
+}
+
+void Stage::InstanceOjama()
+{
+	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<OjamaPuyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), PuyoID::Ojama));
 }

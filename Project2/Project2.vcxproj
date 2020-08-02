@@ -154,6 +154,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Input\MouseState.cpp" />
     <ClCompile Include="Input\PadState.cpp" />
+    <ClCompile Include="OjamaPuyo.cpp" />
     <ClCompile Include="PlayUnit.cpp" />
     <ClCompile Include="puyo.cpp" />
     <ClCompile Include="SceneMng.cpp" />
@@ -172,12 +173,14 @@
     <ClInclude Include="Input\KeyState.h" />
     <ClInclude Include="Input\MouseState.h" />
     <ClInclude Include="Input\PadState.h" />
+    <ClInclude Include="ModePuyo\DeleteMode.h" />
     <ClInclude Include="ModePuyo\DropMode.h" />
     <ClInclude Include="ModePuyo\FallMode.h" />
     <ClInclude Include="ModePuyo\GameOver.h" />
     <ClInclude Include="ModePuyo\MunyonMode.h" />
     <ClInclude Include="ModePuyo\PuyonMode.h" />
     <ClInclude Include="ModePuyo\RensaMode.h" />
+    <ClInclude Include="OjamaPuyo.h" />
     <ClInclude Include="PlayUnit.h" />
     <ClInclude Include="puyo.h" />
     <ClInclude Include="SceneMng.h" />

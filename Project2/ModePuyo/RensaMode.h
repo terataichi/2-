@@ -18,17 +18,15 @@ struct RensaMode
 
 		if (deleteFlg)
 		{
-			// 消去
-			auto itr = std::remove_if(stage.puyoVec_.begin(), stage.puyoVec_.end(), [](std::shared_ptr<puyo>& puyo) {return !(puyo->alive()); });
-			stage.puyoVec_.erase(itr, stage.puyoVec_.end());
-
-			// 残りのぷよのスピードを変える
-			std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
+			// ここで消える前にアニメーションをセットする
+			for (auto&& pvec : stage.puyoVec_)
+			{
+				if (!pvec->alive())
 				{
-					uniPuyo->SetSpeed(8, 0);
-					uniPuyo->UpSpeed();
-				});
-			stage.stgMode_ = StgMode::FALL;
+					//pvec->PlayDeathAnim();
+				}
+			}
+			stage.stgMode_ = StgMode::Delete;
 		}
 		else
 		{
@@ -46,7 +44,10 @@ struct RensaMode
 			{
 				if (stage.data_[vec.y][vec.x])
 				{
-					return stage.data_[vec.y][vec.x]->id() == id;
+					if (stage.data_[vec.y][vec.x]->id() != PuyoID::Ojama)
+					{
+						return stage.data_[vec.y][vec.x]->id() == id;
+					}
 				}
 				return false;
 			};
