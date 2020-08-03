@@ -2,10 +2,12 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <list>
 #include <map>
 #include "common/Vector2.h"
 #include "Input/InputState.h"
 #include "puyo.h"
+#include "OjamaPuyo.h"
 
 #define STAGE_X 8
 #define STAGE_Y 15
@@ -22,6 +24,7 @@ enum class StgMode
 	Rensa,
 	FALL,
 	Delete,
+	Ojama,
 	GameOver
 };
 
@@ -32,18 +35,20 @@ public:
 	~Stage();
 
 	void Draw(void);													// 各スクリーンに描画する
-	void UpDate(void);													// 更新.
+	int  UpDate(int ojamaCnt);											// 更新.
 
 	// ------ Set
 	bool SetErase(SharePuyo& puyo, Vector2 vec);						// ぷよを消すのをセット
 	void ResetRensa(void);												// 連鎖が終わるときに使う
 	void AddRensa(void);												// 連鎖を増やす
+	void ojamaCnt(int cnt);												// お邪魔プヨを相手に送り付けるときに使う
 	// ------ Get
 	const int GetStageID(void)const;									// ステージID書き込み用
 	const Vector2 offSet(void)const;									// ステージのオフセット
 	const Vector2 size(void) const;										// サイズの取得
 	const int rensa(void)const;											// 連鎖の取得
-	const Vector2 GetGrid(Vector2 pos);									// 指定した座標のマス目を取得;
+	const Vector2 GetGrid(Vector2 pos);									// 指定した座標のマス目を取得;]
+	const int ojamaCnt(void)const;										// 自分のお邪魔ｶｳﾝﾄ取得
 private:
 
 	void Init(void);
@@ -55,6 +60,7 @@ private:
 	int blockSize_;
 	int stageID_;														// ステージの描画用スクリーンID
 	int rensa_;															// 今何連鎖
+	int ojamaCnt_;														// 何個お邪魔あるのー
 
 	std::unique_ptr<PlayUnit> playUnit_;								// ﾌﾟﾚｲﾔｰに関する処理をフレンドでもらって管理
 
@@ -68,7 +74,8 @@ private:
 
 	std::shared_ptr<InputState> input_;									// キーの入力管理
 
-	std::vector<SharePuyo> puyoVec_;
+	std::vector<SharePuyo> puyoVec_;									// ぷよのリスト
+	std::list<SharePuyo> ojamaList_;											// お邪魔リスト
 
 	std::map<StgMode, std::function<void(Stage&)>> modeMap_;			// モード別関数オブジェクト
 
@@ -84,5 +91,6 @@ private:
 	friend struct MunyonMode;
 	friend struct GameOver;
 	friend struct DeleteMode;
+	friend struct OjamaMode;
 };
 

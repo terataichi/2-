@@ -7,12 +7,13 @@ SceneMng* SceneMng::_sInstance;
 
 void SceneMng::Run(void)
 {
+	int ojamaCnt = 0;
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
 	{
 		_dbgStartDraw();
 		for (auto&& id : _stage)
 		{
-			id->UpDate();
+			ojamaCnt = id->UpDate(ojamaCnt);
 		}
 
 		Draw();

@@ -129,11 +129,11 @@ void PlayUnit::InitFunc(void)
 		auto pos2 = stage_.puyoVec_[target ^ 1]->pos();
 		auto size = stage_.blockSize_;
 
-		int a = 2;
-		rota(pos1.x > pos2.x, pos2 + Vector2(size, -size * rotate), Vector2(0, a * rotate), Vector2(0, -1 * rotate));
-		rota(pos1.x < pos2.x, pos2 + Vector2(-size, size * rotate), Vector2(0, -a * rotate), Vector2(0, 1 * rotate));
-		rota(pos1.y > pos2.y, pos2 + Vector2(size * rotate, size), Vector2(-a * rotate, 0), Vector2(1 * rotate, 0));
-		rota(pos1.y < pos2.y, pos2 + Vector2(-size * rotate, -size), Vector2(a * rotate, 0), Vector2(-1* rotate, 0));
+		int temp = 2;
+		rota(pos1.x > pos2.x, pos2 + Vector2(size, -size * rotate), Vector2(0, temp * rotate), Vector2(0, -1 * rotate));
+		rota(pos1.x < pos2.x, pos2 + Vector2(-size, size * rotate), Vector2(0, -temp * rotate), Vector2(0, 1 * rotate));
+		rota(pos1.y > pos2.y, pos2 + Vector2(size * rotate, size), Vector2(-temp * rotate, 0), Vector2(1 * rotate, 0));
+		rota(pos1.y < pos2.y, pos2 + Vector2(-size * rotate, -size), Vector2(temp* rotate, 0), Vector2(-1* rotate, 0));
 
 		if (stage_.puyoVec_[0]->pos().y > stage_.puyoVec_[1]->pos().y)
 		{

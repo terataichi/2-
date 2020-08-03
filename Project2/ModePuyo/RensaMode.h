@@ -19,13 +19,13 @@ struct RensaMode
 		if (deleteFlg)
 		{
 			// ここで消える前にアニメーションをセットする
-			for (auto&& pvec : stage.puyoVec_)
-			{
-				if (!pvec->alive())
-				{
-					//pvec->PlayDeathAnim();
-				}
-			}
+			//for (auto&& pvec : stage.puyoVec_)
+			//{
+			//	if (!pvec->alive())
+			//	{
+			//		//pvec->PlayDeathAnim();
+			//	}
+			//}
 			stage.stgMode_ = StgMode::Delete;
 		}
 		else
@@ -40,6 +40,7 @@ struct RensaMode
 				return;
 			}
 
+			// むにょんしていいか調べるためのラムダ
 			auto punyonBit = [&](PuyoID id, Vector2 vec)
 			{
 				if (stage.data_[vec.y][vec.x])
@@ -53,9 +54,10 @@ struct RensaMode
 			};
 
 			Vector2 grid{ 0,0 };
+			// どっちの方向にむにょんするか調べる
 			for (auto vec : stage.puyoVec_)
 			{
-				DirUnion bit = { 0,0,0,0 };											// どっちの方向にむにょんするか
+				DirUnion bit = { 0,0,0,0 };		
 				grid = vec->GetGrid(stage.blockSize_);
 				bit.bit.left = punyonBit(vec->id(), Vector2(grid.x - 1, grid.y));
 				bit.bit.right = punyonBit(vec->id(), Vector2(grid.x + 1, grid.y));

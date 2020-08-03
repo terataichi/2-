@@ -1,6 +1,7 @@
 #pragma once
 #include "../Stage.h"
 #include "../_debug/_DebugConOut.h"
+#include "../OjamaPuyo.h"
 
 struct DeleteMode
 {
@@ -21,6 +22,9 @@ struct DeleteMode
 				});
 			stage.AddRensa();										// ‚±‚±‚Ü‚Å—ˆ‚Ä‚ê‚Î‰½‚©Á‚¦‚Ä‚¢‚é‚Ì‚Å˜A½Šm’è
 			TRACE("%d˜A½\n", stage.rensa());
+
+			stage.ojamaCnt_ = stage.rensa();
+
 			stage.stgMode_ = StgMode::FALL;
 		}
 	}

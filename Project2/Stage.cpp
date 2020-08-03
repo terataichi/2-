@@ -18,6 +18,7 @@
 #include "ModePuyo/MunyonMode.h"
 #include "ModePuyo/GameOver.h"
 #include "ModePuyo/DeleteMode.h"
+#include "ModePuyo/OjamaMode.h"
 
 
 int Stage::playCnt_ = 0;
@@ -57,6 +58,11 @@ const int Stage::rensa(void) const
 const Vector2 Stage::GetGrid(Vector2 pos)
 {
 	return Vector2((pos.x + blockSize_ / 2) / blockSize_, (pos.y + blockSize_ / 2) / blockSize_);
+}
+
+const int Stage::ojamaCnt(void) const
+{
+	return ojamaCnt_;
 }
 
 bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
@@ -132,6 +138,11 @@ void Stage::AddRensa(void)
 	rensa_++;
 }
 
+void Stage::ojamaCnt(int cnt)
+{
+	ojamaCnt_ = cnt;
+}
+
 void Stage::Draw(void)
 {
 	SetDrawScreen(stageID_);
@@ -154,11 +165,20 @@ void Stage::Draw(void)
 	//}
 }
 
-void Stage::UpDate(void)
+int Stage::UpDate(int ojamaCnt)
 {
+	int count = 0;
+	while (count < ojamaCnt)
+	{
+		InstanceOjama();
+		count++;
+	}
+	ojamaCnt_ = 0;
 	(*input_)();
 	modeMap_[stgMode_](*this);
 	Draw();
+
+	return ojamaCnt_;
 }
 
 void Stage::Init()
@@ -171,6 +191,7 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::Munyon, MunyonMode());
 	modeMap_.try_emplace(StgMode::GameOver, GameOver());
 	modeMap_.try_emplace(StgMode::Delete, DeleteMode());
+	modeMap_.try_emplace(StgMode::Ojama, OjamaMode());
 
 	stageID_ = MakeScreen(size_.x, size_.y);
 
@@ -201,6 +222,7 @@ void Stage::Init()
 	input_ = std::make_shared<KeyState>();
 	input_->SetUp(id_);
 	playUnit_ = std::make_unique<PlayUnit>(*this);
+	ojamaList_.clear();
 	InstancePuyo();
 
 	stgMode_ = StgMode::Drop;
@@ -258,5 +280,5 @@ void Stage::InstancePuyo()
 
 void Stage::InstanceOjama()
 {
-	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<OjamaPuyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), PuyoID::Ojama));
+	ojamaList_.emplace_front(std::make_shared<OjamaPuyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), PuyoID::Ojama));
 }
