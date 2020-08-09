@@ -1,12 +1,16 @@
 #include <DxLib.h>
+#include <EffekseerForDXLib.h>
 #include "SceneMng.h"
 #include "_debug/_DebugConOut.h"
 #include "_debug/_DebugDispOut.h"
+#include "common/EffectMng.h"
 
 SceneMng* SceneMng::_sInstance;
 
 void SceneMng::Run(void)
 {
+	lpEffectMng.Init(Vector2(screenSize_.x, screenSize_.y));
+
 	int ojamaCnt = 0;
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
 	{
@@ -15,7 +19,7 @@ void SceneMng::Run(void)
 		{
 			ojamaCnt = id->UpDate(ojamaCnt);
 		}
-
+		lpEffectMng.Update();
 		Draw();
 	}
 }
@@ -29,7 +33,7 @@ void SceneMng::Draw(void)
 
 	for (auto&& id : _stage)
 	{
-		DrawGraph(id->offSet().x, id->offSet().y, id->GetStageID(), true);
+		id->DrawStage();
 	}
 
 	ScreenFlip();
@@ -39,12 +43,14 @@ bool SceneMng::SysInit(void)
 {
 	ChangeWindowMode(true);
 	SetWindowText("1916025_寺崎大智");
-	SetGraphMode(_screenSize.x, _screenSize.y, 16);
+	SetGraphMode(screenSize_.x, screenSize_.y, 16);
 
 	if (DxLib_Init() == -1)
 	{
 		return false;
 	}
+
+
 	_dbgSetup(255,255,255);
 	_dbgSetAlpha(255);
 	return true;
@@ -58,7 +64,7 @@ void SceneMng::Init(void)
 
 SceneMng::SceneMng() :
 	pyoSize_(64), pyoRadius_(pyoSize_ / 2), gameSize_(Vector2(pyoSize_ * 6, pyoSize_ * 13)), gameOffSet_(Vector2(66, 66)),
-	_frameSize(Vector2(64, 66)), _screenSize(Vector2(gameSize_.x * 3 + _frameSize.x * 2, gameSize_.y + gameOffSet_.y))
+	_frameSize(Vector2(64, 66)), screenSize_(Vector2(gameSize_.x * 3 + _frameSize.x * 2, gameSize_.y + gameOffSet_.y))
 {
 	TRACE("シーンマネージャーの生成\n");
 	if (!SysInit())

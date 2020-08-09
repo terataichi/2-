@@ -40,6 +40,16 @@ struct RensaMode
 				return;
 			}
 
+			// 最大連鎖の更新と生成するお邪魔プヨの計算
+			if (stage.rensa_ > stage.maxRensa_)						// 連鎖の最大更新
+			{
+				stage.maxRensa_ = stage.rensa_;
+			}
+
+			stage.ojamaCnt_ = (stage.maxRensa_ / 2) * (stage.rensa_) * (stage.eraseCnt_ / 8);
+			stage.ojamaCnt_ = (stage.rensa_) * 30;
+			stage.eraseCnt_ = 0;
+
 			// むにょんしていいか調べるためのラムダ
 			auto punyonBit = [&](PuyoID id, Vector2 vec)
 			{

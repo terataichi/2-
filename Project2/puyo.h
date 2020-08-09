@@ -45,7 +45,7 @@ public:
 	puyo();
 	puyo(Vector2&& pos,PuyoID id) ;
 	~puyo();
-	virtual bool UpDate(void);
+	virtual bool UpDate(int no);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
 	bool CheckPuyon(void);										// まだぷよんしてるか確認する
@@ -63,8 +63,9 @@ public:
 	void SetMunyon(int cnt);									// 呼んだらむにょん開始
 	void pos(Vector2& vec);										// 座標
 	void UpSpeed();												// 加速させる
-
+	virtual void SetFall(bool flg);								// お邪魔用、落ちていいかどうか
 	// ------ゲット関数
+	virtual bool seiretu(void);									// お邪魔用、整列用
 	const Vector2& pos(void)const;
 	const DirUnion& GetDirFlg(void)const;
 	const DirUnion& GetOldDirFlg(void)const;

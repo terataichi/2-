@@ -37,7 +37,7 @@ public:
 	const Vector2 gameOffSet_;								// オフセット
 	const Vector2 gameSize_;								// ゲーム画面のみのサイズ
 	const Vector2 _frameSize;								// ゲーム画面の周りのフレームのサイズ
-	const Vector2 _screenSize;								// スクリーンサイズ
+	const Vector2 screenSize_;								// スクリーンサイズ
 private:
 	bool SysInit(void);
 	void Init(void);

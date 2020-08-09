@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <functional>
 #include <random>
 #include <DxLib.h>
 #include "_debug/_DebugConOut.h"
@@ -18,8 +17,8 @@
 #include "ModePuyo/MunyonMode.h"
 #include "ModePuyo/GameOver.h"
 #include "ModePuyo/DeleteMode.h"
-#include "ModePuyo/OjamaMode.h"
-
+#include "NextPuyo.h"
+#include "common/EffectMng.h"
 
 int Stage::playCnt_ = 0;
 
@@ -27,6 +26,8 @@ Stage::Stage(Vector2&& offSet,Vector2&& size) :offSet_(std::move(offSet)), size_
 {
 	id_ = playCnt_;
 	Init();
+	maxRensa_ = 0;
+	eraseCnt_ = 0;
 	playCnt_++;
 }
 
@@ -63,6 +64,11 @@ const Vector2 Stage::GetGrid(Vector2 pos)
 const int Stage::ojamaCnt(void) const
 {
 	return ojamaCnt_;
+}
+
+const int Stage::id(void) const
+{
+	return id_ + 1;
 }
 
 bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
@@ -119,11 +125,14 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (erasedata_[gri.y][gri.x]->id() == puyo->id())
 			{
+				lpEffectMng.PlayEffect("blast", offSet_ + puyo->pos() + puyo->rad());
 				puyo->alive(false);
 				data_[gri.y][gri.x].reset();
 			}
 		}
 	}
+
+	eraseCnt_ += count;
 
 	return true;
 }
@@ -143,14 +152,18 @@ void Stage::ojamaCnt(int cnt)
 	ojamaCnt_ = cnt;
 }
 
-void Stage::Draw(void)
+void Stage::DrawUpdate(void)
 {
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0, 0, lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y, 0x778899, true);
+	DrawBox(0, 0, lpSceneMng.gameSize_.x + 1, lpSceneMng.gameSize_.y, 0x778899, true);
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->Draw();
+	}
+	for (auto&& ojama : ojamaList_)
+	{
+		ojama->Draw();
 	}
 
 	//for (auto data : data_)
@@ -165,6 +178,13 @@ void Stage::Draw(void)
 	//}
 }
 
+void Stage::DrawStage(void)
+{
+	DrawGraph(offSet().x, offSet().y, GetStageID(), true);
+	nextPuyo_->Draw();
+	lpEffectMng.Draw();
+}
+
 int Stage::UpDate(int ojamaCnt)
 {
 	int count = 0;
@@ -176,7 +196,7 @@ int Stage::UpDate(int ojamaCnt)
 	ojamaCnt_ = 0;
 	(*input_)();
 	modeMap_[stgMode_](*this);
-	Draw();
+	DrawUpdate();
 
 	return ojamaCnt_;
 }
@@ -191,9 +211,9 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::Munyon, MunyonMode());
 	modeMap_.try_emplace(StgMode::GameOver, GameOver());
 	modeMap_.try_emplace(StgMode::Delete, DeleteMode());
-	modeMap_.try_emplace(StgMode::Ojama, OjamaMode());
+	//modeMap_.try_emplace(StgMode::Ojama, OjamaMode());
 
-	stageID_ = MakeScreen(size_.x, size_.y);
+	stageID_ = MakeScreen(size_.x + 200, size_.y);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る
@@ -223,6 +243,16 @@ void Stage::Init()
 	input_->SetUp(id_);
 	playUnit_ = std::make_unique<PlayUnit>(*this);
 	ojamaList_.clear();
+	Vector2 pos;
+	if (id_ == 0)
+	{
+		pos = offSet_ + Vector2{ (size_.x + 1) + blockSize_ / 2,blockSize_ };
+	}
+	else
+	{
+		pos = offSet_ + Vector2{ -blockSize_ * 2,blockSize_ };
+	}
+	nextPuyo_ = std::make_unique<NextPuyo>(pos, 2);
 	InstancePuyo();
 
 	stgMode_ = StgMode::Drop;
@@ -269,12 +299,16 @@ bool Stage::CheckMove(SharePuyo& vec)
 
 void Stage::InstancePuyo()
 {
-	std::random_device rnd;
-	std::mt19937 mt(rnd());
-	std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>(PuyoID::Purple));
+	auto nextPuyo = nextPuyo_->PickUp();
 
-	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ + blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
-	puyoVec_.emplace(puyoVec_.begin(), std::make_shared<puyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), static_cast<PuyoID>(puyoRand(mt))));
+	auto pos2 = Vector2{ blockSize_ / 2 + blockSize_ * 3, blockSize_ + blockSize_ / 2 };
+	auto pos1 = Vector2{blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2};
+	nextPuyo.first->pos(pos1);
+	nextPuyo.second->pos(pos2);
+
+	puyoVec_.emplace(puyoVec_.begin(), nextPuyo.first);
+	puyoVec_.emplace(puyoVec_.begin(), nextPuyo.second);
+
 	playUnit_->SetTarget();
 }
 

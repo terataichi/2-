@@ -18,21 +18,21 @@ struct MunyonMode
 			if (stage.ojamaList_.size())
 			{
 				int count = 0;								// Å‘å‰½ŒÂ~‚ç‚¹‚é‚©
-				for (auto list : stage.ojamaList_)
+				for (auto ojama : stage.ojamaList_)
 				{
-					stage.puyoVec_.emplace(stage.puyoVec_.begin(), list);
-					if (count > 10)
+					ojama->SetSpeed(16, 0);
+
+					stage.puyoVec_.emplace(stage.puyoVec_.begin(), ojama);
+					if (count > 30)
 					{
 						break;
 					}
 					count++;
 				}
-				stage.ojamaCnt_ = 0;
 				stage.ojamaList_.clear();
-				//stage.ojamaList_.remove_if(stage.ojamaList_.begin(), stage.ojamaList_.end(),std::next(stage.ojamaList_.begin(), count));
-
+				//stage.ojamaList_.remove_if(stage.ojamaList_.begin(), stage.ojamaList_.end(),
+				//	[&]() {return std::next(stage.ojamaList_.begin(), count); });
 				stage.stgMode_ = StgMode::FALL;
-				return;
 			}
 			else
 			{

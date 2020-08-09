@@ -47,16 +47,35 @@ struct FallMode
 			});
 
 		bool rensa = true;
+		int count = 0;
+		bool fall = true;
 		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 			{
-				if (!uniPuyo->UpDate())
+				if (!uniPuyo->UpDate(count))
 				{
 					// false‚¾‚Á‚½‚ç‚Ü‚¾“®‚¢‚Ä‚é‚©‚ç˜A½‚É‚¢‚©‚È‚¢ 
 					Vector2 grid = uniPuyo->GetGrid(stage.blockSize_);
 					stage.data_[grid.y][grid.x].reset();
 					rensa = false;
+
+					if (uniPuyo->id() == PuyoID::Ojama)
+					{
+						fall &= uniPuyo->seiretu();
+					}
 				}
+				count++;
 			});
+
+		if (fall)
+		{
+			std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
+				{
+					if (uniPuyo->id() == PuyoID::Ojama)
+					{
+						uniPuyo->SetFall(true);
+					}
+				});
+		}
 
 		if (rensa)
 		{

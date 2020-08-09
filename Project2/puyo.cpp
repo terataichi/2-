@@ -20,7 +20,7 @@ puyo::~puyo()
 {
 }
 
-bool puyo::UpDate(void)
+bool puyo::UpDate(int no)
 {
 
 	if (softCnt_ < softCntMax_)
@@ -101,6 +101,10 @@ void puyo::pos(Vector2& vec)
 void puyo::UpSpeed()
 {
 	speedUp_ = true;
+}
+
+void puyo::SetFall(bool flg)
+{
 }
 
 void puyo::SetPuyon()
@@ -184,6 +188,11 @@ bool puyo::SetMnyonFlg(DirUnion flg)
 void puyo::alive(bool flg)
 {
 	alive_ =  flg;
+}
+
+bool puyo::seiretu(void)
+{
+	return true;
 }
 
 const Vector2& puyo::pos() const

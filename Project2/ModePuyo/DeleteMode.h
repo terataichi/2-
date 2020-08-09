@@ -20,10 +20,11 @@ struct DeleteMode
 					uniPuyo->SetSpeed(8, 0);
 					uniPuyo->UpSpeed();
 				});
-			stage.AddRensa();										// ここまで来てれば何か消えているので連鎖確定
-			TRACE("%d連鎖\n", stage.rensa());
 
-			stage.ojamaCnt_ = stage.rensa();
+			stage.AddRensa();										// ここまで来てれば何か消えているので連鎖確定
+
+
+			TRACE("%d連鎖\n", stage.rensa());
 
 			stage.stgMode_ = StgMode::FALL;
 		}
