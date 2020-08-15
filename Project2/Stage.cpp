@@ -71,6 +71,16 @@ const int Stage::id(void) const
 	return id_ + 1;
 }
 
+const bool Stage::alive(void) const
+{
+	return alive_;;
+}
+
+const Victory& Stage::victory(void) const
+{
+	return victory_;
+}
+
 bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 {
 	//memset(eraseDataBase_.data(), 0, eraseDataBase_.size() * sizeof(PuyoID));		// ÉTÉCÉYÇçÏÇ¡ÇƒíÜÇ…0(PuyoID::Non)ÇÇ¢ÇÍÇÈ
@@ -125,7 +135,7 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (erasedata_[gri.y][gri.x]->id() == puyo->id())
 			{
-				lpEffectMng.PlayEffect("blast", offSet_ + puyo->pos() + puyo->rad());
+				lpEffectMng.PlayEffect("blast", offSet_ + puyo->pos());
 				puyo->alive(false);
 				data_[gri.y][gri.x].reset();
 			}
@@ -150,6 +160,11 @@ void Stage::AddRensa(void)
 void Stage::ojamaCnt(int cnt)
 {
 	ojamaCnt_ = cnt;
+}
+
+void Stage::victory(Victory vic)
+{
+	victory_ = vic;
 }
 
 void Stage::DrawUpdate(void)
@@ -190,11 +205,32 @@ int Stage::UpDate(int ojamaCnt)
 	int count = 0;
 	while (count < ojamaCnt)
 	{
-		InstanceOjama();
+		InstanceOjama(count);
 		count++;
 	}
 	ojamaCnt_ = 0;
-	(*input_)();
+
+	// ëÄçÏëŒè€ÇÃêÿÇËë÷Ç¶(PGUP : 1P, PGDN : 2P)
+	int pgDn = CheckHitKey(KEY_INPUT_PGDN);
+	if (CheckHitKey(KEY_INPUT_PGUP) || pgDn)
+	{
+		int no = 0;
+		if (pgDn)
+		{
+			no = 1;
+		}
+		TRACE("ëÄçÏëŒè€ÇÃì¸ÇÍë÷Ç¶\n");
+		for (auto key : input_)
+		{
+			key.second->SetUp(id_ ^ no);
+		}
+	}
+	// ëÄçÏèàóù
+	for (auto key : input_)
+	{
+		(*key.second)();
+	}
+	
 	modeMap_[stgMode_](*this);
 	DrawUpdate();
 
@@ -232,17 +268,34 @@ void Stage::Init()
 		}
 	}
 
+	victory_ = Victory::Non;
+
+	rensa_ = 0;
+	blockSize_ = 64;
+
+	alive_ = true;
+
+	// ëÄçÏån
 	for (auto id : INPUT_ID())
 	{
 		moveFlg_.try_emplace(id, false);
 	}
 
-	rensa_ = 0;
-	blockSize_ = 64;
-	input_ = std::make_shared<KeyState>();
-	input_->SetUp(id_);
+	input_ =
+	{ 
+		{CntType::Pad, std::make_shared<PadState>()},
+		{CntType::Mouse, std::make_shared<MouseState>()},
+		{CntType::Key, std::make_shared<KeyState>()}
+	};
+	for (auto key : input_)
+	{
+		key.second->SetUp(id_);
+	}	
+
 	playUnit_ = std::make_unique<PlayUnit>(*this);
+	
 	ojamaList_.clear();
+
 	Vector2 pos;
 	if (id_ == 0)
 	{
@@ -253,6 +306,7 @@ void Stage::Init()
 		pos = offSet_ + Vector2{ -blockSize_ * 2,blockSize_ };
 	}
 	nextPuyo_ = std::make_unique<NextPuyo>(pos, 2);
+
 	InstancePuyo();
 
 	stgMode_ = StgMode::Drop;
@@ -312,7 +366,7 @@ void Stage::InstancePuyo()
 	playUnit_->SetTarget();
 }
 
-void Stage::InstanceOjama()
+void Stage::InstanceOjama(int no)
 {
-	ojamaList_.emplace_front(std::make_shared<OjamaPuyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), PuyoID::Ojama));
+	ojamaList_.emplace_front(std::make_shared<OjamaPuyo>(Vector2(blockSize_ / 2 + blockSize_ * 3, blockSize_ / 2), no));
 }

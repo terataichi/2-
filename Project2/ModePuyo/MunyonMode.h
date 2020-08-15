@@ -15,33 +15,37 @@ struct MunyonMode
 
 		if (flg)
 		{
-			if (stage.ojamaList_.size())
+			if (!stage.ojamaFlg)
 			{
-				int count = 0;								// 最大何個降らせるか
-				for (auto ojama : stage.ojamaList_)
+				if (stage.ojamaList_.size())
 				{
-					ojama->SetSpeed(16, 0);
-
-					stage.puyoVec_.emplace(stage.puyoVec_.begin(), ojama);
-					if (count > 30)
+					int count = 0;								// 最大何個降らせるか
+					for (auto ojama : stage.ojamaList_)
 					{
-						break;
+						ojama->SetSpeed(16, 0);
+
+						ojama->SetFall(true);
+
+						stage.puyoVec_.emplace(stage.puyoVec_.begin(), ojama);
+						count++;
+						if (count >= 30)
+						{
+							break;
+						}
 					}
-					count++;
+					stage.ojamaList_.erase(stage.ojamaList_.begin(), std::next(stage.ojamaList_.begin(), count));
+					stage.ojamaFlg = true;
+					stage.stgMode_ = StgMode::FALL;
+					return;
 				}
-				stage.ojamaList_.clear();
-				//stage.ojamaList_.remove_if(stage.ojamaList_.begin(), stage.ojamaList_.end(),
-				//	[&]() {return std::next(stage.ojamaList_.begin(), count); });
-				stage.stgMode_ = StgMode::FALL;
 			}
-			else
-			{
-				stage.ResetRensa();							// 連鎖のリセット
-				stage.InstancePuyo();
-				stage.CheckMove(stage.puyoVec_[1]);
-				stage.CheckMove(stage.puyoVec_[0]);
-				stage.stgMode_ = StgMode::Drop;
-			}
+
+			stage.ojamaFlg = false;
+			stage.ResetRensa();							// 連鎖のリセット
+			stage.InstancePuyo();
+			stage.CheckMove(stage.puyoVec_[1]);
+			stage.CheckMove(stage.puyoVec_[0]);
+			stage.stgMode_ = StgMode::Drop;
 		}
 	}
 };

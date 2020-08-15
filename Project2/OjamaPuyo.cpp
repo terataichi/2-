@@ -1,12 +1,10 @@
 #include "OjamaPuyo.h"
 
-int OjamaPuyo::ojamaCnt_ = 0;
 
-OjamaPuyo::OjamaPuyo(Vector2&& pos, PuyoID id)
+OjamaPuyo::OjamaPuyo(Vector2&& pos, int no)
 {
-	Init(pos,id);
-	id_ = ojamaCnt_;
-	ojamaCnt_++;
+	Init(pos, PuyoID::Ojama);
+	id_ = no;
 
 	intervalCnt_ = 0;
 	interval_ = (id_ / 6) * 4;
@@ -27,27 +25,34 @@ void OjamaPuyo::seiretuCnt(int cnt)
 
 bool OjamaPuyo::UpDate(int no)
 {
-	if (seiretu_ && fall_)
-	{
-		intervalCnt_++;
-	}
 
 	// êÆóÒÇµÇ´Ç¡ÇƒÇ¢ÇΩÇÁÇ±Ç¡ÇøâÒÇªÇ§
-	if (fall_ && intervalCnt_ > interval_)
+	if (fall_  && drop_)
 	{
-		return 	puyo::UpDate(0);
-	}
+		intervalCnt_++;
 
-	// êÆóÒÇ≥ÇπÇÈ
-	if (pos_.x < ((no % 6) * size_) + rad_.x)
-	{
-		pos_.x += 8;
+		if (intervalCnt_ > interval_)
+		{
+			return 	puyo::UpDate(0);
+		}
 		return false;
 	}
 
-	if (pos_.x > ((no % 6) * size_) + rad_.x)
+	if (seiretu_)
 	{
-		pos_.x -= 8;
+		return false;
+	}
+
+	// êÆóÒÇ≥ÇπÇÈ
+	if (pos_.x < ((id_ % 6) * size_) + rad_.x)
+	{
+		pos_.x += 16;
+		return false;
+	}
+
+	if (pos_.x > ((id_ % 6) * size_) + rad_.x)
+	{
+		pos_.x -= 16;
 		return false;
 	}
 	
@@ -66,7 +71,12 @@ void OjamaPuyo::SetFall(bool flg)
 	fall_ = flg;
 }
 
-//bool OjamaPuyo::UpDate()
-//{
-//	return false;
-//}
+bool OjamaPuyo::CheckFall()
+{
+	return fall_;
+}
+
+void OjamaPuyo::SetDrop()
+{
+	drop_ = true;
+}

@@ -25,7 +25,7 @@ struct InputState
 {
 	void operator()()
 	{
-		UpDate();
+		Update();
 	}
 
 	const TrgData& GetTrgData(void);			// データのゲット関数
@@ -33,7 +33,7 @@ struct InputState
 	virtual bool SetUp(int no) = 0;
 
 private:
-	virtual void UpDate(void) = 0;
+	virtual void Update(void) = 0;
 
 protected:
 

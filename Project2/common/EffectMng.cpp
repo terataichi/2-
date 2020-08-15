@@ -57,7 +57,7 @@ bool EffectMng::Init(Vector2&& size)
 int EffectMng::GetHandle(std::string name)
 {
 	// + name + ‚Å‚­‚Á‚Â‚¯‚é‚±‚Æ‚ª‚Å‚«‚é•Ö—˜!
-	effectMap_.try_emplace(name, LoadEffekseerEffect(("effect/" + name + ".efk").c_str(), 500.0f));
+	effectMap_.try_emplace(name, LoadEffekseerEffect(("effect/" + name + ".efk").c_str(), 100.0f));
 	return effectMap_[name];
 }
 

@@ -16,19 +16,21 @@ bool PadState::SetUp(int no)
 	{
 		_padID = DX_INPUT_PAD2;
 	}
+	_keyConDef.clear();
 	_keyConDef = {
 	{INPUT_ID::BUTTON_LEFT,PAD_INPUT_LEFT},
 	{INPUT_ID::BUTTON_UP,PAD_INPUT_UP},
 	{INPUT_ID::BUTTON_RIGHT,PAD_INPUT_RIGHT},
 	{INPUT_ID::BUTTON_DOWN,PAD_INPUT_DOWN},
 	{INPUT_ID::BUTTON_ROTA_L,PAD_INPUT_1},
+	{INPUT_ID::BUTTON_ROTA_R,PAD_INPUT_2},
 	};
 
 	_keyCon = _keyConDef;
 	return true;
 }
 
-void PadState::UpDate(void)
+void PadState::Update()
 {
 
 	for (auto id : INPUT_ID())				// now‚ÌƒZƒbƒg

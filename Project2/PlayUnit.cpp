@@ -29,22 +29,28 @@ void PlayUnit::UpDate(void)
 	}
 
 	// ソフトドロップ
-	if (stage_.input_->GetTrgData().at(INPUT_ID::BUTTON_DOWN)[static_cast<int>(Trg::Now)])
+	for (auto& key : stage_.input_)
 	{
-		stage_.puyoVec_[target]->SoftDrop();
-		stage_.puyoVec_[target^1]->SoftDrop();
+		if (key.second->GetTrgData().at(INPUT_ID::BUTTON_DOWN)[static_cast<int>(Trg::Now)])
+		{
+			stage_.puyoVec_[target]->SoftDrop();
+			stage_.puyoVec_[target ^ 1]->SoftDrop();
+		}
 	}
 
-	for (auto data : stage_.input_->GetTrgData())
+	for (auto& key : stage_.input_)
 	{
-		// old とnow を見る
-		if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
+		for (auto data : key.second->GetTrgData())
 		{
-			if (keyFunc_[data.first](data.first))
+			// old とnow を見る
+			if (data.second[static_cast<int>(Trg::Now)] && !data.second[static_cast<int>(Trg::Old)])
 			{
-				//　入力された方向に進もうとする
-				stage_.puyoVec_[target]->Move(data.first);
-				stage_.puyoVec_[target ^ 1]->Move(data.first);
+				if (keyFunc_[data.first](data.first))
+				{
+					//　入力された方向に進もうとする
+					stage_.puyoVec_[target]->Move(data.first);
+					stage_.puyoVec_[target ^ 1]->Move(data.first);
+				}
 			}
 		}
 	}

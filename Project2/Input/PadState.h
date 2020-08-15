@@ -6,7 +6,7 @@ class PadState :
 public:
 	virtual CntType GetCntType(void) override;		// ©•ª‚ª‚¢‚Ü‰½‚ğg‚Á‚Ä‚¢‚é‚Ì‚©‚ğ•Ô‚·
 	virtual bool SetUp(int no) override;			// ‰Šú‰»
-	virtual void UpDate(void) override;
+	virtual void Update(void) override;
 
 private:
 	std::map<INPUT_ID, int> _keyCon;					// ƒL[‚Ì“o˜^

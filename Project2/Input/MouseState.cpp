@@ -13,7 +13,7 @@ bool MouseState::SetUp(int no)
 		//{INPUT_ID::BUTTON_UP,PAD_INPUT_UP},
 		//{INPUT_ID::BUTTON_RIGHT,MOUSE_INPUT_RIGHT},
 		{INPUT_ID::BUTTON_ROTA_L,MOUSE_INPUT_RIGHT},
-		{INPUT_ID::BUTTON_ROTA_L,MOUSE_INPUT_LEFT},
+		{INPUT_ID::BUTTON_ROTA_R,MOUSE_INPUT_LEFT},
 	};
 	//_wheel = 0;
 	//_oldwheel = 0;
@@ -22,7 +22,7 @@ bool MouseState::SetUp(int no)
 	return true;
 }
 
-void MouseState::UpDate(void)
+void MouseState::Update(void)
 {
 
 	for (auto id : INPUT_ID())

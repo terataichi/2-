@@ -6,11 +6,17 @@ struct FallMode
 	void operator()(Stage& stage)
 	{
 		bool nextFlg = true;
+		for (auto puyo : stage.puyoVec_)
+		{
+			// まだ動いていいかチェックをかける
+			puyo->SetOldDirFlg();
+			nextFlg &= stage.CheckMove(puyo);
+		}
 		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 			{
 				// まだ動いていいかチェックをかける
-				uniPuyo->SetOldDirFlg();
-				nextFlg &= stage.CheckMove(uniPuyo);
+				//uniPuyo->SetOldDirFlg();
+				//nextFlg &= stage.CheckMove(uniPuyo);
 
 				if (uniPuyo->id() != PuyoID::Ojama)
 				{
@@ -46,38 +52,46 @@ struct FallMode
 				}
 			});
 
-		bool rensa = true;
+		bool puyon = true;		// ぷよんに行っていいかどうか
 		int count = 0;
+
+		// 全員整列しきっているか
 		bool fall = true;
 		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 			{
-				if (!uniPuyo->UpDate(count))
+				if (uniPuyo->id() == PuyoID::Ojama)
 				{
-					// falseだったらまだ動いてるから連鎖にいかない 
-					Vector2 grid = uniPuyo->GetGrid(stage.blockSize_);
-					stage.data_[grid.y][grid.x].reset();
-					rensa = false;
-
-					if (uniPuyo->id() == PuyoID::Ojama)
-					{
-						fall &= uniPuyo->seiretu();
-					}
+					fall &= uniPuyo->seiretu();
 				}
-				count++;
 			});
 
-		if (fall)
-		{
-			std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
+		std::for_each(stage.ojamaList_.rbegin(), stage.ojamaList_.rend(), [&](SharePuyo& ojama)
+			{
+				if (!ojama->CheckFall())
 				{
-					if (uniPuyo->id() == PuyoID::Ojama)
-					{
-						uniPuyo->SetFall(true);
-					}
-				});
-		}
+					ojama->UpDate(count);
+					count++;
+				}
+			});
 
-		if (rensa)
+		// 落ちる処理
+		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
+			{
+				if (fall)
+				{
+					uniPuyo->SetDrop();
+				}
+
+				// falseだったらまだ動いてるから連鎖にいかない 
+				if (!uniPuyo->UpDate(0))
+				{
+					Vector2 grid = uniPuyo->GetGrid(stage.blockSize_);
+					stage.data_[grid.y][grid.x].reset();
+					puyon = false;
+				}
+			});
+
+		if (puyon)
 		{
 			stage.stgMode_ = StgMode::Puyon;
 		}

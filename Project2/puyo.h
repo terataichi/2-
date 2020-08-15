@@ -64,6 +64,8 @@ public:
 	void pos(Vector2& vec);										// 座標
 	void UpSpeed();												// 加速させる
 	virtual void SetFall(bool flg);								// お邪魔用、落ちていいかどうか
+	virtual bool CheckFall();
+	virtual void SetDrop();
 	// ------ゲット関数
 	virtual bool seiretu(void);									// お邪魔用、整列用
 	const Vector2& pos(void)const;

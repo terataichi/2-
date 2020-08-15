@@ -103,6 +103,15 @@ void puyo::UpSpeed()
 	speedUp_ = true;
 }
 
+bool puyo::CheckFall()
+{
+	return false;
+}
+
+void puyo::SetDrop()
+{
+}
+
 void puyo::SetFall(bool flg)
 {
 }

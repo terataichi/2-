@@ -18,14 +18,6 @@ struct RensaMode
 
 		if (deleteFlg)
 		{
-			// ここで消える前にアニメーションをセットする
-			//for (auto&& pvec : stage.puyoVec_)
-			//{
-			//	if (!pvec->alive())
-			//	{
-			//		//pvec->PlayDeathAnim();
-			//	}
-			//}
 			stage.stgMode_ = StgMode::Delete;
 		}
 		else
@@ -35,8 +27,8 @@ struct RensaMode
 			{
 				TRACE("プレイヤー%d", stage.id_ + 1);
 				TRACE("GAME OVER\n");
-
-				stage.stgMode_ = StgMode::GameOver;
+				stage.alive_ = false;
+				//stage.stgMode_ = StgMode::GameOver;
 				return;
 			}
 
@@ -46,9 +38,27 @@ struct RensaMode
 				stage.maxRensa_ = stage.rensa_;
 			}
 
-			stage.ojamaCnt_ = (stage.maxRensa_ / 2) * (stage.rensa_) * (stage.eraseCnt_ / 8);
+			stage.ojamaCnt_ = (stage.maxRensa_  / 2) * (stage.rensa_ - 1) * (stage.eraseCnt_ / 4);
 			stage.ojamaCnt_ = (stage.rensa_) * 30;
+			stage.rensa_ = 0;
 			stage.eraseCnt_ = 0;
+
+			// 相殺する前にまずお邪魔リストを持っているか確認する
+			if (stage.ojamaList_.size())
+			{	
+				// 相殺する
+				// 計算した結果お邪魔リストより数が多かったらその分引いて送る
+				if (stage.ojamaCnt_ > static_cast<int>(stage.ojamaList_.size()))
+				{
+					stage.ojamaList_.clear();
+					stage.ojamaCnt_ -= static_cast<int>(stage.ojamaList_.size());
+				}
+				else
+				{
+					stage.ojamaList_.erase(stage.ojamaList_.begin(), std::next(stage.ojamaList_.begin(), stage.ojamaCnt_));
+					stage.ojamaCnt_ = 0;
+				}
+			}
 
 			// むにょんしていいか調べるためのラムダ
 			auto punyonBit = [&](PuyoID id, Vector2 vec)

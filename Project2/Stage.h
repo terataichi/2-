@@ -29,6 +29,15 @@ enum class StgMode
 	GameOver
 };
 
+// 勝ち負け判断用
+enum class Victory
+{
+	Non,
+	Win,
+	Lose,
+	Draw
+};
+
 class Stage
 {
 public:
@@ -44,6 +53,7 @@ public:
 	void ResetRensa(void);												// 連鎖が終わるときに使う
 	void AddRensa(void);												// 連鎖を増やす
 	void ojamaCnt(int cnt);												// お邪魔プヨを相手に送り付けるときに使う
+	void victory(Victory vic);
 	// ------ Get
 	const int GetStageID(void)const;									// ステージID書き込み用
 	const Vector2 offSet(void)const;									// ステージのオフセット
@@ -52,12 +62,14 @@ public:
 	const Vector2 GetGrid(Vector2 pos);									// 指定した座標のマス目を取得;]
 	const int ojamaCnt(void)const;										// 自分のお邪魔ｶｳﾝﾄ取得
 	const int id(void)const;											// すてーじのID取得
+	const bool alive(void)const;										// 生きてるか死んでるか
+	const Victory& victory(void)const;
 private:
 
 	void Init(void);
 	bool CheckMove(SharePuyo& vec);										// 上下左右動いていいか
 	void InstancePuyo();												// 新しいプヨ
-	void InstanceOjama();												// お邪魔プヨの生成
+	void InstanceOjama(int no);											// お邪魔プヨの生成
 	Vector2 offSet_;													// ステージ画面のオフセット
 	Vector2 size_;
 	int blockSize_;
@@ -67,6 +79,8 @@ private:
 	int rensa_;															// 今何連鎖
 	int ojamaCnt_;														// 何個お邪魔あるのー
 	int eraseCnt_;														// 今回何個ぷよきえたのー
+
+	bool ojamaFlg = false;
 
 	std::unique_ptr<PlayUnit> playUnit_;								// ﾌﾟﾚｲﾔｰに関する処理をフレンドでもらって管理
 	std::unique_ptr<NextPuyo> nextPuyo_;
@@ -79,12 +93,17 @@ private:
 
 	std::map<INPUT_ID, bool> moveFlg_;									// 移動していいか。true : ロック
 
-	std::shared_ptr<InputState> input_;									// キーの入力管理
+	std::map<CntType,std::shared_ptr<InputState>> input_;				// キーの入力管理
+
+	int inputNum = 0;													// ページアップページダウンで操作対象を切り替えたい
 
 	std::vector<SharePuyo> puyoVec_;									// ぷよのリスト
 	std::list<SharePuyo> ojamaList_;									// お邪魔リスト
 
 	std::map<StgMode, std::function<void(Stage&)>> modeMap_;			// モード別関数オブジェクト
+
+	bool alive_;														// ステージが生きてるか
+	Victory victory_;													// 勝ちなのか負けなのか引き分けなのか
 
 	static int playCnt_;												// 複数人いた場合人数でキーを変えれるように
 	int id_;

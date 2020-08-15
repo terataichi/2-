@@ -8,6 +8,7 @@ CntType KeyState::GetCntType(void)
 
 bool KeyState::SetUp(int no)
 {
+	_keyConDef.clear();
 	if (no == 0)
 	{
 		_keyConDef = {
@@ -16,10 +17,10 @@ bool KeyState::SetUp(int no)
 			{INPUT_ID::BUTTON_RIGHT,KEY_INPUT_D},
 			{INPUT_ID::BUTTON_DOWN,KEY_INPUT_S},
 			{INPUT_ID::BUTTON_ROTA_L,KEY_INPUT_Z},
-			{INPUT_ID::BUTTON_ROTA_R,KEY_INPUT_C},
+			{INPUT_ID::BUTTON_ROTA_R,KEY_INPUT_X},
 		};
 	}
-	else if (no == 1)
+	if (no == 1)
 	{
 		_keyConDef = 
 		{
@@ -37,7 +38,7 @@ bool KeyState::SetUp(int no)
 	return false;
 }
 
-void KeyState::UpDate(void)
+void KeyState::Update()
 {
 	GetHitKeyStateAll(_buf.data());																// キーボードの情報取得
 

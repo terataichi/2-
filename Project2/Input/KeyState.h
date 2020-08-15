@@ -10,7 +10,7 @@ struct KeyState :
 public:
 	virtual CntType GetCntType(void) override;			// 自分がいま何を使っているのかを返す
 	virtual bool SetUp(int no) override;
-	virtual void UpDate(void) override;
+	virtual void Update(void) override;
 
 private:
 	std::array<char, 256> _buf;							// キーボード情報取得用
