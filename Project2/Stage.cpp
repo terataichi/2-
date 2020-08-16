@@ -144,7 +144,7 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (erasedata_[gri.y][gri.x]->id() == puyo->id())
 			{
-				lpEffectMng.PlayEffect("blast", offSet_ + puyo->pos());
+				lpEffectMng.PlayEffect("baku", offSet_ + puyo->pos());
 				puyo->alive(false);
 				data_[gri.y][gri.x].reset();
 			}
