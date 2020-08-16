@@ -24,6 +24,8 @@ enum class PuyoID
 	Max,
 };
 
+using VecPair = std::pair<Vector2, Vector2>;
+
 // 方向の入力のビットフィールド
 struct DirBits
 {
@@ -62,6 +64,7 @@ public:
 	void SetPuyon(void);										// 呼んだらぷよん開始
 	void SetMunyon(int cnt);									// 呼んだらむにょん開始
 	void pos(Vector2& vec);										// 座標
+	void PuyonUpdate();
 	void UpSpeed();												// 加速させる
 	virtual void SetFall(bool flg);								// お邪魔用、落ちていいかどうか
 	virtual bool CheckFall();
@@ -77,12 +80,14 @@ public:
 	const Vector2 GetGrid(int size);							// 現在のマス目の取得
 	const Vector2 GetGrid(Vector2 pos, int size);				// 指定した場所のマス目の取得
 	const bool alive(void)const;
+	const VecPair drawPos(void)const;
 protected:
 	void Init(Vector2& pos,PuyoID id);
 
 	const int size_;											// ぷよのサイズ
 	const Vector2 rad_;											// ぷよの半径
-	Vector2 pos_;
+	Vector2 pos_;												// 座標
+	VecPair drawPos_;											// 描画するときの座標（表現用）
 	DirUnion dirFlg_;											// 移動していいのかどうかの情報をセットする
 	DirUnion oldDirFlg_;										// 前の情報
 	DirUnion mnyonFlg_;											// むにょんフラグ、trueだったら横に伸ばす

@@ -1,24 +1,26 @@
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "SceneMng.h"
-#include "_debug/_DebugConOut.h"
-#include "_debug/_DebugDispOut.h"
-#include "common/EffectMng.h"
+#include "../_debug/_DebugConOut.h"
+#include "../_debug/_DebugDispOut.h"
+#include "../common/EffectMng.h"
+#include "GameScene.h"
+#include "TitleScene.h"
 
-SceneMng* SceneMng::_sInstance;
+SceneMng* SceneMng::sInstance_;
 
 void SceneMng::Run(void)
 {
 	lpEffectMng.Init(Vector2(screenSize_.x, screenSize_.y));
 
-	int ojamaCnt = 0;
+	activeScene_ = std::make_unique<TitleScene>();
+
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
 	{
 		_dbgStartDraw();
-		for (auto&& id : _stage)
-		{
-			ojamaCnt = id->UpDate(ojamaCnt);
-		}
+
+		activeScene_ = (*activeScene_).Update(std::move(activeScene_));
+
 		lpEffectMng.Update();
 		Draw();
 	}
@@ -31,10 +33,7 @@ void SceneMng::Draw(void)
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClearDrawScreen();
 
-	for (auto&& id : _stage)
-	{
-		id->DrawStage();
-	}
+	(*activeScene_).Draw();
 
 	ScreenFlip();
 }
@@ -58,8 +57,6 @@ bool SceneMng::SysInit(void)
 
 void SceneMng::Init(void)
 {
-	_stage.emplace_back(std::make_unique<Stage>(Vector2(gameOffSet_.x, _frameSize.y / 2), Vector2(gameSize_.x, gameSize_.y)));
-	_stage.emplace_back(std::make_unique<Stage>(Vector2(gameSize_.x * (_stage.size() + 1)+ gameOffSet_.x, _frameSize.y / 2), Vector2(gameSize_.x, gameSize_.y)));
 }
 
 SceneMng::SceneMng() :
@@ -71,7 +68,7 @@ SceneMng::SceneMng() :
 	{
 		TRACE("DXLIB :Ž¸”s‚µ‚Ü‚µ‚½\n");
 	}
-	Init();
+	//Init();
 }
 
 SceneMng::~SceneMng()

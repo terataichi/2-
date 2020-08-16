@@ -2,7 +2,7 @@
 #include <math.h>
 #include <random>
 #include "puyo.h"
-#include "SceneMng.h"
+#include "Scene/SceneMng.h"
 #include "_debug/_DebugDispOut.h"
 #include "_debug/_DebugConOut.h"
 
@@ -22,6 +22,8 @@ puyo::~puyo()
 
 bool puyo::UpDate(int no)
 {
+	// Ç’ÇÊÇÒÇÃçXêV
+	//PuyonUpdate();
 
 	if (softCnt_ < softCntMax_)
 	{
@@ -144,14 +146,7 @@ bool puyo::CheckMunyon(void)
 
 void puyo::Draw(void)
 {
-	auto puyonPos = abs(((puyonCnt_ + 6 )) % (12) - (6));
-
-	if (puyonCnt_ > 0)
-	{
-		puyonCnt_--;
-	}
-
-	DrawOval(pos_.x, pos_.y + puyonPos + (puyonOffset_ * puyonPos * 2), rad_.x + puyonPos, rad_.y - puyonPos, puyoCor_[id_], true);
+	DrawOval(drawPos_.first.x, drawPos_.first.y, drawPos_.second.x, drawPos_.second.y, puyoCor_[id_], true);
 
 	if (munyonCnt_ > 0)
 	{
@@ -249,6 +244,11 @@ const bool puyo::alive(void) const
 	return alive_;
 }
 
+const VecPair puyo::drawPos(void) const
+{
+	return drawPos_;
+}
+
 void puyo::Init(Vector2& pos,PuyoID id)
 {
 	puyoCor_.try_emplace(PuyoID::Red, 0xff0000);
@@ -268,4 +268,15 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	speed_ = size_ / 4;
 	puyonCnt_ = 0;
 	puyonOffset_ = 0;
+}
+
+void puyo::PuyonUpdate()
+{
+	auto puyonPos = abs(((puyonCnt_ + 6)) % (12) - (6));
+	if (puyonCnt_ > 0)
+	{
+		puyonCnt_--;
+	}
+	drawPos_.first = { pos_.x ,pos_.y + puyonPos + (puyonOffset_ * puyonPos * 2) };
+	drawPos_.second = { rad_.x + puyonPos, rad_.y - puyonPos };
 }

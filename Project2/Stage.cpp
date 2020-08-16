@@ -4,7 +4,7 @@
 #include "_debug/_DebugConOut.h"
 #include "_debug/_DebugDispOut.h"
 #include "Stage.h"
-#include "SceneMng.h"
+#include "Scene/SceneMng.h"
 #include "Input/KeyState.h"
 #include "Input/PadState.h"
 #include "Input/MouseState.h"
@@ -17,6 +17,10 @@
 #include "ModePuyo/MunyonMode.h"
 #include "ModePuyo/GameOver.h"
 #include "ModePuyo/DeleteMode.h"
+#include "ModePuyo/Victory/Lose.h"
+#include "ModePuyo/Victory/Win.h"
+#include "ModePuyo/Victory/Draw.h"
+
 #include "NextPuyo.h"
 #include "common/EffectMng.h"
 
@@ -73,7 +77,12 @@ const int Stage::id(void) const
 
 const bool Stage::alive(void) const
 {
-	return alive_;;
+	return alive_;
+}
+
+const bool Stage::nextScene(void) const
+{
+	return nextScene_;
 }
 
 const Victory& Stage::victory(void) const
@@ -162,6 +171,11 @@ void Stage::ojamaCnt(int cnt)
 	ojamaCnt_ = cnt;
 }
 
+void Stage::gameOverCnt(int cnt)
+{
+	gameOverCnt_ = cnt;
+}
+
 void Stage::victory(Victory vic)
 {
 	victory_ = vic;
@@ -171,36 +185,41 @@ void Stage::DrawUpdate(void)
 {
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0, 0, lpSceneMng.gameSize_.x + 1, lpSceneMng.gameSize_.y, 0x778899, true);
+	DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
+
+	int cnt = 0;
+	for (auto&& puyo : puyoVec_)
+	{
+		puyo->PuyonUpdate();
+		// ”’˜g‚Ì•`‰æ
+		if (cnt < 2 && puyo->id() != PuyoID::Ojama)
+		{
+			DrawOval(puyo->drawPos().first.x, puyo->drawPos().first.y, puyo->drawPos().second.x + 4, puyo->drawPos().second.y + 4, 0xffffff, true);
+		}
+		cnt++;
+	}
+
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->Draw();
 	}
+
+	// ‚¨×–‚ƒŠƒXƒg‚Ì•`‰æ
 	for (auto&& ojama : ojamaList_)
 	{
+		ojama->PuyonUpdate();
 		ojama->Draw();
 	}
-
-	//for (auto data : data_)
-	//{
-	//	if ((*data))
-	//	{
-	//		if ((*data)->id() == PuyoID::Wall)
-	//		{
-	//			DrawBox((*data)->pos().x, (*data)->pos().x, (*data)->pos().x + blockSize_, (*data)->pos().y + blockSize_, 0xf, false);
-	//		}
-	//	}
-	//}
 }
 
 void Stage::DrawStage(void)
 {
-	DrawGraph(offSet().x, offSet().y, GetStageID(), true);
+	DrawRotaGraph(offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y, 1, angle_, GetStageID(), true);
 	nextPuyo_->Draw();
 	lpEffectMng.Draw();
 }
 
-int Stage::UpDate(int ojamaCnt)
+int Stage::Update(int ojamaCnt)
 {
 	int count = 0;
 	while (count < ojamaCnt)
@@ -225,12 +244,19 @@ int Stage::UpDate(int ojamaCnt)
 			key.second->SetUp(id_ ^ no);
 		}
 	}
+
 	// ‘€ìˆ—
 	for (auto key : input_)
 	{
 		(*key.second)();
 	}
 	
+	// Ÿ‚¿•‰‚¯‚ªŒˆ‚Ü‚Á‚½‚çƒ‚[ƒh‚ğˆÚ“®
+	if (victory_ != Victory::Non)
+	{
+		stgMode_ = StgMode::GameOver;
+	}
+
 	modeMap_[stgMode_](*this);
 	DrawUpdate();
 
@@ -248,6 +274,11 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::GameOver, GameOver());
 	modeMap_.try_emplace(StgMode::Delete, DeleteMode());
 	//modeMap_.try_emplace(StgMode::Ojama, OjamaMode());
+
+	victoryMap_.try_emplace(Victory::Draw,Draw());
+	victoryMap_.try_emplace(Victory::Lose,Lose());
+	victoryMap_.try_emplace(Victory::Win,Win());
+
 
 	stageID_ = MakeScreen(size_.x + 200, size_.y);
 
@@ -270,9 +301,11 @@ void Stage::Init()
 
 	victory_ = Victory::Non;
 
+	angle_ = 0;
 	rensa_ = 0;
+	gameOverCnt_ = 0;
 	blockSize_ = 64;
-
+	gameOverPos_ = { 0,0 };
 	alive_ = true;
 
 	// ‘€ìŒn
@@ -306,7 +339,7 @@ void Stage::Init()
 		pos = offSet_ + Vector2{ -blockSize_ * 2,blockSize_ };
 	}
 	nextPuyo_ = std::make_unique<NextPuyo>(pos, 2);
-
+	nextScene_ = false;
 	InstancePuyo();
 
 	stgMode_ = StgMode::Drop;

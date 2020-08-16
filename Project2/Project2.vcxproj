@@ -71,17 +71,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXLIB_DIR);$(IncludePath)</IncludePath>
+    <IncludePath>$(DXLIB_DIR);$(IncludePath);$(IncludePath)</IncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(IncludePath)</IncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(DXLIB_DIR);$(IncludePath)</IncludePath>
+    <IncludePath>$(DXLIB_DIR);$(IncludePath);$(IncludePath)</IncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(IncludePath)</IncludePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -146,6 +152,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\GameOverScene.cpp" />
+    <ClCompile Include="Scene\GameScene.cpp" />
+    <ClCompile Include="Scene\BaseScene.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
     <ClCompile Include="common\EffectMng.cpp" />
     <ClCompile Include="Input\InputState.cpp" />
@@ -158,12 +167,19 @@
     <ClCompile Include="OjamaPuyo.cpp" />
     <ClCompile Include="PlayUnit.cpp" />
     <ClCompile Include="puyo.cpp" />
-    <ClCompile Include="SceneMng.cpp" />
+    <ClCompile Include="Scene\SceneMng.cpp" />
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="_debug\_DebugConOut.cpp" />
     <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\GameOverScene.h" />
+    <ClInclude Include="ModePuyo\Victory\Draw.h" />
+    <ClInclude Include="ModePuyo\Victory\Lose.h" />
+    <ClInclude Include="ModePuyo\Victory\Win.h" />
+    <ClInclude Include="Scene\GameScene.h" />
+    <ClInclude Include="Scene\BaseScene.h" />
     <ClInclude Include="common\details\Vector2.h" />
     <ClInclude Include="common\detelas\Vector2.h" />
     <ClInclude Include="common\Vector2.h" />
@@ -186,9 +202,10 @@
     <ClInclude Include="OjamaPuyo.h" />
     <ClInclude Include="PlayUnit.h" />
     <ClInclude Include="puyo.h" />
-    <ClInclude Include="SceneMng.h" />
+    <ClInclude Include="Scene\SceneMng.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Stage.h" />
+    <ClInclude Include="Scene\TitleScene.h" />
     <ClInclude Include="_debug\_DebugConOut.h" />
     <ClInclude Include="_debug\_DebugDispOut.h" />
   </ItemGroup>

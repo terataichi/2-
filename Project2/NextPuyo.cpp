@@ -37,7 +37,9 @@ void NextPuyo::Draw()
     // カウントの数だけネクストを描画する
     for (auto puyo : nextPuyoList_)
     {
+        puyo.first->PuyonUpdate();
         puyo.first->Draw();
+        puyo.second->PuyonUpdate();
         puyo.second->Draw();
         count--;
         if (count <= 0)

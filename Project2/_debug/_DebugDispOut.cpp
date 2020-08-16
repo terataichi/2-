@@ -36,12 +36,12 @@ void _DebugDispOut::RevScreen(void)
 
 void _DebugDispOut::WaitMode(void)
 {
-	if (CheckHitKey(KEY_INPUT_PGDN))
+	if (CheckHitKey(KEY_INPUT_0))
 	{
 		_waitTime+=10.0;
 		TRACE("ÉXÉçÅ[ÅF%f\n", _waitTime);
 	}
-	if (CheckHitKey(KEY_INPUT_PGUP))
+	if (CheckHitKey(KEY_INPUT_9))
 	{
 		_waitTime -= 10.0;
 		if (_waitTime < 0.0)

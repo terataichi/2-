@@ -1,8 +1,9 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "Stage.h"
-#include "common/Vector2.h"
+#include "../Stage.h"
+#include "../common/Vector2.h"
+#include "../Scene/BaseScene.h"
 
 #define lpSceneMng SceneMng::GetInstance()
 
@@ -12,22 +13,22 @@ public:
 	static SceneMng& GetInstance(void)
 	{
 		Create();
-		return *_sInstance;
+		return *sInstance_;
 	}
 	static void Create()
 	{
-		if (_sInstance == nullptr)
+		if (sInstance_ == nullptr)
 		{
-			_sInstance = new SceneMng();
+			sInstance_ = new SceneMng();
 		}
 	}
 	static void Destroy()									// 呼び忘れに注意
 	{
-		if (_sInstance != nullptr)
+		if (sInstance_ != nullptr)
 		{
-			delete _sInstance;
+			delete sInstance_;
 		}
-		_sInstance = nullptr;
+		sInstance_ = nullptr;
 	}
 
 	void Run(void);
@@ -43,8 +44,9 @@ private:
 	void Init(void);
 	void Draw(void);										// 描画
 
-	std::vector<std::unique_ptr<Stage>> _stage;				// ステージを配列で管理して人数変更を可能にする
-	static SceneMng* _sInstance;
+	uniqueBase activeScene_;								// シーン管理
+
+	static SceneMng* sInstance_;
 
 	SceneMng();
 	~SceneMng();

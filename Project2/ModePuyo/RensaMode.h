@@ -28,7 +28,7 @@ struct RensaMode
 				TRACE("ƒvƒŒƒCƒ„[%d", stage.id_ + 1);
 				TRACE("GAME OVER\n");
 				stage.alive_ = false;
-				//stage.stgMode_ = StgMode::GameOver;
+				stage.gameOverCnt(180);
 				return;
 			}
 

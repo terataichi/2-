@@ -14,10 +14,6 @@ struct FallMode
 		}
 		std::for_each(stage.puyoVec_.rbegin(), stage.puyoVec_.rend(), [&](SharePuyo& uniPuyo)
 			{
-				// まだ動いていいかチェックをかける
-				//uniPuyo->SetOldDirFlg();
-				//nextFlg &= stage.CheckMove(uniPuyo);
-
 				if (uniPuyo->id() != PuyoID::Ojama)
 				{
 					// ぷよんさせる
