@@ -196,13 +196,16 @@ void Stage::DrawUpdate(void)
 		puyo->PuyonUpdate();
 	}
 
-	// ‰º‚És‚¯‚é‚Æ‚«‚¾‚¯‘€ì‚Õ‚æ‚É˜g‚ð•t‚¯‚é
-	if (puyoVec_[playUnit_->target()]->id() != PuyoID::Ojama)
+	if (puyoVec_.size())
 	{
-		if (!puyoVec_[playUnit_->target()]->GetDirFlg().bit.down)
+		// ‰º‚És‚¯‚é‚Æ‚«‚¾‚¯‘€ì‚Õ‚æ‚É˜g‚ð•t‚¯‚é
+		if (puyoVec_[playUnit_->target()]->id() != PuyoID::Ojama)
 		{
-			DrawOval(puyoVec_[playUnit_->target()]->drawPos().first.x, puyoVec_[playUnit_->target()]->drawPos().first.y,
-				puyoVec_[playUnit_->target()]->drawPos().second.x + 4, puyoVec_[playUnit_->target()]->drawPos().second.y + 4, 0xffffff, true);
+			if (!puyoVec_[playUnit_->target()]->GetDirFlg().bit.down)
+			{
+				DrawOval(puyoVec_[playUnit_->target()]->drawPos().first.x, puyoVec_[playUnit_->target()]->drawPos().first.y,
+					puyoVec_[playUnit_->target()]->drawPos().second.x + 4, puyoVec_[playUnit_->target()]->drawPos().second.y + 4, 0xffffff, true);
+			}
 		}
 	}
 

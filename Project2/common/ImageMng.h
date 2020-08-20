@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#define lpImageMng ImageMng::GetInstance()
+
 using VecInt = std::vector<int>;
 
 class ImageMng
@@ -14,6 +16,7 @@ public:
 		return *_sInstance;	// * ½Ï°ÄÎß²İÀ‚Ì’†g‚ğ•Ô‚·
 	}
 
+	int GetHandle(std::string name);
 private:
 	struct ImageMngDeleter	// ²Ò°¼ŞÏÈ°¼Ş¬°‚Ì¶½ÀÑÃŞØ°À°
 	{
@@ -28,7 +31,7 @@ private:
 
 	static std::unique_ptr<ImageMng, ImageMngDeleter>_sInstance;
 
-	std::map<std::string, VecInt> imgMap;
+	std::map<std::string, int> imgMap_;
 
 };
 

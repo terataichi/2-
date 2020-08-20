@@ -73,6 +73,8 @@ int EffectMng::GetHandle(std::string name)
 
 EffectMng::EffectMng()
 {
+	size_ = { 0, 0 };
+	effectID_ = 0;
 }
 
 EffectMng::~EffectMng()

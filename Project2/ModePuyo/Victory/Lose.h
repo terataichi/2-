@@ -1,6 +1,8 @@
 #pragma once
 #include "../../Stage.h"
 #include <cmath>
+#include "../../Scene/SceneMng.h"
+#include "../../common/ImageMng.h"
 
 struct Lose
 {
@@ -16,6 +18,9 @@ struct Lose
 		}
 		stage.gameOverCnt_--;
 		speed ++;
+
+		lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("lose"), {stage.size_.x / 3 + stage.offSet_.x,stage.size_.y / 3}, 0,0 });
+
 		return false;
 	}
 };
