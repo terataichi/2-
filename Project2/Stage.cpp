@@ -183,10 +183,12 @@ void Stage::victory(Victory vic)
 
 void Stage::DrawUpdate(void)
 {
+	// ”wŒi•`‰æ
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
 	DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
 
+	// ƒvƒˆ•`‰æ
 	SetDrawScreen(puyoID_);
 	ClsDrawScreen();
 	for (auto&& puyo : puyoVec_)
@@ -215,15 +217,16 @@ void Stage::DrawUpdate(void)
 		ojama->PuyonUpdate();
 		ojama->Draw();
 	}
+	nextPuyo_->Draw();
+	lpEffectMng.Draw();
+
 	DrawStage();
 }
 
 void Stage::DrawStage(void)
 {
-	nextPuyo_->Draw();
-	lpEffectMng.Draw();
-	lpSceneMng.AddDrawQue({ stageID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 100 });
-	lpSceneMng.AddDrawQue({ puyoID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 200 });
+	lpSceneMng.AddDrawQue({ stageID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 10 });
+	lpSceneMng.AddDrawQue({ puyoID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 1 });
 }
 
 int Stage::Update(int ojamaCnt)

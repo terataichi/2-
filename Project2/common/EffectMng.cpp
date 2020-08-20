@@ -1,5 +1,6 @@
 #include "EffectMng.h"
 #include <EffekseerForDXLib.h>
+#include "../Scene/SceneMng.h"
 
 std::unique_ptr<EffectMng, EffectMng::EffectMngDeleter>EffectMng::_sInstance(new EffectMng());
 
@@ -14,7 +15,12 @@ void EffectMng::Update(void)
 
 void EffectMng::Draw(void)
 {
+	SetDrawScreen(effectID_);
+	ClsDrawScreen();
+
 	DrawEffekseer2D();
+
+	lpSceneMng.AddDrawQue({ effectID_,size_ / 2,0.0,0 });
 }
 
 bool EffectMng::StopAllEffect(void)
@@ -41,6 +47,8 @@ bool EffectMng::Init(Vector2&& size)
 		return false;
 	}
 
+	size_ = size;
+
 	SetChangeScreenModeGraphicsSystemResetFlag(FALSE);
 
 	Effekseer_SetGraphicsDeviceLostCallbackFunctions();
@@ -50,6 +58,8 @@ bool EffectMng::Init(Vector2&& size)
 	SetUseZBuffer3D(TRUE);
 
 	SetWriteZBuffer3D(TRUE);
+
+	effectID_ = MakeScreen(size.x, size.y, true);
 
 	return true;
 }

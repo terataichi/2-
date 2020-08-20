@@ -12,7 +12,11 @@ SceneMng* SceneMng::sInstance_;
 
 void SceneMng::Run(void)
 {
-	lpEffectMng.Init(Vector2(screenSize_.x, screenSize_.y));
+	if (!lpEffectMng.Init(Vector2(screenSize_.x, screenSize_.y)))
+	{
+		DxLib_End();
+		return;
+	}
 
 	activeScene_ = std::make_unique<TitleScene>();
 
@@ -40,7 +44,7 @@ void SceneMng::Draw(void)
 	// リストのソート
 	std::sort(drawList_.begin(), drawList_.end(), [](drawQueT que1, drawQueT que2)
 		{
-			return (std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que1))) <
+			return (std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que1))) >
 				(std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que2)));
 		});
 

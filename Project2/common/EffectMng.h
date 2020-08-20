@@ -37,6 +37,9 @@ private:
 
 	static std::unique_ptr<EffectMng, EffectMngDeleter>_sInstance;
 
+	int effectID_;														// エフェクト用のスクリーン作成
+	Vector2 size_;														// エフェクトのスクリーンサイズ
+
 	std::map<std::string, int> effectMap_;
 	std::list<int> playList_;
 };

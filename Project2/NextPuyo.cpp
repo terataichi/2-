@@ -1,6 +1,7 @@
 #include "NextPuyo.h"
 #include <random>
 #include <DxLib.h>
+#include "Scene/SceneMng.h"
 
 int NextPuyo::count_ = 0;
 
@@ -27,6 +28,11 @@ pairPuyo NextPuyo::PickUp()
     return nextdata;
 }
 
+int NextPuyo::screenID()
+{
+    return screenID_;
+}
+
 void NextPuyo::Draw()
 {
     auto count = drawCnt_;
@@ -49,8 +55,9 @@ void NextPuyo::Draw()
     }
 
     SetDrawScreen(id);
-    DrawGraph(pos_.x, pos_.y, screenID_, true);
+    //DrawGraph(pos_.x, pos_.y, screenID_, true);
 
+    lpSceneMng.AddDrawQue({ screenID_,{pos_.x + 48, pos_.y + 48},0.0, 1 });
 }
 
 bool NextPuyo::Add(int no)

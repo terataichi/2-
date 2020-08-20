@@ -15,6 +15,7 @@ public:
 	~NextPuyo();
 
 	pairPuyo PickUp();				// ネクストぷよの情報を取り出す
+	int screenID();
 	void Draw();					// 描画
 private:							// プライベート
 	bool Add(int no);				// 引数でもらった数だけインスタンスする
