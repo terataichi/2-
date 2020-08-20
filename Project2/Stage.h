@@ -76,6 +76,7 @@ private:
 	Vector2 size_;
 	int blockSize_;
 	int stageID_;														// ステージの描画用スクリーンID
+	int puyoID_;														// ぷよの描画ID
 	Vector2 gameOverPos_;												// ゲームオーバーの時に動かす用
 	double angle_;														// ステージの角度
 

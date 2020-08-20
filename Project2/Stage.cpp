@@ -187,16 +187,21 @@ void Stage::DrawUpdate(void)
 	ClsDrawScreen();
 	DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
 
-	int cnt = 0;
+	SetDrawScreen(puyoID_);
+	ClsDrawScreen();
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->PuyonUpdate();
-		// 白枠の描画
-		if (cnt < 2 && puyo->id() != PuyoID::Ojama)
+	}
+
+	// 下に行けるときだけ操作ぷよに枠を付ける
+	if (puyoVec_[playUnit_->target()]->id() != PuyoID::Ojama)
+	{
+		if (!puyoVec_[playUnit_->target()]->GetDirFlg().bit.down)
 		{
-			DrawOval(puyo->drawPos().first.x, puyo->drawPos().first.y, puyo->drawPos().second.x + 4, puyo->drawPos().second.y + 4, 0xffffff, true);
+			DrawOval(puyoVec_[playUnit_->target()]->drawPos().first.x, puyoVec_[playUnit_->target()]->drawPos().first.y,
+				puyoVec_[playUnit_->target()]->drawPos().second.x + 4, puyoVec_[playUnit_->target()]->drawPos().second.y + 4, 0xffffff, true);
 		}
-		cnt++;
 	}
 
 	for (auto&& puyo : puyoVec_)
@@ -210,13 +215,15 @@ void Stage::DrawUpdate(void)
 		ojama->PuyonUpdate();
 		ojama->Draw();
 	}
+	DrawStage();
 }
 
 void Stage::DrawStage(void)
 {
-	DrawRotaGraph(offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y, 1, angle_, GetStageID(), true);
 	nextPuyo_->Draw();
 	lpEffectMng.Draw();
+	lpSceneMng.AddDrawQue({ stageID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 100 });
+	lpSceneMng.AddDrawQue({ puyoID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 200 });
 }
 
 int Stage::Update(int ojamaCnt)
@@ -227,6 +234,17 @@ int Stage::Update(int ojamaCnt)
 		InstanceOjama(count);
 		count++;
 	}
+	if (count)
+	{
+		// 新しくインスタンスされてたら全体をリセットする
+		int reset = 0;
+		for (auto ojama : ojamaList_)
+		{
+			ojama->Init(reset);
+			reset++;
+		}
+	}
+
 	ojamaCnt_ = 0;
 
 	// 操作対象の切り替え(PGUP : 1P, PGDN : 2P)
@@ -260,6 +278,7 @@ int Stage::Update(int ojamaCnt)
 	modeMap_[stgMode_](*this);
 	DrawUpdate();
 
+
 	return ojamaCnt_;
 }
 
@@ -280,7 +299,8 @@ void Stage::Init()
 	victoryMap_.try_emplace(Victory::Win,Win());
 
 
-	stageID_ = MakeScreen(size_.x + 200, size_.y);
+	stageID_ = MakeScreen(size_.x + 200, size_.y,true);
+	puyoID_ = MakeScreen(size_.x + 200, size_.y, true);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る

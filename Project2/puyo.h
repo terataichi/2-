@@ -48,12 +48,12 @@ public:
 	puyo(Vector2&& pos,PuyoID id) ;
 	~puyo();
 	virtual bool UpDate(int no);
+	virtual void Init(int no);
 	void Move(INPUT_ID id);										// 移動関数
 	void SoftDrop();											// ソフトドロップ
 	bool CheckPuyon(void);										// まだぷよんしてるか確認する
 	bool CheckMunyon(void);										// むにょんカウントチェックー
 	void Draw(void);											// 描画
-	
 	// ------ セット関数
 	bool SetDirFlg(DirUnion flg);								// 移動フラグセット用
 	bool SetOldDirFlg(void);									// 移動フラグの前の情報を格納

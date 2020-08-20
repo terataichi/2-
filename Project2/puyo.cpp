@@ -270,6 +270,10 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	puyonOffset_ = 0;
 }
 
+void puyo::Init(int no)
+{
+}
+
 void puyo::PuyonUpdate()
 {
 	auto puyonPos = abs(((puyonCnt_ + 6)) % (12) - (6));

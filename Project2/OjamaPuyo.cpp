@@ -3,19 +3,25 @@
 
 OjamaPuyo::OjamaPuyo(Vector2&& pos, int no)
 {
-	Init(pos, PuyoID::Ojama);
-	id_ = no;
-
-	intervalCnt_ = 0;
-	interval_ = (id_ / 6) * 4;
+	puyo::Init(pos, PuyoID::Ojama);
+	initPos_ = pos;
+	Init(no);
 	softCntMax_ = 0;
-	seiretuCnt_ = 0;
-	seiretu_ = false;
-	fall_ = false;
 }
 
 OjamaPuyo::~OjamaPuyo()
 {
+}
+
+void OjamaPuyo::Init(int no)
+{
+	id_ = no;
+	intervalCnt_ = 0;
+	interval_ = (id_ / 6) * 4;
+	seiretuCnt_ = 0;
+	seiretu_ = false;
+	fall_ = false;
+	pos_ = initPos_;
 }
 
 void OjamaPuyo::seiretuCnt(int cnt)

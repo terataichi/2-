@@ -7,6 +7,17 @@
 
 #define lpSceneMng SceneMng::GetInstance()
 
+enum class DrawQue
+{
+	Image,
+	Pos,
+	Angle,
+	ZOrder,
+};
+
+//						ImageID, 座標,	角度,	奥行
+using drawQueT = std::tuple<int, Vector2, float, int>;
+
 class SceneMng
 {
 public:
@@ -32,6 +43,7 @@ public:
 	}
 
 	void Run(void);
+	bool AddDrawQue(drawQueT que);
 
 	const int pyoSize_;										// ぷよの大きさ
 	const int pyoRadius_;									// ぷよの半径
@@ -47,6 +59,8 @@ private:
 	uniqueBase activeScene_;								// シーン管理
 
 	static SceneMng* sInstance_;
+
+	std::vector<drawQueT>drawList_;		// 描画リスト
 
 	SceneMng();
 	~SceneMng();

@@ -7,6 +7,7 @@ class OjamaPuyo :
 public:
     OjamaPuyo(Vector2&& pos, int no);
     ~OjamaPuyo();
+    void Init(int no) override;
     void seiretuCnt(int cnt);
     bool UpDate(int no) override;
     bool seiretu(void) override;
@@ -21,5 +22,6 @@ private:
     int id_;                                // ƒJƒEƒ“ƒgŠi”[
     int interval_;                          // ‰½•b‘Ò‚Â‚©
     int intervalCnt_;                       // ‰½•b‘Ò‚Â‚©
+    Vector2 initPos_;                       // Ä®—ñ‚µ‚È‚¨‚·—p
 };
 

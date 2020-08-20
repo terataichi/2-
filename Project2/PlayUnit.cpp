@@ -18,12 +18,12 @@ void PlayUnit::UpDate(void)
 	}
 
 	// どちらかが下についたら動けなくする
-	if (stage_.puyoVec_[target]->GetDirFlg().bit.down || stage_.puyoVec_[target ^ 1]->GetDirFlg().bit.down)
+	if (stage_.puyoVec_[target_]->GetDirFlg().bit.down || stage_.puyoVec_[target_ ^ 1]->GetDirFlg().bit.down)
 	{
-		stage_.puyoVec_[target]->SetSpeed(8, 0);
-		stage_.puyoVec_[target]->UpSpeed();
-		stage_.puyoVec_[target ^ 1]->SetSpeed(8, 0);
-		stage_.puyoVec_[target ^ 1]->UpSpeed();
+		stage_.puyoVec_[target_]->SetSpeed(8, 0);
+		stage_.puyoVec_[target_]->UpSpeed();
+		stage_.puyoVec_[target_ ^ 1]->SetSpeed(8, 0);
+		stage_.puyoVec_[target_ ^ 1]->UpSpeed();
 		stage_.stgMode_ = StgMode::FALL;
 		return;
 	}
@@ -33,8 +33,8 @@ void PlayUnit::UpDate(void)
 	{
 		if (key.second->GetTrgData().at(INPUT_ID::BUTTON_DOWN)[static_cast<int>(Trg::Now)])
 		{
-			stage_.puyoVec_[target]->SoftDrop();
-			stage_.puyoVec_[target ^ 1]->SoftDrop();
+			stage_.puyoVec_[target_]->SoftDrop();
+			stage_.puyoVec_[target_ ^ 1]->SoftDrop();
 		}
 	}
 
@@ -48,8 +48,8 @@ void PlayUnit::UpDate(void)
 				if (keyFunc_[data.first](data.first))
 				{
 					//　入力された方向に進もうとする
-					stage_.puyoVec_[target]->Move(data.first);
-					stage_.puyoVec_[target ^ 1]->Move(data.first);
+					stage_.puyoVec_[target_]->Move(data.first);
+					stage_.puyoVec_[target_ ^ 1]->Move(data.first);
 				}
 			}
 		}
@@ -58,12 +58,17 @@ void PlayUnit::UpDate(void)
 
 void PlayUnit::SetTarget(void)
 {
-	target = 0;
+	target_ = 0;
+}
+
+const bool PlayUnit::target(void)
+{
+	return target_;
 }
 
 void PlayUnit::Init(void)
 {
-	target = 0;
+	target_ = 0;
 	InitFunc();
 }
 
@@ -73,14 +78,14 @@ void PlayUnit::InitFunc(void)
 	{
 		if (id == INPUT_ID::BUTTON_RIGHT)
 		{
-			if (stage_.puyoVec_[target]->GetDirFlg().bit.right || stage_.puyoVec_[target ^ 1]->GetDirFlg().bit.right)
+			if (stage_.puyoVec_[target_]->GetDirFlg().bit.right || stage_.puyoVec_[target_ ^ 1]->GetDirFlg().bit.right)
 			{
 				return false;
 			}
 		}
 		if (id == INPUT_ID::BUTTON_LEFT)
 		{
-			if (stage_.puyoVec_[target]->GetDirFlg().bit.left || stage_.puyoVec_[target ^ 1]->GetDirFlg().bit.left)
+			if (stage_.puyoVec_[target_]->GetDirFlg().bit.left || stage_.puyoVec_[target_ ^ 1]->GetDirFlg().bit.left)
 			{
 				return false;
 			}
@@ -99,13 +104,13 @@ void PlayUnit::InitFunc(void)
 			// 中途半端な時に移動するとめり込むので余りが出たらもう一個下を見る
 			int set = (pos.y + stage_.blockSize_ / 2) % stage_.blockSize_ != 0;
 			
-			set = stage_.puyoVec_[target]->pos().y < pos.y;
+			set = stage_.puyoVec_[target_]->pos().y < pos.y;
 			 
 			if (flg)
 			{
 				if (!stage_.data_[grid.y + set][grid.x])
 				{
-					stage_.puyoVec_[target ^ 1]->pos(pos);
+					stage_.puyoVec_[target_ ^ 1]->pos(pos);
 
 					return true;
 				}
@@ -114,9 +119,9 @@ void PlayUnit::InitFunc(void)
 					if (!stage_.data_[grid.y + set + offset.y][grid.x + offset.x])
 					{
 						pos -= Vector2{ 64 * off.x ,64 * off.y};
-						stage_.puyoVec_[target ^ 1]->pos(pos);
+						stage_.puyoVec_[target_ ^ 1]->pos(pos);
 						pos -= Vector2{ 64 * off.x ,64 * off.y };
-						stage_.puyoVec_[target]->pos(pos);
+						stage_.puyoVec_[target_]->pos(pos);
 					}
 					return true;
 				}
@@ -131,8 +136,8 @@ void PlayUnit::InitFunc(void)
 			rotate = (-1);
 		}
 
-		auto pos1 = stage_.puyoVec_[target]->pos();
-		auto pos2 = stage_.puyoVec_[target ^ 1]->pos();
+		auto pos1 = stage_.puyoVec_[target_]->pos();
+		auto pos2 = stage_.puyoVec_[target_ ^ 1]->pos();
 		auto size = stage_.blockSize_;
 
 		int temp = 2;
@@ -144,8 +149,8 @@ void PlayUnit::InitFunc(void)
 		if (stage_.puyoVec_[0]->pos().y > stage_.puyoVec_[1]->pos().y)
 		{
 			std::swap(stage_.puyoVec_[0], stage_.puyoVec_[1]);
-			target = target ^ 1;
-			TRACE("%d\n", target);
+			target_ = target_ ^ 1;
+			TRACE("%d\n", target_);
 		}
 		return true;
 	};

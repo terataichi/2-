@@ -149,9 +149,6 @@
     <ClInclude Include="ModePuyo\DeleteMode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ModePuyo\OjamaMode.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="NextPuyo.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

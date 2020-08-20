@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <DxLib.h>
 #include <EffekseerForDXLib.h>
 #include "SceneMng.h"
@@ -26,15 +27,39 @@ void SceneMng::Run(void)
 	}
 }
 
+bool SceneMng::AddDrawQue(drawQueT que)
+{
+	drawList_.emplace_back(que);
+	return true;
+}
+
 void SceneMng::Draw(void)
 {
 	_dbgAddDraw();
 
+	// リストのソート
+	std::sort(drawList_.begin(), drawList_.end(), [](drawQueT que1, drawQueT que2)
+		{
+			return (std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que1))) <
+				(std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que2)));
+		});
+
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClearDrawScreen();
 
-	(*activeScene_).Draw();
+	for (auto que : drawList_)
+	{
+		int id;
+		float angle;
+		Vector2 pos;
 
+		std::tie(id, pos, angle, std::ignore) = que;
+
+		DrawRotaGraph(pos.x, pos.y, 1, angle, id, true);
+	}
+
+	//(*activeScene_).Draw();
+	drawList_.clear();
 	ScreenFlip();
 }
 
@@ -48,7 +73,6 @@ bool SceneMng::SysInit(void)
 	{
 		return false;
 	}
-
 
 	_dbgSetup(255,255,255);
 	_dbgSetAlpha(255);
