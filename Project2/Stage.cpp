@@ -329,7 +329,7 @@ void Stage::Init()
 
 	angle_ = 0;
 	rensa_ = 0;
-	gameOverCnt_ = 0;
+	gameOverCnt_ = 600;
 	blockSize_ = 64;
 	gameOverPos_ = { 0,0 };
 	alive_ = true;

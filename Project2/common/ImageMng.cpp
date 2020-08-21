@@ -3,10 +3,27 @@
 
 std::unique_ptr<ImageMng, ImageMng::ImageMngDeleter> ImageMng::_sInstance(new ImageMng);
 
-int ImageMng::GetHandle(std::string name)
+VecInt& ImageMng::GetHandle(std::string name)
 {
 	// + name + でくっつけることができる便利!
-	imgMap_.try_emplace(name, LoadGraph(("image/" + name + ".png").c_str()));
+	if (imgMap_.find(name) == imgMap_.end())
+	{
+		imgMap_[name].resize(1);
+		imgMap_[name][0] = LoadGraph(("image/" + name + ".png").c_str());
+	}
+	return imgMap_[name];
+}
+
+VecInt& ImageMng::GetHandle(std::string name, Vector2 divSize, Vector2 size)
+{
+
+	// ファインドをするとBeginからendまで探してくれる
+	if (imgMap_.find(name) == imgMap_.end())
+	{
+		imgMap_[name].resize(divSize.x * divSize.y);
+		LoadDivGraph(("image/" + name + ".png").c_str(), divSize.x * divSize.y, divSize.x, divSize.y, size.x, size.y, &imgMap_[name][0]);
+	}
+
 	return imgMap_[name];
 }
 
