@@ -25,6 +25,7 @@
 #include "common/EffectMng.h"
 
 int Stage::playCnt_ = 0;
+std::map<int, int> Stage::stgBG_;
 
 Stage::Stage(Vector2&& offSet,Vector2&& size) :offSet_(std::move(offSet)), size_(std::move(size))
 {
@@ -186,7 +187,7 @@ void Stage::DrawUpdate(void)
 	// 背景描画
 	SetDrawScreen(stageID_);
 	ClsDrawScreen();
-	DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
+	//DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
 
 	// プヨ描画
 	SetDrawScreen(puyoID_);
@@ -194,7 +195,19 @@ void Stage::DrawUpdate(void)
 	for (auto&& puyo : puyoVec_)
 	{
 		puyo->PuyonUpdate();
+		puyo->Draw();
 	}
+
+	// お邪魔リストの描画
+	for (auto&& ojama : ojamaList_)
+	{
+		ojama->PuyonUpdate();
+		ojama->Draw();
+	}
+
+	// ガイドの描画
+	SetDrawScreen(guideID_);
+	ClsDrawScreen();
 
 	if (puyoVec_.size())
 	{
@@ -208,18 +221,8 @@ void Stage::DrawUpdate(void)
 			}
 		}
 	}
+	
 
-	for (auto&& puyo : puyoVec_)
-	{
-		puyo->Draw();
-	}
-
-	// お邪魔リストの描画
-	for (auto&& ojama : ojamaList_)
-	{
-		ojama->PuyonUpdate();
-		ojama->Draw();
-	}
 	nextPuyo_->Draw();
 	lpEffectMng.Draw();
 
@@ -228,8 +231,10 @@ void Stage::DrawUpdate(void)
 
 void Stage::DrawStage(void)
 {
-	lpSceneMng.AddDrawQue({ stageID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 10 });
-	lpSceneMng.AddDrawQue({ puyoID_,{ offSet().x + size_.x - size_.x / 4 + gameOverPos_.x, offSet().y + size_.y / 2 + gameOverPos_.y }, (float)angle_, 1 });
+	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,0}, (float)angle_, 1 });
+	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,0}, (float)angle_, 3});
+	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ ,(float)angle_,  5});
+	lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
 
 int Stage::Update(int ojamaCnt)
@@ -307,6 +312,7 @@ void Stage::Init()
 
 	stageID_ = MakeScreen(size_.x + 200, size_.y,true);
 	puyoID_ = MakeScreen(size_.x + 200, size_.y, true);
+	guideID_ = MakeScreen(size_.x + 200, size_.y, true);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る
@@ -364,6 +370,10 @@ void Stage::Init()
 	{
 		pos = offSet_ + Vector2{ -blockSize_ * 2,blockSize_ };
 	}
+
+	stgBG_.try_emplace(0, lpImageMng.GetHandle("Stage01")[0]);
+	stgBG_.try_emplace(1, lpImageMng.GetHandle("Stage02")[0]);
+
 	nextPuyo_ = std::make_unique<NextPuyo>(pos, 2);
 	nextScene_ = false;
 	InstancePuyo();

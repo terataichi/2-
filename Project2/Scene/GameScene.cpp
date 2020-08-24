@@ -1,5 +1,6 @@
 #include "GameScene.h"
 #include "../Scene/SceneMng.h"
+#include "../common/ImageMng.h"
 #include "../Scene/GameOverScene.h"
 
 GameScene::GameScene()
@@ -54,6 +55,7 @@ uniqueBase GameScene::Update(uniqueBase own)
 		}
 	}
 
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0] ,lpSceneMng.screenSize_ / 2,0.0f,1000 });
 	return std::move(own);
 }
 

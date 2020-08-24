@@ -7,7 +7,7 @@ int NextPuyo::count_ = 0;
 
 NextPuyo::NextPuyo(Vector2& pos,int drawCnt)
 {
-    screenID_ = MakeScreen(97, 129);
+    screenID_ = MakeScreen(97, 129,true);
     nextPuyoList_.clear();
     pos_ = pos;
     drawCnt_ = drawCnt;

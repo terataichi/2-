@@ -4,8 +4,8 @@ class PadState :
 	public InputState
 {
 public:
-	virtual CntType GetCntType(void) override;		// ©•ª‚ª‚¢‚Ü‰½‚ğg‚Á‚Ä‚¢‚é‚Ì‚©‚ğ•Ô‚·
-	virtual bool SetUp(int no) override;			// ‰Šú‰»
+	virtual CntType GetCntType(void) override;			// ©•ª‚ª‚¢‚Ü‰½‚ğg‚Á‚Ä‚¢‚é‚Ì‚©‚ğ•Ô‚·
+	virtual bool SetUp(int no) override;				// ‰Šú‰»
 	virtual void Update(void) override;
 
 private:

@@ -9,15 +9,21 @@ struct Lose
 	bool operator()(Stage& stage)
 	{
 		//TRACE("プレイヤー %d Lose\n", stage.id_ + 1);
-		stage.gameOverPos_.y += speed;
 		stage.angle_ += atanf(0.008f);
+
+		// 一定の場所までステージを落とす
+		//if (stage.gameOverPos_.y > lpSce)
+		{
+			stage.gameOverPos_.y += speed;
+			speed++;
+		}
+
 
 		if (stage.gameOverCnt_ < 0)
 		{
 			return true;
 		}
 		stage.gameOverCnt_--;
-		speed ++;
 
 		int standard = 0;
 		float angle = 0;

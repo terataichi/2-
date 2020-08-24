@@ -77,6 +77,7 @@ private:
 	int blockSize_;
 	int stageID_;														// ステージの描画用スクリーンID
 	int puyoID_;														// ぷよの描画ID
+	int guideID_;														// ガイド用スクリーン
 	Vector2 gameOverPos_;												// ゲームオーバーの時に動かす用
 	double angle_;														// ステージの角度
 
@@ -108,6 +109,8 @@ private:
 
 	std::map<StgMode, std::function<void(Stage&)>> modeMap_;			// モード別関数オブジェクト
 	std::map<Victory, std::function<bool(Stage&)>> victoryMap_;			// 勝ち負けで処理を変える
+
+	static std::map<int, int> stgBG_;									// ステージによって背景を変えれるように
 
 	bool alive_;														// ステージが生きてるか
 
