@@ -185,8 +185,8 @@ void Stage::victory(Victory vic)
 void Stage::DrawUpdate(void)
 {
 	// 背景描画
-	SetDrawScreen(stageID_);
-	ClsDrawScreen();
+	//SetDrawScreen(stageID_);
+	//ClsDrawScreen();
 	//DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
 
 	// プヨ描画
@@ -198,6 +198,9 @@ void Stage::DrawUpdate(void)
 		puyo->Draw();
 	}
 
+	// プヨ描画
+	SetDrawScreen(ojamaID_);
+	ClsDrawScreen();
 	// お邪魔リストの描画
 	for (auto&& ojama : ojamaList_)
 	{
@@ -231,7 +234,9 @@ void Stage::DrawStage(void)
 	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4, -blockSize_ / 2}, (float)angle_, 1 });
 	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,-blockSize_ / 2}, (float)angle_, 3});
 	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ + Vector2{0, -(blockSize_ - blockSize_ / 4)},(float)angle_,  5});
-	lpSceneMng.AddDrawQue({ hideID_ ,{lpSceneMng.screenSize_.x / 2, blockSize_ / 2} ,0,0 });
+	//lpSceneMng.AddDrawQue({ hideID_ ,{lpSceneMng.screenSize_.x / 2, blockSize_ / 2} ,0,0 });
+	lpSceneMng.AddDrawQue({ ojamaID_ ,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4, -blockSize_ / 2} ,0,-10 });
+
 	//lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
 
@@ -320,6 +325,7 @@ void Stage::Init()
 	puyoID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
 	guideID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
 	hideID_ = MakeScreen(lpSceneMng.screenSize_.x, 129, true);
+	ojamaID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る

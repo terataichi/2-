@@ -67,7 +67,6 @@ public:
 	const bool nextScene(void)const;
 	const Victory& victory(void)const;
 private:
-
 	void Init(void);
 	bool CheckMove(SharePuyo& vec);										// 上下左右動いていいか
 	void InstancePuyo();												// 新しいプヨ
@@ -78,6 +77,7 @@ private:
 	int stageID_;														// ステージの描画用スクリーンID
 	int puyoID_;														// ぷよの描画ID
 	int guideID_;														// ガイド用スクリーン
+	int ojamaID_;														// お邪魔用スクリーン作成
 	int hideID_;														// いちます上のところを隠すためのマスクを作成
 	int ojamaPuyoID_;													// お邪魔プヨ描画用
 	Vector2 gameOverPos_;												// ゲームオーバーの時に動かす用
