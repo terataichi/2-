@@ -56,6 +56,7 @@ uniqueBase GameScene::Update(uniqueBase own)
 	}
 
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0] ,lpSceneMng.screenSize_ / 2,0.0f,1000 });
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextBG")[0] ,{lpSceneMng.screenSize_.x / 2, lpSceneMng.screenSize_.x / 8},0.0f,-1 });
 	return std::move(own);
 }
 

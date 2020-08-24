@@ -57,7 +57,7 @@ void NextPuyo::Draw()
     SetDrawScreen(id);
     //DrawGraph(pos_.x, pos_.y, screenID_, true);
 
-    lpSceneMng.AddDrawQue({ screenID_,{pos_.x + 48, pos_.y + 48},0.0, 1 });
+    lpSceneMng.AddDrawQue({ screenID_,{pos_.x + 48, pos_.y + 116},0.0, -10 });
 }
 
 bool NextPuyo::Add(int no)

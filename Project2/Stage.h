@@ -10,7 +10,7 @@
 #include "OjamaPuyo.h"
 
 #define STAGE_X 8
-#define STAGE_Y 15
+#define STAGE_Y 16
 
 class PlayUnit;
 class NextPuyo;
@@ -78,6 +78,8 @@ private:
 	int stageID_;														// ステージの描画用スクリーンID
 	int puyoID_;														// ぷよの描画ID
 	int guideID_;														// ガイド用スクリーン
+	int hideID_;														// いちます上のところを隠すためのマスクを作成
+	int ojamaPuyoID_;													// お邪魔プヨ描画用
 	Vector2 gameOverPos_;												// ゲームオーバーの時に動かす用
 	double angle_;														// ステージの角度
 
@@ -90,7 +92,7 @@ private:
 	bool ojamaFlg = false;
 
 	std::unique_ptr<PlayUnit> playUnit_;								// ﾌﾟﾚｲﾔｰに関する処理をフレンドでもらって管理
-	std::unique_ptr<NextPuyo> nextPuyo_;
+	std::unique_ptr<NextPuyo> nextPuyo_;								// ネクストプヨ管理用
 
 	std::vector<SharePuyo> dataBase_;									// ステージ全体のマス管理用
 	std::vector<SharePuyo*> data_;										// dataBaseのポインターを入れて
@@ -115,7 +117,7 @@ private:
 	bool alive_;														// ステージが生きてるか
 
 	static int playCnt_;												// 複数人いた場合人数でキーを変えれるように
-	int id_;
+	int id_;															// ステージの番号
 	StgMode stgMode_;
 	Victory victory_;													// 勝ちなのか負けなのか引き分けなのか
 

@@ -145,7 +145,7 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (erasedata_[gri.y][gri.x]->id() == puyo->id())
 			{
-				lpEffectMng.PlayEffect("baku", offSet_ + puyo->pos());
+				lpEffectMng.PlayEffect("baku", offSet_ + puyo->pos() - Vector2{ 0,puyo->size() });
 				puyo->alive(false);
 				data_[gri.y][gri.x].reset();
 			}
@@ -221,20 +221,18 @@ void Stage::DrawUpdate(void)
 			}
 		}
 	}
-	
-
 	nextPuyo_->Draw();
 	lpEffectMng.Draw();
-
 	DrawStage();
 }
 
 void Stage::DrawStage(void)
 {
-	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,0}, (float)angle_, 1 });
-	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,0}, (float)angle_, 3});
-	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ ,(float)angle_,  5});
-	lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
+	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4, -blockSize_ / 2}, (float)angle_, 1 });
+	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,-blockSize_ / 2}, (float)angle_, 3});
+	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ + Vector2{0, -(blockSize_ - blockSize_ / 4)},(float)angle_,  5});
+	lpSceneMng.AddDrawQue({ hideID_ ,{lpSceneMng.screenSize_.x / 2, blockSize_ / 2} ,0,0 });
+	//lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
 
 int Stage::Update(int ojamaCnt)
@@ -309,10 +307,19 @@ void Stage::Init()
 	victoryMap_.try_emplace(Victory::Lose,Lose());
 	victoryMap_.try_emplace(Victory::Win,Win());
 
+	victory_ = Victory::Non;
+	blockSize_ = 64;
+	angle_ = 0;
+	rensa_ = 0;
+	gameOverCnt_ = 600;
+	gameOverPos_ = { 0,0 };
+	alive_ = true;
 
 	stageID_ = MakeScreen(size_.x + 200, size_.y,true);
-	puyoID_ = MakeScreen(size_.x + 200, size_.y, true);
-	guideID_ = MakeScreen(size_.x + 200, size_.y, true);
+	ojamaPuyoID_ = MakeScreen(size_.x + 200, size_.y, true);
+	puyoID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
+	guideID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
+	hideID_ = MakeScreen(lpSceneMng.screenSize_.x, 129, true);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
 	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る
@@ -330,15 +337,6 @@ void Stage::Init()
 			}
 		}
 	}
-
-	victory_ = Victory::Non;
-
-	angle_ = 0;
-	rensa_ = 0;
-	gameOverCnt_ = 600;
-	blockSize_ = 64;
-	gameOverPos_ = { 0,0 };
-	alive_ = true;
 
 	// 操作系
 	for (auto id : INPUT_ID())
@@ -377,6 +375,11 @@ void Stage::Init()
 	nextPuyo_ = std::make_unique<NextPuyo>(pos, 2);
 	nextScene_ = false;
 	InstancePuyo();
+
+	// プヨ隠す用のスクリーンをあらかじめ作成しておく
+	SetDrawScreen(hideID_);
+	ClsDrawScreen();
+	DrawGraph(0, 0, lpImageMng.GetHandle("BG")[0], true);
 
 	stgMode_ = StgMode::Drop;
 }
