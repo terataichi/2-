@@ -19,11 +19,11 @@ struct Lose
 		}
 
 		// カウントダウン中
-		if (stage.gameOverCnt_-- < 0)
-		{
-			// 終了
-			return true;
-		}
+		//if (stage.gameOverCnt_-- < 0)
+		//{
+		//	// 終了
+		//	return true;
+		//}
 
 		if (stage.gameOverCnt_ % 2 == 0)
 		{
@@ -35,16 +35,16 @@ struct Lose
 		float angleStnd = 36.0f;
 
 		// 文字ごとに動きを付ける
-		Vector2 div{ 6,1 };
+		Vector2 div{4,1 };
 		for (int j = 0; j < div.x; j++)
 		{
-			int id = lpImageMng.GetHandle("lose", div, { 64,64 })[j];
+			int id = lpImageMng.GetHandle("lose2", div, { 48,74 })[j];
 
 			// サインカーブ				基準位置　-+　幅　*　カーブ
 			standard = static_cast<int>((maxY - stage.gameOverPos_.y) + (stage.size_.y / 3) - 50.0f * cosf((count + (j + 1) * 30) * 0.01f));
 			angle = static_cast<float>((-DX_PI_F / angleStnd) - (DX_PI_F / (angleStnd / 2.0f)) * cosf((count + (j + 1) * 30.0f) * 0.01f));
 
-			lpSceneMng.AddDrawQue({ id, {stage.offSet_.x + 32 + 64 * j, standard}, angle,0 });
+			lpSceneMng.AddDrawQue({ id, {stage.offSet_.x + (stage.blockSize_ + 32) + (stage.blockSize_ * j), standard}, angle,0 });
 			count++;
 		}
 

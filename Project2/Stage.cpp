@@ -234,9 +234,9 @@ void Stage::DrawStage(void)
 	Vector2 tmpPos{ size().x / 4 + 4, -blockSize_ / 2 };
 	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + tmpPos, (float)angle_, 1 });
 	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + tmpPos, (float)angle_, 3});
-	lpSceneMng.AddDrawQue({ hideID_ ,{lpSceneMng.screenSize_.x / 2, blockSize_ / 2} ,0,0 });
+	lpSceneMng.AddDrawQue({ hideID_ ,offSet() -16 ,0,0 });
 
-	tmpPos = { 0, -(blockSize_ - blockSize_ / 4) };
+	tmpPos = { 0, blockSize_/2};
 	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ + tmpPos,(float)angle_,  5});
 
 	tmpPos = { size().x / 4 + 4, blockSize_ / 2 - 1 };
@@ -330,7 +330,7 @@ void Stage::Init()
 	ojamaPuyoID_ = MakeScreen(size_.x + 200, size_.y, true);
 	puyoID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
 	guideID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
-	hideID_ = MakeScreen(lpSceneMng.screenSize_.x, 129, true);
+	hideID_ = MakeScreen(lpSceneMng.screenSize_.x, 64, true);
 	ojamaID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
 
 	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
@@ -381,8 +381,8 @@ void Stage::Init()
 		pos = offSet_ + Vector2{ -blockSize_ * 2,blockSize_ };
 	}
 
-	stgBG_.try_emplace(0, lpImageMng.GetHandle("Stage01")[0]);
-	stgBG_.try_emplace(1, lpImageMng.GetHandle("Stage02")[0]);
+	stgBG_.try_emplace(0, lpImageMng.GetHandle("Stage03")[0]);
+	stgBG_.try_emplace(1, lpImageMng.GetHandle("Stage03")[0]);
 
 	nextPuyo_ = std::make_unique<NextPuyo>(pos, 2);
 	nextScene_ = false;
@@ -392,6 +392,8 @@ void Stage::Init()
 	SetDrawScreen(hideID_);
 	ClsDrawScreen();
 	DrawGraph(0, 0, lpImageMng.GetHandle("BG")[0], true);
+	//DrawGraph(0, 0, lpImageMng.GetHandle("Stage03")[0], true);
+
 
 	stgMode_ = StgMode::Drop;
 }
