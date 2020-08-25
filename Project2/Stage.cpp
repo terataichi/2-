@@ -231,11 +231,16 @@ void Stage::DrawUpdate(void)
 
 void Stage::DrawStage(void)
 {
-	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4, -blockSize_ / 2}, (float)angle_, 1 });
-	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4,-blockSize_ / 2}, (float)angle_, 3});
-	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ + Vector2{0, -(blockSize_ - blockSize_ / 4)},(float)angle_,  5});
-	//lpSceneMng.AddDrawQue({ hideID_ ,{lpSceneMng.screenSize_.x / 2, blockSize_ / 2} ,0,0 });
-	lpSceneMng.AddDrawQue({ ojamaID_ ,offSet() + size() / 2 + gameOverPos_ + Vector2{size().x / 4 + 4, -blockSize_ / 2} ,0,-10 });
+	Vector2 tmpPos{ size().x / 4 + 4, -blockSize_ / 2 };
+	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + tmpPos, (float)angle_, 1 });
+	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + tmpPos, (float)angle_, 3});
+	lpSceneMng.AddDrawQue({ hideID_ ,{lpSceneMng.screenSize_.x / 2, blockSize_ / 2} ,0,0 });
+
+	tmpPos = { 0, -(blockSize_ - blockSize_ / 4) };
+	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ + tmpPos,(float)angle_,  5});
+
+	tmpPos = { size().x / 4 + 4, blockSize_ / 2 - 1 };
+	lpSceneMng.AddDrawQue({ ojamaID_ ,offSet() + size() / 2 + gameOverPos_ + tmpPos ,0,-10 });
 
 	//lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
@@ -248,6 +253,7 @@ int Stage::Update(int ojamaCnt)
 		InstanceOjama(count);
 		count++;
 	}
+
 	if (count)
 	{
 		// 新しくインスタンスされてたら全体をリセットする
@@ -353,7 +359,7 @@ void Stage::Init()
 	input_ =
 	{ 
 		{CntType::Pad, std::make_shared<PadState>()},
-		{CntType::Mouse, std::make_shared<MouseState>()},
+		//{CntType::Mouse, std::make_shared<MouseState>()},
 		{CntType::Key, std::make_shared<KeyState>()}
 	};
 	for (auto key : input_)

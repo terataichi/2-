@@ -9,6 +9,8 @@
 puyo::puyo() :size_(64), rad_(size_ / 2, size_ / 2)
 {
 	//TRACE("基底のデフォルトコンストラクタ\n");
+	Vector2 non{ 0,0 };
+	Init(non, PuyoID::Non);
 }
 
 puyo::puyo(Vector2&& pos,PuyoID id) :size_(64), rad_(size_ / 2, size_ / 2)
@@ -163,11 +165,11 @@ void puyo::Draw(void)
 	}
 	if (mnyonFlg_.bit.up)
 	{
-		DrawBox(pos_.x - rad_.x, pos_.y, pos_.x + rad_.x, pos_.y - rad_.y , puyoCor_[id_], true);
+		DrawBox(pos_.x - rad_.x, pos_.y, pos_.x + rad_.x + 1, pos_.y - rad_.y , puyoCor_[id_], true);
 	}
 	if (mnyonFlg_.bit.down)
 	{
-		DrawBox(pos_.x - rad_.x, pos_.y, pos_.x + rad_.x, pos_.y + rad_.y, puyoCor_[id_], true);
+		DrawBox(pos_.x - rad_.x, pos_.y, pos_.x + rad_.x + 1, pos_.y + rad_.y, puyoCor_[id_], true);
 	}
 }
 
@@ -256,7 +258,7 @@ void puyo::Init(Vector2& pos,PuyoID id)
 	puyoCor_.try_emplace(PuyoID::Green,0x00ff00);
 	puyoCor_.try_emplace(PuyoID::Yellow,0xffff00);
 	puyoCor_.try_emplace(PuyoID::Purple,0xff00ff);
-	puyoCor_.try_emplace(PuyoID::Ojama, 0xf);
+	puyoCor_.try_emplace(PuyoID::Ojama, 0x696969);
 
 	mnyonFlg_ = { 0,0,0,0 };
 	pos_ = pos;

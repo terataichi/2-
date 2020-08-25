@@ -1,5 +1,7 @@
 #pragma once
 #include "../Stage.h"
+#include <random>
+
 
 struct MunyonMode
 {
@@ -17,16 +19,44 @@ struct MunyonMode
 		{
 			if (!stage.ojamaFlg)
 			{
-				if (stage.ojamaList_.size())
+				int size = 0;
+				if (size = static_cast<int>(stage.ojamaList_.size()))
 				{
 					int count = 0;								// Å‘å‰½ŒÂ~‚ç‚¹‚é‚©
+					bool tmpNam[6]{ false };
 					for (auto ojama : stage.ojamaList_)
 					{
 						ojama->SetSpeed(16, 0);
-
 						ojama->SetFall(true);
 
+						if (size < 6)
+						{
+							// ƒ‰ƒ“ƒ_ƒ€‚Ì¶¬
+							std::random_device rnd;
+							std::mt19937 mt(rnd());
+							std::uniform_int_distribution<> posRand(1, 6);
+							int random = posRand(mt);
+							bool tmpFlg = false;
+
+							while (!tmpFlg)
+							{
+								if (!tmpNam[random - 1])
+								{
+									tmpNam[random - 1] = true;
+									tmpFlg = true;
+								}
+								else
+								{
+									random = posRand(mt);
+								}
+							}
+
+							Vector2 pos{ random * ojama->size() - ojama->rad().x,ojama->pos().y };
+							ojama->pos(pos);
+						}
+
 						stage.puyoVec_.emplace(stage.puyoVec_.begin(), ojama);
+
 						count++;
 						if (count >= 30)
 						{
@@ -48,4 +78,6 @@ struct MunyonMode
 			stage.stgMode_ = StgMode::Drop;
 		}
 	}
+private:
+
 };
