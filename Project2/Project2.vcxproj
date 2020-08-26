@@ -152,6 +152,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\Button.cpp" />
+    <ClCompile Include="Scene\MenuScene.cpp" />
     <ClCompile Include="Scene\GameOverScene.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="Scene\BaseScene.cpp" />
@@ -174,6 +176,12 @@
     <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common\Button.h" />
+    <ClInclude Include="common\ButtonMove\MoveLeftRight.h" />
+    <ClInclude Include="common\ButtonMove\MoveNon.h" />
+    <ClInclude Include="common\ButtonMove\MoveScale.h" />
+    <ClInclude Include="common\ButtonMove\MoveUpDown.h" />
+    <ClInclude Include="Scene\MenuScene.h" />
     <ClInclude Include="Scene\GameOverScene.h" />
     <ClInclude Include="ModePuyo\Victory\Draw.h" />
     <ClInclude Include="ModePuyo\Victory\Lose.h" />
