@@ -55,8 +55,6 @@ uniqueBase GameScene::Update(uniqueBase own)
 		}
 	}
 
-	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0] ,lpSceneMng.screenSize_ / 2,0.0f,1000 });
-	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextBG")[0] ,{lpSceneMng.screenSize_.x / 2, lpSceneMng.screenSize_.x / 8},0.0f,-1 });
 	return std::move(own);
 }
 
@@ -66,6 +64,10 @@ void GameScene::Draw()
 	{
 		id->DrawStage();
 	}
+
+	Vector2 tmp = lpSceneMng.screenSize_;
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0] ,tmp.x / 2,tmp.y / 2, 1,0.0f,1000 });
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextBG")[0] ,tmp.x / 2, tmp.x / 8,1,0.0f,-1 });
 }
 
 void GameScene::Init(void)

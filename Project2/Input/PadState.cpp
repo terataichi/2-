@@ -39,3 +39,12 @@ void PadState::Update()
 		_state[id][static_cast<int>(Trg::Now)] = (GetJoypadInputState(_padID) & _keyCon[id]);	// now‚ÌƒZƒbƒg
 	}
 }
+
+PadState::PadState()
+{
+	_padID = 0;
+}
+
+PadState::~PadState()
+{
+}

@@ -39,7 +39,7 @@ struct Win
 
 			angle = (-DX_PI_F / angleStnd) - (DX_PI_F / (angleStnd / 2)) * cosf((count + (j + 1) * 30.0f) * 0.01f);
 
-			lpSceneMng.AddDrawQue({ id, {stage.offSet_.x + stage.blockSize_*2 + stage.blockSize_ * j, standard}, angle, 0 });
+			lpSceneMng.AddDrawQue({ id, stage.offSet_.x + stage.blockSize_ * 2 + stage.blockSize_ * j, standard,1, angle, 0 });
 			count++;
 		}
 		return false;

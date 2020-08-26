@@ -20,7 +20,7 @@ void EffectMng::Draw(void)
 
 	DrawEffekseer2D();
 
-	lpSceneMng.AddDrawQue({ effectID_,size_ / 2,0.0,0 });
+	lpSceneMng.AddDrawQue({ effectID_,size_.x / 2,size_.y / 2,1,0.0f,0 });
 }
 
 bool EffectMng::StopAllEffect(void)
@@ -35,7 +35,7 @@ bool EffectMng::StopAllEffect(void)
 bool EffectMng::PlayEffect(std::string name, const Vector2& pos)
 {
 	playList_.push_front(PlayEffekseer2DEffect(GetHandle(name)));
-	GetEffekseer2DManager()->SetAllColor(effectMap_[name], Effekseer::Color{255,0,0});
+	//GetEffekseer2DManager()->SetAllColor(effectMap_[name], Effekseer::Color{255,0,0});
 	SetPosPlayingEffekseer2DEffect(*(playList_.begin()), static_cast<float>(pos.x), static_cast<float>(pos.y), 0);
 	return true;
 }

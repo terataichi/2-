@@ -1,5 +1,6 @@
 #include <DxLib.h>
 #include "SceneMng.h"
+#include "../common/ImageMng.h"
 #include "TitleScene.h"
 #include "GameScene.h"
 
@@ -27,9 +28,6 @@ uniqueBase TitleScene::Update(uniqueBase own)
 
 void TitleScene::Draw(void)
 {
-	DrawBox(0, 0, lpSceneMng.screenSize_.x, lpSceneMng.screenSize_.y, 0xffffff, true);
-
-	SetFontSize(64);
-	DrawFormatString(lpSceneMng.screenSize_.x / 3 + 64, lpSceneMng.screenSize_.y / 2, 0xf, "ƒ^ƒCƒgƒ‹");
-	DrawFormatString(lpSceneMng.screenSize_.x / 3 - 32, lpSceneMng.screenSize_.y - lpSceneMng.screenSize_.y / 3, 0xf, "Please Hit Space");
+	Vector2 tmp{ lpSceneMng.screenSize_ / 2 };
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0],tmp.x,tmp.y,1 , 0.0f, 0 });
 }

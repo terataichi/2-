@@ -48,3 +48,11 @@ void KeyState::Update()
 		_state[id][static_cast<int>(Trg::Now)] = _buf[_keyCon[id]];								// now‚ÌƒZƒbƒg
 	}
 }
+
+KeyState::KeyState()
+{
+}
+
+KeyState::~KeyState()
+{
+}

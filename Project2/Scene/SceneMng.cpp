@@ -24,10 +24,11 @@ void SceneMng::Run(void)
 	{
 		_dbgStartDraw();
 
-		activeScene_ = (*activeScene_).Update(std::move(activeScene_));
-
+		activeScene_ = (*activeScene_).Update(std::move(activeScene_));			// 現在のシーンアップデート
+		(*activeScene_).Draw();													// キューを投げる
 		lpEffectMng.Update();
-		Draw();
+
+		Draw();																	// すべて描画
 	}
 }
 
@@ -53,13 +54,12 @@ void SceneMng::Draw(void)
 
 	for (auto que : drawList_)
 	{
-		int id;
+		int id, x, y,ex;
 		float angle;
-		Vector2 pos;
 
-		std::tie(id, pos, angle, std::ignore) = que;
+		std::tie(id, x, y, ex, angle, std::ignore) = que;
 
-		DrawRotaGraph(pos.x, pos.y, 1, angle, id, true);
+		DrawRotaGraph(x,y, ex, angle, id, true);
 	}
 
 	//(*activeScene_).Draw();

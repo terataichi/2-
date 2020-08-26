@@ -12,6 +12,8 @@ public:
 	virtual bool SetUp(int no) override;
 	virtual void Update(void) override;
 
+	KeyState();
+	~KeyState();
 private:
 	std::array<char, 256> _buf;							// キーボード情報取得用
 	std::map<INPUT_ID, int> _keyCon;					// キーの登録

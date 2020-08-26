@@ -10,13 +10,15 @@
 enum class DrawQue
 {
 	Image,
-	Pos,
+	X,
+	Y,
+	EX,						// Šg‘å”{—¦
 	Angle,
 	ZOrder,
 };
 
-//						ImageID, À•W,	Šp“x,	‰œs
-using drawQueT = std::tuple<int, Vector2, float, int>;
+//						ImageID, À•W,		”{—¦	Šp“x,	‰œs
+using drawQueT = std::tuple<int, int, int, int, float, int>;
 
 class SceneMng
 {

@@ -40,7 +40,7 @@ void NextPuyo::Draw()
     SetDrawScreen(screenID_);
     ClsDrawScreen();
 
-    // カウントの数だけネクストを描画する
+    // ｶｳﾝﾄの数だけねくすとを表示する
     for (auto puyo : nextPuyoList_)
     {
         puyo.first->PuyonUpdate();
@@ -57,7 +57,7 @@ void NextPuyo::Draw()
     SetDrawScreen(id);
     //DrawGraph(pos_.x, pos_.y, screenID_, true);
 
-    lpSceneMng.AddDrawQue({ screenID_,{pos_.x + 48, pos_.y + 116},0.0, -10 });
+    lpSceneMng.AddDrawQue({ screenID_,pos_.x + 48, pos_.y + 116,1,0.0f, -10 });
 }
 
 bool NextPuyo::Add(int no)
@@ -67,7 +67,7 @@ bool NextPuyo::Add(int no)
     std::mt19937 mt(rnd());
     std::uniform_int_distribution<> puyoRand(static_cast<int>(PuyoID::Red), static_cast<int>(PuyoID::Purple));
 
-    // もらってきた数だけインスタンスする
+    // もらってきた数だけインスタンス
     while (no > 0)
     {
         nextPuyoList_.push_back

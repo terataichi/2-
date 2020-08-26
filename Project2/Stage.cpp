@@ -224,23 +224,27 @@ void Stage::DrawUpdate(void)
 			}
 		}
 	}
+
 	nextPuyo_->Draw();
 	lpEffectMng.Draw();
-	DrawStage();
+	//DrawStage();
 }
 
 void Stage::DrawStage(void)
 {
 	Vector2 tmpPos{ size().x / 4 + 4, -blockSize_ / 2 };
-	lpSceneMng.AddDrawQue({ puyoID_,offSet() + size() / 2 + gameOverPos_ + tmpPos, (float)angle_, 1 });
-	lpSceneMng.AddDrawQue({ guideID_,offSet() + size() / 2 + gameOverPos_ + tmpPos, (float)angle_, 3});
-	lpSceneMng.AddDrawQue({ hideID_ ,offSet() -16 ,0,0 });
+		// 358 417
+	Vector2 drawPos{ offSet() + size() / 2 + gameOverPos_ };
+	lpSceneMng.AddDrawQue({ puyoID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1, (float)angle_, 1 });
+	lpSceneMng.AddDrawQue({ guideID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1, (float)angle_, 3});
 
 	tmpPos = { 0, blockSize_/2};
-	lpSceneMng.AddDrawQue({ stgBG_[id_],offSet() + size() / 2 + gameOverPos_ + tmpPos,(float)angle_,  5});
+	lpSceneMng.AddDrawQue({ stgBG_[id_],drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1,(float)angle_,  5});
 
 	tmpPos = { size().x / 4 + 4, blockSize_ / 2 - 1 };
-	lpSceneMng.AddDrawQue({ ojamaID_ ,offSet() + size() / 2 + gameOverPos_ + tmpPos ,0,-10 });
+	lpSceneMng.AddDrawQue({ ojamaID_ ,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1 ,0.0f,-10 });
+
+	lpSceneMng.AddDrawQue({ hideID_ ,offSet().x - 16,offSet().y - 16,1 ,0.0f,0 });
 
 	//lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
