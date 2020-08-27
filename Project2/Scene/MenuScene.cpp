@@ -1,8 +1,16 @@
 #include "MenuScene.h"
 
-MenuScene::MenuScene(uniqueBase& child, bool move):childScene_(std::move(child))
+/// <summary>
+/// 
+/// </summary>
+/// <param name="child"></param>
+/// <param name="move"></param>
+/// <param name="buttonNum"></param>
+/// <param name="width"></param>
+/// <returns></returns>
+MenuScene::MenuScene(uniqueBase& child, bool move, int buttonNum, Vector2&& buttonPos, Vector2&& size):childScene_(std::move(child))
 {
-	move_ = move;
+	Init(move, buttonNum, buttonPos, size);
 }
 
 MenuScene::~MenuScene()
@@ -24,6 +32,12 @@ void MenuScene::Draw(void)
 {
 }
 
-void MenuScene::Init(void)
+void MenuScene::Init(bool move, int buttonNum, Vector2& buttonPos, Vector2& size)
 {
+	move_ = move;
+	
+	for (int no = 0; no < buttonNum; no++)
+	{
+		button_.emplace_back(std::make_unique<Button>());
+	}
 }

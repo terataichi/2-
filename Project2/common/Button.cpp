@@ -25,6 +25,11 @@ void Button::Update()
 	Draw();
 }
 
+bool Button::CheckHitButton(Vector2 pos)
+{
+	return (pos_.x < pos.x) && (pos.x < pos_.x + size_.x) && (pos_.y < pos.y) && (pos.y < pos_.y + size_.y);
+}
+
 void Button::pos(Vector2 pos)
 {
 	pos_ = pos;

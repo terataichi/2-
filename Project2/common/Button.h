@@ -23,6 +23,7 @@ public:
 	~Button();
 
 	void Update();
+	bool CheckHitButton(Vector2 pos);				// ƒ{ƒ^ƒ“‚Æ‚Ì“–‚½‚è”»’è
 
 	// ----- Set
 	void pos(Vector2 pos);
