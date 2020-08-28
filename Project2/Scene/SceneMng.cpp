@@ -54,7 +54,8 @@ void SceneMng::Draw(void)
 
 	for (auto que : drawList_)
 	{
-		int id, x, y,ex;
+		int id, x, y;
+		double ex;
 		float angle;
 
 		std::tie(id, x, y, ex, angle, std::ignore) = que;

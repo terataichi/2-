@@ -10,6 +10,6 @@ public:
     uniqueBase Update(uniqueBase own) override;
     void Draw(void)override;
 private:
-    int newKey_;            // 後でインプットでできるようにしたい
-    int oldKey_;
+    bool Init(void);
+    bool flg = false;
 };

@@ -177,10 +177,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Button.h" />
-    <ClInclude Include="common\ButtonMove\MoveLeftRight.h" />
-    <ClInclude Include="common\ButtonMove\MoveNon.h" />
-    <ClInclude Include="common\ButtonMove\MoveScale.h" />
-    <ClInclude Include="common\ButtonMove\MoveUpDown.h" />
     <ClInclude Include="Scene\MenuScene.h" />
     <ClInclude Include="Scene\GameOverScene.h" />
     <ClInclude Include="ModePuyo\Victory\Draw.h" />

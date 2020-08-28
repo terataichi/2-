@@ -33,6 +33,11 @@ bool KeyState::SetUp(int no)
 		};
 	}
 
+	// ‹¤’Ê
+	_keyConDef.try_emplace(INPUT_ID::BUTTON_MENU, KEY_INPUT_M);
+	_keyConDef.try_emplace(INPUT_ID::BUTTON_MOVEON, KEY_INPUT_1);
+	_keyConDef.try_emplace(INPUT_ID::BUTTON_RETURN, KEY_INPUT_2);
+
 
 	_keyCon = _keyConDef;
 	return false;

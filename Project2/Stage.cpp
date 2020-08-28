@@ -20,7 +20,6 @@
 #include "ModePuyo/Victory/Lose.h"
 #include "ModePuyo/Victory/Win.h"
 #include "ModePuyo/Victory/Draw.h"
-
 #include "NextPuyo.h"
 #include "common/EffectMng.h"
 
@@ -89,6 +88,11 @@ const bool Stage::nextScene(void) const
 const Victory& Stage::victory(void) const
 {
 	return victory_;
+}
+
+const bool Stage::CheckMenuScene(void) const
+{
+	return false;
 }
 
 bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
@@ -208,7 +212,7 @@ void Stage::DrawUpdate(void)
 		ojama->Draw();
 	}
 
-	// ƒKƒCƒh‚Ì•`‰æ
+	// ‚Õ‚æ‚ÌŽü‚è‚ðŒõ‚ç‚¹‚éƒKƒCƒh‚Ì•`‰æ
 	SetDrawScreen(guideID_);
 	ClsDrawScreen();
 
@@ -233,18 +237,18 @@ void Stage::DrawUpdate(void)
 void Stage::DrawStage(void)
 {
 	Vector2 tmpPos{ size().x / 4 + 4, -blockSize_ / 2 };
-		// 358 417
+	// 358 417
 	Vector2 drawPos{ offSet() + size() / 2 + gameOverPos_ };
-	lpSceneMng.AddDrawQue({ puyoID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1, (float)angle_, 1 });
-	lpSceneMng.AddDrawQue({ guideID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1, (float)angle_, 3});
+	lpSceneMng.AddDrawQue({ puyoID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0, (float)angle_, 1 });
+	lpSceneMng.AddDrawQue({ guideID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0, (float)angle_, 3});
 
 	tmpPos = { 0, blockSize_/2};
-	lpSceneMng.AddDrawQue({ stgBG_[id_],drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1,(float)angle_,  5});
+	lpSceneMng.AddDrawQue({ stgBG_[id_],drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0,(float)angle_,  5});
 
 	tmpPos = { size().x / 4 + 4, blockSize_ / 2 - 1 };
-	lpSceneMng.AddDrawQue({ ojamaID_ ,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1 ,0.0f,-10 });
+	lpSceneMng.AddDrawQue({ ojamaID_ ,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0 ,0.0f,-10 });
 
-	lpSceneMng.AddDrawQue({ hideID_ ,offSet().x - 16,offSet().y - 16,1 ,0.0f,0 });
+	lpSceneMng.AddDrawQue({ hideID_ ,offSet().x - 16,offSet().y - 16,1.0 ,0.0f,0 });
 
 	//lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
@@ -252,6 +256,7 @@ void Stage::DrawStage(void)
 int Stage::Update(int ojamaCnt)
 {
 	int count = 0;
+
 	while (count < ojamaCnt)
 	{
 		InstanceOjama(count);
@@ -292,7 +297,7 @@ int Stage::Update(int ojamaCnt)
 	{
 		(*key.second)();
 	}
-	
+
 	// Ÿ‚¿•‰‚¯‚ªŒˆ‚Ü‚Á‚½‚çƒ‚[ƒh‚ðˆÚ“®
 	if (victory_ != Victory::Non)
 	{
@@ -366,6 +371,7 @@ void Stage::Init()
 		//{CntType::Mouse, std::make_shared<MouseState>()},
 		{CntType::Key, std::make_shared<KeyState>()}
 	};
+
 	for (auto key : input_)
 	{
 		key.second->SetUp(id_);

@@ -8,6 +8,9 @@ enum class INPUT_ID
 	BUTTON_DOWN,
 	BUTTON_ROTA_L,
 	BUTTON_ROTA_R,
+	BUTTON_MENU,			// ƒƒjƒ…[‚Ú‚½‚ñ
+	BUTTON_MOVEON,			// ŽŸ‚Éi‚Þ
+	BUTTON_RETURN,			// –ß‚é
 	MAX,
 };
 

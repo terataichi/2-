@@ -1,7 +1,10 @@
 #include "GameScene.h"
-#include "../Scene/SceneMng.h"
+#include <DxLib.h>
+#include "SceneMng.h"
+#include "GameOverScene.h"
+#include "MenuScene.h"
 #include "../common/ImageMng.h"
-#include "../Scene/GameOverScene.h"
+
 
 GameScene::GameScene()
 {
@@ -29,11 +32,6 @@ uniqueBase GameScene::Update(uniqueBase own)
 			lose = true;
 		}
 	}
-
-	if (nextScene)
-	{
-		return std::make_unique<GameOverScene>();
-	}
 	
 	// lose の
 	if (lose)
@@ -54,6 +52,22 @@ uniqueBase GameScene::Update(uniqueBase own)
 			}
 		}
 	}
+
+	// true で次のシーンへ
+	if (nextScene)
+	{
+		return std::make_unique<GameOverScene>();
+	}
+
+	//// メニューを開く
+	//if (CheckHitKey(KEY_INPUT_F2))
+	//{
+	//	ButtonVec button;
+
+	//	for()
+
+	//	return std::make_unique<MenuScene>(own,false,);
+	//}
 
 	return std::move(own);
 }

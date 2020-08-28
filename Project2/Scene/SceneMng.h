@@ -18,7 +18,7 @@ enum class DrawQue
 };
 
 //						ImageID, À•W,		”{—¦	Šp“x,	‰œs
-using drawQueT = std::tuple<int, int, int, int, float, int>;
+using drawQueT = std::tuple<int, int, int, double, float, int>;
 
 class SceneMng
 {

@@ -2,15 +2,10 @@
 #include <DxLib.h>
 #include "../Scene/SceneMng.h"
 #include "ImageMng.h"
-#include "ButtonMove/MoveLeftRight.h"
-#include "ButtonMove/MoveNon.h"
-#include "ButtonMove/MoveUpDown.h"
-#include "ButtonMove/MoveScale.h"
 
-
-Button::Button(std::string& name, Vector2&& pos, Vector2&& size,int rate, float angle)
+Button::Button(std::string name, Vector2& pos, Vector2& size,int rate, float angle, int zlayer, int num)
 {
-	Init(name, pos, size, rate, angle);
+	Init(name, pos, size, rate, angle,zlayer, num);
 }
 
 Button::~Button()
@@ -19,15 +14,13 @@ Button::~Button()
 
 void Button::Update()
 {
-	moveCnt_ = (movePattern_ != oldPattern_) ? 0 : moveCnt_++;				// 動きが変わるときにカウントをリセットする
-	moveFunc[movePattern_](pos_, angle_,exRate_, moveCnt_);					// 動きに対応した関数オブジェクトの呼び出し
-
-	Draw();
+	moveCnt_ = (movePattern_ != oldPattern_) ?  0 : moveCnt_ += 1;		// 動きが変わるときにカウントをリセットする
+	moveFunc[movePattern_]();											// 動きに対応した関数オブジェクトの呼び出し
 }
 
 bool Button::CheckHitButton(Vector2 pos)
 {
-	return (pos_.x < pos.x) && (pos.x < pos_.x + size_.x) && (pos_.y < pos.y) && (pos.y < pos_.y + size_.y);
+	return (pos_.x <= pos.x) && (pos.x <= pos_.x + size_.x) && (pos_.y <= pos.y) && (pos.y <= pos_.y + size_.y);
 }
 
 void Button::pos(Vector2 pos)
@@ -52,6 +45,7 @@ void Button::angle(float angle)
 
 void Button::movePattern(MovePattern pattern)
 {
+	oldPattern_ = movePattern_;				// 前情報の格納
 	movePattern_ = pattern;
 }
 
@@ -60,7 +54,7 @@ void Button::exRate(int exRate)
 	exRate_ = exRate;
 }
 
-bool Button::Init(std::string name, Vector2 pos, Vector2 size, int rate, float angle)
+bool Button::Init(std::string name, Vector2& pos, Vector2& size, int& rate, float angle, int zLayer, int num)
 {
 	pos_ = pos;
 	stdPos_ = pos;
@@ -73,18 +67,38 @@ bool Button::Init(std::string name, Vector2 pos, Vector2 size, int rate, float a
 	id_ = name;
 	exRate_ = rate;
 	stdExRate_ = rate;
+	zLayer_ = zLayer;
+	buttonID_ = num;
+	InitFunc();
 
+	return true;
+}
+
+bool Button::InitFunc(void)
+{
 	// 動きのパターンに合わせた関数オブジェクトの登録
-	moveFunc.try_emplace(MovePattern::Non, MoveNon());
-	moveFunc.try_emplace(MovePattern::LeftRight, MoveLeftRight());
-	moveFunc.try_emplace(MovePattern::UpDown, MoveUpDown());
-	moveFunc.try_emplace(MovePattern::Scale, MoveScale());
+	moveFunc.try_emplace(MovePattern::Non, [&]() {});
+	moveFunc.try_emplace(MovePattern::LeftRight,
+		[&]()
+		{
+			pos_.x = static_cast<int>(stdPos_.x + 30 * cosf((moveCnt_ * 0.05f)));
+		});
 
+	moveFunc.try_emplace(MovePattern::UpDown,
+		[&]()
+		{
+			pos_.y = static_cast<int>(stdPos_.y + 30 * sinf((moveCnt_ * 0.05f)));
+		});
+	moveFunc.try_emplace(MovePattern::Scale,
+		[&]()
+		{
+			exRate_ = static_cast<double>(stdExRate_ + 0.1 * sin((static_cast<double>(moveCnt_) * 0.05)));
+		});
 
 	return true;
 }
 
 void Button::Draw()
 {
-	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle(id_.c_str())[0],pos_.x,pos_.y,exRate_,angle_,-1 });
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle(id_.c_str())[0],pos_.x,pos_.y,exRate_,angle_, zLayer_});
 }

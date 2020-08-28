@@ -66,6 +66,7 @@ public:
 	const bool alive(void)const;										// 生きてるか死んでるか
 	const bool nextScene(void)const;
 	const Victory& victory(void)const;
+	const bool CheckMenuScene(void)const;									// メニューシーンに行っていいかどうか 
 private:
 	void Init(void);
 	bool CheckMove(SharePuyo& vec);										// 上下左右動いていいか

@@ -159,10 +159,20 @@ void PlayUnit::InitFunc(void)
 	{
 		return true;
 	};
+
+	std::function<bool(INPUT_ID id)> NonMove = [&](INPUT_ID id)
+	{
+		return false;
+	};
+
 	keyFunc_.try_emplace(INPUT_ID::BUTTON_LEFT, LRMove);
 	keyFunc_.try_emplace(INPUT_ID::BUTTON_RIGHT, LRMove);
 	keyFunc_.try_emplace(INPUT_ID::BUTTON_DOWN, UDMove);
-	keyFunc_.try_emplace(INPUT_ID::BUTTON_UP, UDMove);
+	keyFunc_.try_emplace(INPUT_ID::BUTTON_UP, NonMove);
 	keyFunc_.try_emplace(INPUT_ID::BUTTON_ROTA_L, RotateMove);
 	keyFunc_.try_emplace(INPUT_ID::BUTTON_ROTA_R, RotateMove);
+	keyFunc_.try_emplace(INPUT_ID::BUTTON_MENU, NonMove);
+	keyFunc_.try_emplace(INPUT_ID::BUTTON_RETURN, NonMove);
+	keyFunc_.try_emplace(INPUT_ID::BUTTON_MOVEON, NonMove);
+
 }
