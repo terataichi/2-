@@ -49,7 +49,7 @@ uniqueBase MenuScene::Update(uniqueBase own)
 			// 選択されてるから決定ボタンが押されるとそのbuttonが持っているシーンに行ける
 			for (auto& key : input_)
 			{
-				if (key.second->GetTrgPull(INPUT_ID::BUTTON_UP))
+				if (key.second->GetTrgPull(INPUT_ID::BUTTON_MOVEON))
 				{
 					return std::move(button.second);
 				}
