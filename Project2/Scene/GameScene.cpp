@@ -56,7 +56,8 @@ uniqueBase GameScene::Update(uniqueBase own)
 	// true で次のシーンへ
 	if (nextScene)
 	{
-		return std::make_unique<GameOverScene>();
+		int screenShot = CreateMaskScreen();
+		return std::make_unique<GameOverScene>(screenShot);
 	}
 
 	//// メニューを開く

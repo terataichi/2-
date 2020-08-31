@@ -46,6 +46,7 @@ public:
 
 	void Run(void);
 	bool AddDrawQue(drawQueT que);
+	void SetEnd(void);
 
 	const int pyoSize_;										// ぷよの大きさ
 	const int pyoRadius_;									// ぷよの半径
@@ -62,7 +63,9 @@ private:
 
 	static SceneMng* sInstance_;
 
-	std::vector<drawQueT>drawList_;		// 描画リスト
+	std::vector<drawQueT>drawList_;							// 描画リスト
+
+	bool end_;												// 実行条件 true : 続行  false : 実行終了
 
 	SceneMng();
 	~SceneMng();

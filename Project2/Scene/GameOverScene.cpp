@@ -2,11 +2,13 @@
 #include <DxLib.h>
 #include "SceneMng.h"
 #include "TitleScene.h"
+#include "MenuScene.h"
+#include "../common/ImageMng.h"
 
-GameOverScene::GameOverScene()
+GameOverScene::GameOverScene(int& mask)
 {
-	oldKey_ = 0;
-	newKey_ = 0;
+	mask_ = mask;
+	MenuFlg_ = false;
 }
 
 GameOverScene::~GameOverScene()
@@ -15,11 +17,24 @@ GameOverScene::~GameOverScene()
 
 uniqueBase GameOverScene::Update(uniqueBase own)
 {
-	oldKey_ = newKey_;
-	newKey_ = CheckHitKey(KEY_INPUT_SPACE);
-	if (!newKey_ && oldKey_)
+	// メニューを開く
+	if (!MenuFlg_)
 	{
-		return std::make_unique<TitleScene>();
+		ButtonPairVec button;
+		int cnt = 0;
+	
+		Vector2 tmpPos = { lpSceneMng.screenSize_.x / 2,lpSceneMng.screenSize_.y / 3 };
+		Vector2 tmpSize{ 320,64 };
+
+		button.emplace_back(std::make_unique<Button>("Continue", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextScene::Game);
+		++cnt;
+		tmpPos.y += 200;
+		button.emplace_back(std::make_unique<Button>("GoTitle", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextScene::Title);
+		++cnt;
+		tmpPos.y += 200;
+		button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextScene::GameEnd);
+		MenuFlg_ = true;
+		return std::make_unique<MenuScene>(std::move(own), true, true, std::move(button));
 	}
 
 	return std::move(own);
@@ -27,9 +42,7 @@ uniqueBase GameOverScene::Update(uniqueBase own)
 
 void GameOverScene::Draw(void)
 {
-	DrawBox(0, 0, lpSceneMng.screenSize_.x, lpSceneMng.screenSize_.y, 0xf, true);
-
-	SetFontSize(64);
-	DrawFormatString(lpSceneMng.screenSize_.x / 3 + 64, lpSceneMng.screenSize_.y / 2, 0xffffff, "ゲームオーバー");
-	DrawFormatString(lpSceneMng.screenSize_.x / 3 - 32, lpSceneMng.screenSize_.y - lpSceneMng.screenSize_.y / 3, 0xff, "Please Hit Space");
+	Vector2 tmp{ lpSceneMng.screenSize_ / 2 };
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0],tmp.x,tmp.y,1 , 0.0f, 0 });
+	lpSceneMng.AddDrawQue({ mask_,tmp.x,tmp.y,1 , 0.0f, 0 });
 }

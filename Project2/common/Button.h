@@ -23,6 +23,7 @@ public:
 	void Update();
 	bool CheckHitButton(Vector2 pos);				// ƒ{ƒ^ƒ“‚Æ‚Ì“–‚½‚è”»’è
 	void Draw();									// •`‰æ
+	void reset();									// À•W‚È‚Çİ’è‚µ‚È‚¨‚·
 
 	// ----- Set
 	void pos(Vector2 pos);
@@ -31,6 +32,7 @@ public:
 	void exRate(int exRate);
 	// ----- Get
 	const Vector2& pos(void)const;
+	const Vector2& stdPos(void)const;
 	const float& angle(void)const;
 
 private:

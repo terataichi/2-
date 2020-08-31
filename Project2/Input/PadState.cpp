@@ -19,13 +19,20 @@ bool PadState::SetUp(int no)
 	_keyConDef.clear();
 	_keyConDef = {
 	{INPUT_ID::BUTTON_LEFT,PAD_INPUT_LEFT},
-	//{INPUT_ID::BUTTON_UP,PAD_INPUT_UP},
+	{INPUT_ID::BUTTON_UP,PAD_INPUT_UP},
 	{INPUT_ID::BUTTON_RIGHT,PAD_INPUT_RIGHT},
 	{INPUT_ID::BUTTON_DOWN,PAD_INPUT_DOWN},
 	{INPUT_ID::BUTTON_ROTA_L,PAD_INPUT_2},
-	{INPUT_ID::BUTTON_ROTA_R,PAD_INPUT_3},
+	{INPUT_ID::BUTTON_ROTA_R,PAD_INPUT_1},
+	{INPUT_ID::BUTTON_MOVEON,PAD_INPUT_4},
+		//{INPUT_ID::BUTTON_MENU,},
 	};
 
+	for (auto id : INPUT_ID())				// now‚ÌƒZƒbƒg
+	{
+		_state[id][static_cast<int>(Trg::Old)] = 0;
+		_state[id][static_cast<int>(Trg::Now)] = 0;
+	}
 	_keyCon = _keyConDef;
 	return true;
 }

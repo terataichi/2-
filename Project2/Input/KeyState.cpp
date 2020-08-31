@@ -38,6 +38,11 @@ bool KeyState::SetUp(int no)
 	_keyConDef.try_emplace(INPUT_ID::BUTTON_MOVEON, KEY_INPUT_1);
 	_keyConDef.try_emplace(INPUT_ID::BUTTON_RETURN, KEY_INPUT_2);
 
+	for (auto id : INPUT_ID())
+	{
+		_state[id][static_cast<int>(Trg::Now)] = 0;
+		_state[id][static_cast<int>(Trg::Old)] = 0;
+	}
 
 	_keyCon = _keyConDef;
 	return false;

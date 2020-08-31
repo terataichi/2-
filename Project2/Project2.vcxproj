@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="common\Button.cpp" />
+    <ClCompile Include="Scene\GameEnd.cpp" />
     <ClCompile Include="Scene\MenuScene.cpp" />
     <ClCompile Include="Scene\GameOverScene.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
@@ -177,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Button.h" />
+    <ClInclude Include="Scene\GameEnd.h" />
     <ClInclude Include="Scene\MenuScene.h" />
     <ClInclude Include="Scene\GameOverScene.h" />
     <ClInclude Include="ModePuyo\Victory\Draw.h" />

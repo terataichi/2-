@@ -20,7 +20,7 @@ void SceneMng::Run(void)
 
 	activeScene_ = std::make_unique<TitleScene>();
 
-	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE))
+	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE) && end_)
 	{
 		_dbgStartDraw();
 
@@ -30,12 +30,18 @@ void SceneMng::Run(void)
 
 		Draw();																	// ‚·‚×‚Ä•`‰æ
 	}
+	Destroy();
 }
 
 bool SceneMng::AddDrawQue(drawQueT que)
 {
 	drawList_.emplace_back(que);
 	return true;
+}
+
+void SceneMng::SetEnd(void)
+{
+	end_ = false;
 }
 
 void SceneMng::Draw(void)
@@ -63,7 +69,6 @@ void SceneMng::Draw(void)
 		DrawRotaGraph(x,y, ex, angle, id, true);
 	}
 
-	//(*activeScene_).Draw();
 	drawList_.clear();
 	ScreenFlip();
 }
@@ -86,6 +91,7 @@ bool SceneMng::SysInit(void)
 
 void SceneMng::Init(void)
 {
+	end_ = true;
 }
 
 SceneMng::SceneMng() :
@@ -97,7 +103,7 @@ SceneMng::SceneMng() :
 	{
 		TRACE("DXLIB :Ž¸”s‚µ‚Ü‚µ‚½\n");
 	}
-	//Init();
+	Init();
 }
 
 SceneMng::~SceneMng()

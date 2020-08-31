@@ -5,12 +5,12 @@ class GameOverScene :
     public BaseScene
 {
 public:
-    GameOverScene();
+    GameOverScene(int& mask);
     ~GameOverScene();
     uniqueBase Update(uniqueBase own) override;
     void Draw(void)override;
 private:
-    int newKey_;            // 後でインプットでできるようにしたい
-    int oldKey_;
+    int mask_;
+    bool MenuFlg_;
 };
 

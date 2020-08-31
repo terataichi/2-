@@ -3,17 +3,14 @@
 #include "../Input/PadState.h"
 #include "../Input/MouseState.h"
 #include "../Input/KeyState.h"
+#include "GameScene.h"
+#include "GameOverScene.h"
+#include "TitleScene.h"
+#include "GameEnd.h"
 
-
-/// <summary>
-/// 
-/// </summary>
-/// <param name="child"></param>
-/// <param name="move"></param>
-/// <param name="buttonNum"></param>
-/// <param name="width"></param>
-/// <returns></returns>
-MenuScene::MenuScene(uniqueBase child, bool update, bool draw, ButtonPairVec buttonVec) :childScene_(std::move(child)), buttonVec_(std::move(buttonVec))
+///
+MenuScene::MenuScene(uniqueBase child, bool update, bool draw, ButtonPairVec buttonVec):
+childScene_(std::move(child)), buttonVec_(std::move(buttonVec))
 {
 	Init(update, draw);
 }
@@ -24,11 +21,6 @@ MenuScene::~MenuScene()
 
 uniqueBase MenuScene::Update(uniqueBase own)
 {
-	//// 元のシーンに戻るよ
-	//if (CheckHitKey(KEY_INPUT_F1))
-	//{
-	//	return std::move(childScene_);
-	//}
 
 	// trueでアップデートを回す
 	if (childUpdateFlg_)
@@ -38,30 +30,26 @@ uniqueBase MenuScene::Update(uniqueBase own)
 
 	for (auto key : input_)
 	{
-		// 操作処理のアップデート
-		(*key.second)();
-	}
 
-	for (auto& button : buttonVec_)
-	{
-		if (button.first->CheckHitButton(pos_))
+		if (buttonVec_[buttonCnt_].first->CheckHitButton(pos_))
 		{
-			// 選択されてるから決定ボタンが押されるとそのbuttonが持っているシーンに行ける
-			for (auto& key : input_)
-			{
-				if (key.second->GetTrgPull(INPUT_ID::BUTTON_MOVEON))
-				{
-					return std::move(button.second);
-				}
-			}
 
-			// 対象の動きを変える
-			button.first->movePattern(MovePattern::UpDown);
+			if (key.second.first->GetTrgPull(INPUT_ID::BUTTON_MOVEON))
+			{
+				return std::move(nextMap_[buttonVec_[buttonCnt_].second]());
+			}
+			// 対象の動きを変える		
+			buttonVec_[buttonCnt_].first->movePattern(MovePattern::UpDown);
 		}
 
-		// buttonのアップデート
-		button.first->Update();
+		key.second.second();
+
+		// 操作処理のアップデート
+		(*key.second.first)();
 	}
+
+	// buttonのアップデート
+	buttonVec_[buttonCnt_].first->Update();
 
 	return std::move(own);
 }
@@ -85,17 +73,74 @@ void MenuScene::Init(bool update, bool draw)
 {
 	childUpdateFlg_ = update;
 	childDrawFlg_ = draw;
-	pos_ = buttonVec_[0].first->pos();
+	pos_ = buttonVec_[0].first->stdPos();
+	buttonCnt_ = 0;
+	oldButtonCnt_ = buttonCnt_;
+	InitFunc();
+	for (auto key : input_)
+	{
+		key.second.first->SetUp(0);
+	}
+}
+
+void MenuScene::InitFunc(void)
+{
+	// ----- インプット関係
+	auto CheckbuttonCnt = [](int& cnt, int max)
+	{
+		if (cnt >= max)
+		{
+			cnt = max - 1;
+		}
+		if (cnt <= 0)
+		{
+			cnt = 0;
+		}
+	};
+
+	auto PadKeyUpdate = [&]()
+	{
+		oldButtonCnt_ = buttonCnt_;
+		for (auto key : input_)
+		{
+			if (key.first != CntType::Mouse)
+			{
+				if (key.second.first->GetTrgPush(INPUT_ID::BUTTON_DOWN))
+				{
+					buttonCnt_++;
+					CheckbuttonCnt(buttonCnt_, static_cast<int>(buttonVec_.size()));
+					pos_ = buttonVec_[buttonCnt_].first->stdPos();
+					buttonVec_[oldButtonCnt_].first->reset();
+				}
+				else if (key.second.first->GetTrgPush(INPUT_ID::BUTTON_UP))
+				{
+					buttonCnt_--;
+					CheckbuttonCnt(buttonCnt_, static_cast<int>(buttonVec_.size()));
+					pos_ = buttonVec_[buttonCnt_].first->stdPos();
+					buttonVec_[oldButtonCnt_].first->reset();
+				}
+			}
+		}
+	};
 
 	input_ =
 	{
-		// {CntType::Pad, std::make_shared<PadState>()},
+		{CntType::Pad, {std::make_shared<PadState>(),PadKeyUpdate}},
 		// {CntType::Mouse, std::make_shared<MouseState>()},
-		{CntType::Key, std::make_shared<KeyState>()}
+		{CntType::Key, {std::make_shared<KeyState>(),PadKeyUpdate}}
 	};
 
-	for (auto key : input_)
-	{
-		key.second->SetUp(0);
-	}
+
+	// ----- シーン関係
+	// 直接書くとダメみたいなので一度ﾗﾑﾀﾞにして使うときにメイクユニークするようにする
+	auto game = []() {return std::make_unique<GameScene>(); };
+	auto title = []() {return std::make_unique<TitleScene>(); };
+	auto gameOver = []() {return std::make_unique<GameOverScene>(); };
+	auto gameEnd = []() {return std::make_unique<GameEnd>(); };
+
+	nextMap_.try_emplace(NextScene::Game, game);
+	nextMap_.try_emplace(NextScene::Title, title);
+	nextMap_.try_emplace(NextScene::GameOver, gameOver);
+	nextMap_.try_emplace(NextScene::GameEnd, gameEnd);
+
 }

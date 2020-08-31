@@ -11,5 +11,7 @@ public:
     void Draw(void)override;
 private:
     bool Init(void);
-    bool flg = false;
+    bool MenuFlg_;
+    Vector2 logoPos_;
+    int count_;
 };

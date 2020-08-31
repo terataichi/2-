@@ -402,7 +402,6 @@ void Stage::Init()
 	SetDrawScreen(hideID_);
 	ClsDrawScreen();
 	DrawGraph(0, 0, lpImageMng.GetHandle("BG")[0], true);
-	//DrawGraph(0, 0, lpImageMng.GetHandle("Stage03")[0], true);
 
 
 	stgMode_ = StgMode::Drop;

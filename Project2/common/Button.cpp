@@ -33,6 +33,11 @@ const Vector2& Button::pos() const
 	return pos_;
 }
 
+const Vector2& Button::stdPos(void) const
+{
+	return stdPos_;
+}
+
 const float& Button::angle(void) const
 {
 	return angle_;
@@ -101,4 +106,12 @@ bool Button::InitFunc(void)
 void Button::Draw()
 {
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle(id_.c_str())[0],pos_.x,pos_.y,exRate_,angle_, zLayer_});
+}
+
+void Button::reset()
+{
+	pos_ = stdPos_;
+	angle_ = stdAngle_;
+	moveCnt_ = 0;
+	exRate_ = stdExRate_;
 }

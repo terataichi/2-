@@ -35,9 +35,9 @@ struct Win
 		{
 			int id = lpImageMng.GetHandle("win2", div, { 76,64 })[j];
 
-			standard = static_cast<int>((maxY - winY) + (stage.size_.y / 3) - 50.0f * cosf((count + (j + 1) * 30.0f) * 0.01f));			// サインカーブ
+			standard = static_cast<int>((maxY - winY) + (stage.size_.y / 3) - 50.0f * cosf((count + (j + 1) * 30.0f) * 0.015f));			// サインカーブ
 
-			angle = (-DX_PI_F / angleStnd) - (DX_PI_F / (angleStnd / 2)) * cosf((count + (j + 1) * 30.0f) * 0.01f);
+			angle = (-DX_PI_F / angleStnd) - (DX_PI_F / (angleStnd / 2)) * cosf((count + (j + 1) * 30.0f) * 0.016f);
 
 			lpSceneMng.AddDrawQue({ id, stage.offSet_.x + stage.blockSize_ * 2 + stage.blockSize_ * j, standard,1, angle, 0 });
 			count++;
