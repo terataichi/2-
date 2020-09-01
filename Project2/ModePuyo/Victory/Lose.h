@@ -18,13 +18,6 @@ struct Lose
 			stage.gameOverPos_.y += speed;
 		}
 
-		 // カウントダウン中
-		if (stage.gameOverCnt_-- < 0)
-		{
-			// 終了
-			return true;
-		}
-
 		if (stage.gameOverCnt_ % 2 == 0)
 		{
 			speed++;
@@ -48,6 +41,12 @@ struct Lose
 			count++;
 		}
 
+		// カウントダウン中
+		if (stage.gameOverCnt_-- < 0)
+		{
+			// 終了
+			return true;
+		}
 		return false;
 	}
 

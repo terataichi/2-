@@ -8,7 +8,6 @@
 #include "TitleScene.h"
 #include "GameEnd.h"
 
-///
 MenuScene::MenuScene(uniqueBase child, bool update, bool draw, ButtonPairVec buttonVec):
 childScene_(std::move(child)), buttonVec_(std::move(buttonVec))
 {
@@ -21,28 +20,37 @@ MenuScene::~MenuScene()
 
 uniqueBase MenuScene::Update(uniqueBase own)
 {
-
 	// trueでアップデートを回す
 	if (childUpdateFlg_)
 	{
 		childScene_ = childScene_->Update(std::move(childScene_));
 	}
 
-	for (auto key : input_)
+	for (auto& key : input_)
 	{
-
+		// 当たり判定
 		if (buttonVec_[buttonCnt_].first->CheckHitButton(pos_))
 		{
 
-			if (key.second.first->GetTrgPull(INPUT_ID::BUTTON_MOVEON))
+			if (key.second.first->GetTrgPush(INPUT_ID::BUTTON_MOVEON))
 			{
-				return std::move(nextMap_[buttonVec_[buttonCnt_].second]());
+				if (childScene_->scene() != buttonVec_[buttonCnt_].second)
+				{
+					return std::move(nextMap_[buttonVec_[buttonCnt_].second]());
+				}
+				else
+				{
+					// 同じシーンだったら元に戻る
+					childScene_->SetMenuFlg(false);
+					return std::move(childScene_);
+				}
 			}
 			// 対象の動きを変える		
 			buttonVec_[buttonCnt_].first->movePattern(MovePattern::UpDown);
 		}
 
-		key.second.second();
+		// ぼたんの切り替えをする
+		key.second.second(key.second.first);
 
 		// 操作処理のアップデート
 		(*key.second.first)();
@@ -69,6 +77,16 @@ void MenuScene::Draw(void)
 	}
 }
 
+Scene MenuScene::scene()
+{
+	return scene_;
+}
+
+void MenuScene::SetMenuFlg(bool set)
+{
+	menuFlg_ = set;
+}
+
 void MenuScene::Init(bool update, bool draw)
 {
 	childUpdateFlg_ = update;
@@ -76,6 +94,8 @@ void MenuScene::Init(bool update, bool draw)
 	pos_ = buttonVec_[0].first->stdPos();
 	buttonCnt_ = 0;
 	oldButtonCnt_ = buttonCnt_;
+	scene_ = Scene::Menu;
+	menuFlg_ = false;
 	InitFunc();
 	for (auto key : input_)
 	{
@@ -98,33 +118,30 @@ void MenuScene::InitFunc(void)
 		}
 	};
 
-	auto PadKeyUpdate = [&]()
+	auto PadKeyUpdate = [&](std::shared_ptr<InputState>& type)
 	{
 		oldButtonCnt_ = buttonCnt_;
-		for (auto key : input_)
+
+		if (type->GetCntType() != CntType::Mouse)
 		{
-			if (key.first != CntType::Mouse)
+			if (type->GetTrgPush(INPUT_ID::BUTTON_DOWN))
 			{
-				if (key.second.first->GetTrgPush(INPUT_ID::BUTTON_DOWN))
-				{
-					buttonCnt_++;
-					CheckbuttonCnt(buttonCnt_, static_cast<int>(buttonVec_.size()));
-					pos_ = buttonVec_[buttonCnt_].first->stdPos();
-					buttonVec_[oldButtonCnt_].first->reset();
-				}
-				else if (key.second.first->GetTrgPush(INPUT_ID::BUTTON_UP))
-				{
-					buttonCnt_--;
-					CheckbuttonCnt(buttonCnt_, static_cast<int>(buttonVec_.size()));
-					pos_ = buttonVec_[buttonCnt_].first->stdPos();
-					buttonVec_[oldButtonCnt_].first->reset();
-				}
+				buttonCnt_++;
+				CheckbuttonCnt(buttonCnt_, static_cast<int>(buttonVec_.size()));
+				pos_ = buttonVec_[buttonCnt_].first->stdPos();
+				buttonVec_[oldButtonCnt_].first->reset();
+			}
+			else if (type->GetTrgPush(INPUT_ID::BUTTON_UP))
+			{
+				buttonCnt_--;
+				CheckbuttonCnt(buttonCnt_, static_cast<int>(buttonVec_.size()));
+				pos_ = buttonVec_[buttonCnt_].first->stdPos();
+				buttonVec_[oldButtonCnt_].first->reset();
 			}
 		}
 	};
 
-	input_ =
-	{
+	input_ = {
 		{CntType::Pad, {std::make_shared<PadState>(),PadKeyUpdate}},
 		// {CntType::Mouse, std::make_shared<MouseState>()},
 		{CntType::Key, {std::make_shared<KeyState>(),PadKeyUpdate}}
@@ -138,9 +155,9 @@ void MenuScene::InitFunc(void)
 	auto gameOver = []() {return std::make_unique<GameOverScene>(); };
 	auto gameEnd = []() {return std::make_unique<GameEnd>(); };
 
-	nextMap_.try_emplace(NextScene::Game, game);
-	nextMap_.try_emplace(NextScene::Title, title);
-	nextMap_.try_emplace(NextScene::GameOver, gameOver);
-	nextMap_.try_emplace(NextScene::GameEnd, gameEnd);
+	nextMap_.try_emplace(Scene::Game, game);
+	nextMap_.try_emplace(Scene::Title, title);
+	nextMap_.try_emplace(Scene::GameOver, gameOver);
+	nextMap_.try_emplace(Scene::GameEnd, gameEnd);
 
 }

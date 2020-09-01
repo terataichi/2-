@@ -34,7 +34,7 @@ struct FallMode
 							{
 								stage.data_[grid.y + j][grid.x]->SetPuyon();
 								stage.data_[grid.y + j][grid.x]->SetCnt((max - j));
-								if (j >= 3)
+								if (j >= max)
 								{
 									break;
 								}

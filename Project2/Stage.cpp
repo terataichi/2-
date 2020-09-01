@@ -224,14 +224,13 @@ void Stage::DrawUpdate(void)
 			if (!puyoVec_[playUnit_->target()]->GetDirFlg().bit.down)
 			{
 				DrawOval(puyoVec_[playUnit_->target()]->drawPos().first.x, puyoVec_[playUnit_->target()]->drawPos().first.y,
-					puyoVec_[playUnit_->target()]->drawPos().second.x + 4, puyoVec_[playUnit_->target()]->drawPos().second.y + 4, 0xffffff, true);
+					puyoVec_[playUnit_->target()]->drawPos().second.x - 20, puyoVec_[playUnit_->target()]->drawPos().second.y - 20, 0x797979, true);
 			}
 		}
 	}
 
 	nextPuyo_->Draw();
 	lpEffectMng.Draw();
-	//DrawStage();
 }
 
 void Stage::DrawStage(void)
@@ -239,8 +238,8 @@ void Stage::DrawStage(void)
 	Vector2 tmpPos{ size().x / 4 + 4, -blockSize_ / 2 };
 	// 358 417
 	Vector2 drawPos{ offSet() + size() / 2 + gameOverPos_ };
-	lpSceneMng.AddDrawQue({ puyoID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0, (float)angle_, 1 });
-	lpSceneMng.AddDrawQue({ guideID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0, (float)angle_, 3});
+	lpSceneMng.AddDrawQue({ puyoID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0, (float)angle_, 2 });
+	lpSceneMng.AddDrawQue({ guideID_,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0, (float)angle_, 1});
 
 	tmpPos = { 0, blockSize_/2};
 	lpSceneMng.AddDrawQue({ stgBG_[id_],drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0,(float)angle_,  5});
@@ -250,7 +249,6 @@ void Stage::DrawStage(void)
 
 	lpSceneMng.AddDrawQue({ hideID_ ,offSet().x - 16,offSet().y - 16,1.0 ,0.0f,0 });
 
-	//lpSceneMng.AddDrawQue({ stageID_,offSet() + size() / 2 + gameOverPos_ , (float)angle_, 8 });
 }
 
 int Stage::Update(int ojamaCnt)
@@ -321,7 +319,6 @@ void Stage::Init()
 	modeMap_.try_emplace(StgMode::Munyon, MunyonMode());
 	modeMap_.try_emplace(StgMode::GameOver, GameOver());
 	modeMap_.try_emplace(StgMode::Delete, DeleteMode());
-	//modeMap_.try_emplace(StgMode::Ojama, OjamaMode());
 
 	victoryMap_.try_emplace(Victory::Draw,Draw());
 	victoryMap_.try_emplace(Victory::Lose,Lose());
@@ -331,7 +328,7 @@ void Stage::Init()
 	blockSize_ = 64;
 	angle_ = 0;
 	rensa_ = 0;
-	gameOverCnt_ = 600;
+	gameOverCnt_ = 300;
 	gameOverPos_ = { 0,0 };
 	alive_ = true;
 
@@ -342,8 +339,8 @@ void Stage::Init()
 	hideID_ = MakeScreen(lpSceneMng.screenSize_.x, 64, true);
 	ojamaID_ = MakeScreen(size_.x + 200, size_.y + blockSize_, true);
 
-	dataBase_.resize(STAGE_Y * STAGE_X );							// 全体のサイズを作る
-	eraseDataBase_.resize(STAGE_Y * STAGE_X);						// 全体のサイズを作る
+	dataBase_.resize(STAGE_Y * STAGE_X );										// 全体のサイズを作る
+	eraseDataBase_.resize(STAGE_Y * STAGE_X);									// 全体のサイズを作る
 
 	for (int j = 0; j < static_cast<int>(STAGE_Y); j++)
 	{

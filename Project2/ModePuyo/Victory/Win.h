@@ -13,12 +13,7 @@ struct Win
 		}
 
 		//TRACE("プレイヤー %d Win\n",stage.id_ + 1);
-		// カウントダウン中
-		if (stage.gameOverCnt_-- < 0)
-		{
-			// 終了
-			return true;
-		}
+
 		// 加速
 		if (stage.gameOverCnt_ % 2 == 0)
 		{
@@ -41,6 +36,13 @@ struct Win
 
 			lpSceneMng.AddDrawQue({ id, stage.offSet_.x + stage.blockSize_ * 2 + stage.blockSize_ * j, standard,1, angle, 0 });
 			count++;
+		}
+
+		// カウントダウン中
+		if (stage.gameOverCnt_-- < 0)
+		{
+			// 終了
+			return true;
 		}
 		return false;
 	}

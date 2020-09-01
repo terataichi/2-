@@ -11,5 +11,10 @@ public:
 
 	uniqueBase Update(uniqueBase own) override;
 	void Draw(void)override;
+	Scene scene()override;
+	void SetMenuFlg(bool)override;
+private:
+	Scene scene_;
+	bool menuFlg_;
 };
 

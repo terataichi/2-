@@ -5,12 +5,14 @@ class GameOverScene :
     public BaseScene
 {
 public:
-    GameOverScene(int& mask);
+    GameOverScene();
     ~GameOverScene();
     uniqueBase Update(uniqueBase own) override;
     void Draw(void)override;
+    Scene scene()override;
+    void SetMenuFlg(bool set)override;
 private:
-    int mask_;
-    bool MenuFlg_;
+    Scene scene_;
+    bool menuFlg_;
 };
 

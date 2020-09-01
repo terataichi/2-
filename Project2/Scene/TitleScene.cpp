@@ -18,19 +18,19 @@ TitleScene::~TitleScene()
 uniqueBase TitleScene::Update(uniqueBase own)
 {
 	// メニューを開く
-	if (!MenuFlg_)
+	if (!menuFlg_)
 	{
 		ButtonPairVec button;
 		int cnt = 0;
 		Vector2 tmpPos = { lpSceneMng.screenSize_.x / 2, lpSceneMng.screenSize_.y / 2 + 50};
 		Vector2 tmpSize{ 320,64 };
 
-		button.emplace_back(std::make_unique<Button>("StartGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextScene::Game);
+		button.emplace_back(std::make_unique<Button>("StartGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Game);
 		++cnt;
 		tmpPos.y += 200;
-		button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextScene::GameEnd);
+		button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::GameEnd);
 
-		MenuFlg_ = true;
+		menuFlg_ = true;
 		return std::make_unique<MenuScene>(std::move(own), true, true,std::move(button));
 	}
 
@@ -59,10 +59,33 @@ void TitleScene::Draw(void)
 	}
 }
 
+Scene TitleScene::scene()
+{
+	return scene_;
+}
+
+void TitleScene::SetMenuFlg(bool set)
+{
+	menuFlg_ = set;
+}
+
 bool TitleScene::Init(void)
 {
-	MenuFlg_ = false;
+	menuFlg_ = false;
+	scene_ = Scene::Title;
 	count_ = 0;
 	logoPos_ = { lpSceneMng.screenSize_.x / 4 + 38 ,lpSceneMng.screenSize_.y / 4 };
+
+	// 全体のサイズを作る
+	imageNumBase.resize(20 * 20);
+	for (int y = 0; y < 20; y++)
+	{
+		imageNum.emplace_back(&imageNumBase[y * 20]);
+		for (int x = 0; x < 20; x++)
+		{
+			imageNum[y][x] = false;
+		}
+	}
+
 	return false;
 }

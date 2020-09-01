@@ -4,24 +4,16 @@
 #include "../common/Button.h"
 #include "../Input/InputState.h"
 
-enum class NextScene
-{
-	Title,
-	Game,
-	GameOver,
-	GameEnd,
-};
-
 using uniqueButton = std::unique_ptr<Button>;
 
 // ぼたんに対応したシーンを格納する
-using ButtonPairVec = std::vector<std::pair<uniqueButton, NextScene>>;
+using ButtonPairVec = std::vector<std::pair<uniqueButton, Scene>>;
 
 // 次のシーンを生成するためのマップ
-using NextMap = std::map < NextScene, std::function<uniqueBase(void)> >;
+using NextMap = std::map < Scene, std::function<uniqueBase(void)> >;
 
 // 各操作方法に応じて座標の替え方が違う
-using InputPosP = std::pair<std::shared_ptr<InputState>, std::function<void(void)>>;
+using InputPosP = std::pair<std::shared_ptr<InputState>, std::function<void(std::shared_ptr<InputState>&)>>;
 
 class MenuScene :
 	public BaseScene
@@ -32,6 +24,8 @@ public:
 
 	uniqueBase Update(uniqueBase own) override;
 	void Draw(void)override;
+	Scene scene()override;
+	void SetMenuFlg(bool set)override;
 private:
 	void Init(bool update, bool draw);
 	void InitFunc(void);
@@ -39,9 +33,11 @@ private:
 	bool childUpdateFlg_;												// メニューで子のアップデートを動かすか動かさないか
 	bool childDrawFlg_;													// メニューで子の描画をするかどうか
 	uniqueBase childScene_;												// メニューを開いたときに前のシーンを保存しておく
-
+	bool menuFlg_;
 	ButtonPairVec buttonVec_;											// ぼたん管理用
 	NextMap nextMap_;													// ぼたんに対応したシーンの格納
+	Scene scene_;
+	
 
 	std::map<CntType, InputPosP> input_;								// キーの入力管理
 	int buttonCnt_;														// ぼたんの番号

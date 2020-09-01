@@ -56,8 +56,33 @@ uniqueBase GameScene::Update(uniqueBase own)
 	// true で次のシーンへ
 	if (nextScene)
 	{
-		int screenShot = CreateMaskScreen();
-		return std::make_unique<GameOverScene>(screenShot);
+
+		if (oldMenuFlg_ && !menuFlg_)
+		{
+			Init();
+			oldMenuFlg_ = menuFlg_;
+			return own;
+		}
+		// メニューを開く
+		if (!menuFlg_)
+		{
+			ButtonPairVec button;
+			int cnt = 0;
+
+			Vector2 tmpPos = { lpSceneMng.screenSize_.x / 2,lpSceneMng.screenSize_.y / 3 };
+			Vector2 tmpSize{ 320,64 };
+
+			button.emplace_back(std::make_unique<Button>("Continue", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Game);
+			++cnt;
+			tmpPos.y += 200;
+			button.emplace_back(std::make_unique<Button>("GoTitle", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Title);
+			++cnt;
+			tmpPos.y += 200;
+			button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::GameEnd);
+			menuFlg_ = true;
+			oldMenuFlg_ = menuFlg_;
+			return std::make_unique<MenuScene>(std::move(own), true, true, std::move(button));
+		}
 	}
 
 	//// メニューを開く
@@ -85,12 +110,28 @@ void GameScene::Draw()
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextBG")[0] ,tmp.x / 2, tmp.x / 8,1,0.0f,-1 });
 }
 
+Scene GameScene::scene()
+{
+	return scene_;
+}
+
+void GameScene::SetMenuFlg(bool set)
+{
+	menuFlg_ = set;
+}
+
 void GameScene::Init(void)
 {
+	stage_.clear();
+
 	stage_.emplace_back(std::make_unique<Stage>(Vector2(lpSceneMng.gameOffSet_.x, lpSceneMng._frameSize.y / 2), 
 												Vector2(lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y)));
 
 	stage_.emplace_back(std::make_unique<Stage>(Vector2(lpSceneMng.gameSize_.x * (stage_.size() + 1) + lpSceneMng.gameOffSet_.x, lpSceneMng._frameSize.y / 2),
 												Vector2(lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y)));
+
+	oldMenuFlg_ = false;
+	scene_ = Scene::Game;
+	menuFlg_ = false;
 	ojamaCnt_ = 0;
 }
