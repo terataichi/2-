@@ -76,16 +76,16 @@ bool TitleScene::Init(void)
 	count_ = 0;
 	logoPos_ = { lpSceneMng.screenSize_.x / 4 + 38 ,lpSceneMng.screenSize_.y / 4 };
 
-	// 全体のサイズを作る
-	imageNumBase.resize(20 * 20);
-	for (int y = 0; y < 20; y++)
-	{
-		imageNum.emplace_back(&imageNumBase[y * 20]);
-		for (int x = 0; x < 20; x++)
-		{
-			imageNum[y][x] = false;
-		}
-	}
+	//// 全体のサイズを作る
+	//imageNumBase.resize(20 * 20);
+	//for (int y = 0; y < 20; y++)
+	//{
+	//	imageNum.emplace_back(&imageNumBase[y + 20]);
+	//	for (int x = 0; x < 20; x++)
+	//	{
+	//		imageNum[y][x] = false;
+	//	}
+	//}
 
 	return false;
 }

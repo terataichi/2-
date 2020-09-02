@@ -20,6 +20,6 @@ private:
     int count_;
     bool menuFlg_;
 
-    std::vector<bool> imageNumBase;
-    std::vector<bool*> imageNum;
+    //std::vector<bool> imageNumBase;
+    //std::vector<bool*> imageNum;
 };
