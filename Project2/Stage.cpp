@@ -188,11 +188,6 @@ void Stage::victory(Victory vic)
 
 void Stage::DrawUpdate(void)
 {
-	// ”wŒi•`‰æ
-	//SetDrawScreen(stageID_);
-	//ClsDrawScreen();
-	//DrawBox(0, 0, size_.x + 1, size_.y, 0x778899, true);
-
 	// ƒvƒˆ•`‰æ
 	SetDrawScreen(puyoID_);
 	ClsDrawScreen();

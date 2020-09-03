@@ -25,5 +25,6 @@ private:
 	StageVec stage_;				// ステージを配列で管理して人数変更を可能にする
 	bool oldMenuFlg_;
 	bool menuFlg_;
+	int blackScreen_;
 };
 

@@ -88,17 +88,6 @@ uniqueBase GameScene::Update(uniqueBase own)
 			return std::make_unique<MenuScene>(std::move(own), true, true, std::move(button));
 		}
 	}
-
-	//// ÉÅÉjÉÖÅ[ÇäJÇ≠
-	//if (CheckHitKey(KEY_INPUT_F2))
-	//{
-	//	ButtonVec button;
-
-	//	for()
-
-	//	return std::make_unique<MenuScene>(own,false,);
-	//}
-
 	return std::move(own);
 }
 
@@ -112,6 +101,18 @@ void GameScene::Draw()
 	Vector2 tmp = lpSceneMng.screenSize_;
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0] ,tmp.x / 2,tmp.y / 2, 1,0.0f,1000 });
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextPuyoBG")[0] ,tmp.x / 2, tmp.x / 8,1,0.0f,-1 });
+
+	if (menuFlg_)
+	{
+		SetDrawScreen(blackScreen_);
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+		int id = lpImageMng.GetHandle("black2")[0];
+		DrawGraph(0, 0, id, true);
+
+		lpSceneMng.AddDrawQue({ blackScreen_ ,tmp.x / 2,tmp.y / 2, 1,0.0f,-99 });
+
+	}
 }
 
 Scene GameScene::scene()
@@ -130,6 +131,7 @@ void GameScene::Init(void)
 	scene_ = Scene::Game;
 	menuFlg_ = false;
 	ojamaCnt_ = 0;
+	blackScreen_ = MakeScreen(lpSceneMng.screenSize_.x, lpSceneMng.screenSize_.y, true);
 }
 
 void GameScene::StageInit(void)

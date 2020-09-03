@@ -105,7 +105,7 @@ bool TitleScene::nextUpdate(void)
 		{
 			if (imageNum_[y][x])
 			{
-				int id = lpImageMng.GetHandle("bgbg", { 10,10 }, { 128,90 })[y * 10 + x];
+				int id = lpImageMng.GetHandle("black", { 10,10 }, { 128,90 })[y * 10 + x];
 
 				DrawGraph(128 * x, 90 * y, id, true);
 			}

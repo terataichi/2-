@@ -155,7 +155,6 @@
     <ClCompile Include="common\Button.cpp" />
     <ClCompile Include="Scene\GameEnd.cpp" />
     <ClCompile Include="Scene\MenuScene.cpp" />
-    <ClCompile Include="Scene\GameOverScene.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="Scene\BaseScene.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
@@ -180,7 +179,6 @@
     <ClInclude Include="common\Button.h" />
     <ClInclude Include="Scene\GameEnd.h" />
     <ClInclude Include="Scene\MenuScene.h" />
-    <ClInclude Include="Scene\GameOverScene.h" />
     <ClInclude Include="ModePuyo\Victory\Draw.h" />
     <ClInclude Include="ModePuyo\Victory\Lose.h" />
     <ClInclude Include="ModePuyo\Victory\Win.h" />
