@@ -111,6 +111,7 @@ void GameScene::Draw()
 		DrawGraph(0, 0, id, true);
 
 		lpSceneMng.AddDrawQue({ blackScreen_ ,tmp.x / 2,tmp.y / 2, 1,0.0f,-99 });
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 	}
 }
