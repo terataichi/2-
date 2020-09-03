@@ -18,25 +18,25 @@ GameOverScene::~GameOverScene()
 
 uniqueBase GameOverScene::Update(uniqueBase own)
 {
-	// メニューを開く
-	if (!menuFlg_)
-	{
-		ButtonPairVec button;
-		int cnt = 0;
-	
-		Vector2 tmpPos = { lpSceneMng.screenSize_.x / 2,lpSceneMng.screenSize_.y / 3 };
-		Vector2 tmpSize{ 320,64 };
+	//// メニューを開く
+	//if (!menuFlg_)
+	//{
+	//	ButtonPairVec button;
+	//	int cnt = 0;
+	//
+	//	Vector2 tmpPos = { lpSceneMng.screenSize_.x / 2,lpSceneMng.screenSize_.y / 3 };
+	//	Vector2 tmpSize{ 320,64 };
 
-		button.emplace_back(std::make_unique<Button>("Continue", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Game);
-		++cnt;
-		tmpPos.y += 200;
-		button.emplace_back(std::make_unique<Button>("GoTitle", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Title);
-		++cnt;
-		tmpPos.y += 200;
-		button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::GameEnd);
-		menuFlg_ = true;
-		return std::make_unique<MenuScene>(std::move(own), true, true, std::move(button));
-	}
+	//	button.emplace_back(std::make_unique<Button>("Continue", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Game);
+	//	++cnt;
+	//	tmpPos.y += 200;
+	//	button.emplace_back(std::make_unique<Button>("GoTitle", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Title);
+	//	++cnt;
+	//	tmpPos.y += 200;
+	//	button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::GameEnd);
+	//	menuFlg_ = true;
+	//	return std::make_unique<MenuScene>(std::move(own), true, true, std::move(button));
+	//}
 
 	return std::move(own);
 }

@@ -3,10 +3,12 @@
 #include "SceneMng.h"
 #include "GameOverScene.h"
 #include "MenuScene.h"
+#include "TitleScene.h"
+#include "GameEnd.h"
 #include "../common/ImageMng.h"
 
 
-GameScene::GameScene()
+GameScene::GameScene(StageVec& stage) :stage_(std::move(stage))
 {
 	Init();
 }
@@ -59,10 +61,12 @@ uniqueBase GameScene::Update(uniqueBase own)
 
 		if (oldMenuFlg_ && !menuFlg_)
 		{
+			StageInit();
 			Init();
 			oldMenuFlg_ = menuFlg_;
 			return own;
 		}
+
 		// ÉÅÉjÉÖÅ[ÇäJÇ≠
 		if (!menuFlg_)
 		{
@@ -72,13 +76,13 @@ uniqueBase GameScene::Update(uniqueBase own)
 			Vector2 tmpPos = { lpSceneMng.screenSize_.x / 2,lpSceneMng.screenSize_.y / 3 };
 			Vector2 tmpSize{ 320,64 };
 
-			button.emplace_back(std::make_unique<Button>("Continue", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Game);
+			button.emplace_back(std::make_unique<Button>("Continue", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextMap{ Scene::Game, [&]() {return std::make_unique<GameScene>(stage_); } });
 			++cnt;
 			tmpPos.y += 200;
-			button.emplace_back(std::make_unique<Button>("GoTitle", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::Title);
+			button.emplace_back(std::make_unique<Button>("GoTitle", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextMap{ Scene::Title, []() {return std::make_unique<TitleScene>(); } });
 			++cnt;
 			tmpPos.y += 200;
-			button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), Scene::GameEnd);
+			button.emplace_back(std::make_unique<Button>("EndGame", tmpPos, tmpSize, 1, 0.0f, -100, cnt), NextMap{ Scene::GameEnd, []() {return std::make_unique<GameEnd>(); } });
 			menuFlg_ = true;
 			oldMenuFlg_ = menuFlg_;
 			return std::make_unique<MenuScene>(std::move(own), true, true, std::move(button));
@@ -107,7 +111,7 @@ void GameScene::Draw()
 
 	Vector2 tmp = lpSceneMng.screenSize_;
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("BG")[0] ,tmp.x / 2,tmp.y / 2, 1,0.0f,1000 });
-	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextBG")[0] ,tmp.x / 2, tmp.x / 8,1,0.0f,-1 });
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("NextPuyoBG")[0] ,tmp.x / 2, tmp.x / 8,1,0.0f,-1 });
 }
 
 Scene GameScene::scene()
@@ -122,16 +126,19 @@ void GameScene::SetMenuFlg(bool set)
 
 void GameScene::Init(void)
 {
-	stage_.clear();
-
-	stage_.emplace_back(std::make_unique<Stage>(Vector2(lpSceneMng.gameOffSet_.x, lpSceneMng._frameSize.y / 2), 
-												Vector2(lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y)));
-
-	stage_.emplace_back(std::make_unique<Stage>(Vector2(lpSceneMng.gameSize_.x * (stage_.size() + 1) + lpSceneMng.gameOffSet_.x, lpSceneMng._frameSize.y / 2),
-												Vector2(lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y)));
-
 	oldMenuFlg_ = false;
 	scene_ = Scene::Game;
 	menuFlg_ = false;
 	ojamaCnt_ = 0;
+}
+
+void GameScene::StageInit(void)
+{
+	stage_.clear();
+
+	stage_.emplace_back(std::make_unique<Stage>(Vector2(lpSceneMng.gameOffSet_.x, lpSceneMng._frameSize.y / 2),
+		Vector2(lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y)));
+
+	stage_.emplace_back(std::make_unique<Stage>(Vector2(lpSceneMng.gameSize_.x * (stage_.size() + 1) + lpSceneMng.gameOffSet_.x, lpSceneMng._frameSize.y / 2),
+		Vector2(lpSceneMng.gameSize_.x, lpSceneMng.gameSize_.y)));
 }

@@ -6,11 +6,11 @@
 
 using uniqueButton = std::unique_ptr<Button>;
 
-// ぼたんに対応したシーンを格納する
-using ButtonPairVec = std::vector<std::pair<uniqueButton, Scene>>;
-
 // 次のシーンを生成するためのマップ
-using NextMap = std::map < Scene, std::function<uniqueBase(void)> >;
+using NextMap = std::pair < Scene, std::function<uniqueBase(void)> >;
+
+// ぼたんに対応したシーンを格納する
+using ButtonPairVec = std::vector<std::pair<uniqueButton, NextMap>>;
 
 // 各操作方法に応じて座標の替え方が違う
 using InputPosP = std::pair<std::shared_ptr<InputState>, std::function<void(std::shared_ptr<InputState>&)>>;
@@ -35,9 +35,8 @@ private:
 	uniqueBase childScene_;												// メニューを開いたときに前のシーンを保存しておく
 	bool menuFlg_;
 	ButtonPairVec buttonVec_;											// ぼたん管理用
-	NextMap nextMap_;													// ぼたんに対応したシーンの格納
 	Scene scene_;
-	
+	bool nextFlg_;														// 次のシーンに行っていいかどうか
 
 	std::map<CntType, InputPosP> input_;								// キーの入力管理
 	int buttonCnt_;														// ぼたんの番号

@@ -149,7 +149,7 @@ bool Stage::SetErase(SharePuyo& puyo, Vector2 vec)
 		{
 			if (erasedata_[gri.y][gri.x]->id() == puyo->id())
 			{
-				lpEffectMng.PlayEffect("baku", offSet_ + puyo->pos() - Vector2{ 0,puyo->size() });
+				lpEffectMng.PlayEffect("baku2", offSet_ + puyo->pos() - Vector2{ 0,puyo->size() });
 				puyo->alive(false);
 				data_[gri.y][gri.x].reset();
 			}
@@ -229,7 +229,6 @@ void Stage::DrawUpdate(void)
 		}
 	}
 
-	nextPuyo_->Draw();
 	lpEffectMng.Draw();
 }
 
@@ -248,7 +247,7 @@ void Stage::DrawStage(void)
 	lpSceneMng.AddDrawQue({ ojamaID_ ,drawPos.x + tmpPos.x, drawPos.y + tmpPos.y,1.0 ,0.0f,-10 });
 
 	lpSceneMng.AddDrawQue({ hideID_ ,offSet().x - 16,offSet().y - 16,1.0 ,0.0f,0 });
-
+	nextPuyo_->Draw();
 }
 
 int Stage::Update(int ojamaCnt)
