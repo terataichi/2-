@@ -1,0 +1,67 @@
+#pragma once
+#include <memory>
+#include <vector>
+#include "../common/Vector2.h"
+#include "../Scene/TitleScene.h"
+
+#define lpSceneMng SceneMng::GetInstance()
+
+enum class DrawQue
+{
+	Image,
+	X,
+	Y,
+	EX,						// 拡大倍率
+	Angle,
+	ZOrder,
+};
+
+//						ImageID, 座標,		倍率	角度,	奥行
+using drawQueT = std::tuple<int, int, int, double, float, int>;
+
+class SceneMng
+{
+public:
+	static SceneMng& GetInstance(void)
+	{
+		Create();
+		return *sInstance_;
+	}
+	static void Create()
+	{
+		if (sInstance_ == nullptr)
+		{
+			sInstance_ = new SceneMng();
+		}
+	}
+	static void Destroy()									// 呼び忘れに注意
+	{
+		if (sInstance_ != nullptr)
+		{
+			delete sInstance_;
+		}
+		sInstance_ = nullptr;
+	}
+
+	void Run(void);
+	bool AddDrawQue(drawQueT que);
+	void SetEnd(void);
+
+	const Vector2 screenSize_;								// スクリーンサイズ
+private:
+	bool SysInit(void);
+	void Init(void);
+	void Draw(void);										// 描画
+
+	uniqueBase activeScene_;								// シーン管理
+
+	static SceneMng* sInstance_;
+
+	std::vector<drawQueT>drawList_;							// 描画リスト
+
+	bool end_;												// 実行条件 true : 続行  false : 実行終了
+
+	SceneMng();
+	~SceneMng();
+};
+

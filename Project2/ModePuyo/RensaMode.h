@@ -37,7 +37,11 @@ struct RensaMode
 				stage.maxRensa_ = stage.rensa_;
 			}
 
-			stage.ojamaCnt_ = (stage.maxRensa_  / 2) * (stage.rensa_ ) * (stage.eraseCnt_ / 4);
+			//if (stage.maxRensa_ == 0)
+			//{
+			//	stage.maxRensa_ = 2;
+			//}
+			stage.ojamaCnt_ = (stage.maxRensa_  / 2+1) * (stage.rensa_ ) * (stage.eraseCnt_ / 4);
 			//stage.ojamaCnt_ = (stage.rensa_) * 30;
 			stage.rensa_ = 0;
 			stage.eraseCnt_ = 0;
