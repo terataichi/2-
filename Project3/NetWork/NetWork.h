@@ -7,14 +7,12 @@
 class NetWork
 {
 public:
-	
 	static NetWork& GetInstance(void)
 	{
 		return *sInstance_;
 	}
 
 	IPDATA GetIP();
-
 private:
 
 	struct NetWorkDeleter

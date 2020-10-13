@@ -11,7 +11,7 @@ TitleScene::TitleScene()
 	screen_size_y_ = 0;
 
 	auto ip = lpNetWork.GetIP();
-	//TRACE("%d.%d.%d.%d");
+	TRACE("%d.%d.%d.%d", ip.d1, ip.d2, ip.d3, ip.d4);
 }
 
 TitleScene::~TitleScene()

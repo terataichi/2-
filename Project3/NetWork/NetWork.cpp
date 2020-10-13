@@ -4,8 +4,13 @@ std::unique_ptr<NetWork, NetWork::NetWorkDeleter> NetWork::sInstance_(new NetWor
 
 IPDATA NetWork::GetIP()
 {
-	GetMyIPAddress();
-	return  
+	IPDATA ip;
+	GetMyIPAddress(&ip);
+	return ip;
+}
+
+NetWork::NetWork()
+{
 }
 
 NetWork::~NetWork()
