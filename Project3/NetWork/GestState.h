@@ -1,12 +1,15 @@
 #pragma once
 #include "NetWorkState.h"
-class GestState :
+class GuestState :
 	public NetWorkState
 {
 public:
-	GestState();
-	~GestState();
+	GuestState();
+	~GuestState();
 
-	NetWorkMode GetMode(void) override{ return NetWorkMode::GEST; }	// モードの取得
+	NetWorkMode GetMode(void) override{ return NetWorkMode::GUEST; }	// モードの取得
+	bool ConnectHost(IPDATA hostIP) override;							// ホストに接続
+private:
+
 };
 

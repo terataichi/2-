@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <Dxlib.h>
+#include "NetWorkState.h"
 
 #define lpNetWork NetWork::GetInstance()
 
@@ -12,7 +13,13 @@ public:
 		return *sInstance_;
 	}
 
-	IPDATA GetIP();
+	IPDATA GetIP();															// 自分のIPアドレスを取得
+	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
+	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
+
+	bool GetActive(void);													// 接続できているかどうか
+
+	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 private:
 
 	struct NetWorkDeleter
@@ -28,5 +35,6 @@ private:
 
 	static std::unique_ptr<NetWork, NetWorkDeleter> sInstance_;
 
+	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
 };
 

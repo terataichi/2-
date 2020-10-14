@@ -8,5 +8,8 @@ public:
 	~HostState();
 
 	NetWorkMode GetMode(void) override{ return NetWorkMode::HOST; }	// ƒ‚[ƒh‚Ìæ“¾
+
+private:
+
 };
 
