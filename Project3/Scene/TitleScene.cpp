@@ -9,12 +9,12 @@
 
 TitleScene::TitleScene()
 {
-	TRACE("タイトルシーンの生成");
+	TRACE("タイトルシーンの生成\n");
 	screen_size_x_ = 0;
 	screen_size_y_ = 0;
 
 	auto ip = lpNetWork.GetIP();
-	TRACE("%d.%d.%d.%d", ip.d1, ip.d2, ip.d3, ip.d4);
+	TRACE("%d.%d.%d.%d\n", ip.d1, ip.d2, ip.d3, ip.d4);
 
 
 	int mode;			// モード選択用
@@ -40,10 +40,17 @@ TitleScene::TitleScene()
 
 			// ipに入力された情報をHostIPに格納
 			std::istringstream iss(ip);
-			std::string a;
-			std::getline(iss, a,'.');
-			hostIP.d1 = atoi(a.c_str());
+			std::string a[4];
+			for (int i = 0; i < 4; i++)
+			{
+				std::getline(iss, a[i], '.');
+			}
+			hostIP.d1 = atoi(a[0].c_str());
+			hostIP.d2 = atoi(a[1].c_str());
+			hostIP.d3 = atoi(a[2].c_str());
+			hostIP.d4 = atoi(a[3].c_str());
 
+			TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
 
 			lpNetWork.ConnectHost(hostIP);
 		}
