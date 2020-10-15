@@ -7,8 +7,9 @@ public:
 	GuestState();
 	~GuestState();
 
-	NetWorkMode GetMode(void) override{ return NetWorkMode::GUEST; }	// モードの取得
-	bool ConnectHost(IPDATA hostIP) override;							// ホストに接続
+	NetWorkMode GetMode(void) override{ return NetWorkMode::GUEST; }		// モードの取得
+	bool ConnectHost(IPDATA hostIP) override;								// ホストに接続
+	bool SetSendData(Vector2 pos)override;											// ホストにデータを送る
 private:
 
 };

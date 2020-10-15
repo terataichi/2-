@@ -17,8 +17,10 @@ public:
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 
+	bool Update(void);														// 更新
 	bool GetActive(void);													// 接続できているかどうか
-
+	bool GetReceiveData(Vector2& pos);										// 送られてきたデータを受け取る
+	bool SetSendData(Vector2 pos);											// データを送信
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 private:
 

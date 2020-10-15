@@ -15,3 +15,11 @@ bool GuestState::ConnectHost(IPDATA hostIP)
 	netHandle_ = ConnectNetWork(hostIP, portNum_);
 	return  active_ = (0 <= netHandle_);
 }
+
+bool GuestState::SetSendData(Vector2 pos)
+{
+	ReaceiveData tmpPos;
+	tmpPos = { pos.x,pos.y };
+	NetWorkSend(netHandle_, &tmpPos, sizeof(ReaceiveData));
+	return true;
+}

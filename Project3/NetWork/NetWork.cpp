@@ -39,9 +39,24 @@ NetWorkMode NetWork::GetNetWorkMode(void)
 	return state_->GetMode();
 }
 
+bool NetWork::Update(void)
+{
+	return state_->Update();
+}
+
 bool NetWork::GetActive(void)
 {
 	return state_->GetActive();
+}
+
+bool NetWork::GetReceiveData(Vector2& pos)
+{
+	return state_->GetReceiveData(pos);
+}
+
+bool NetWork::SetSendData(Vector2 pos)
+{
+	return state_->SetSendData(pos);
 }
 
 bool NetWork::ConnectHost(IPDATA hostIP)

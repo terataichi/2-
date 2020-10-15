@@ -1,9 +1,12 @@
 #include "TitleScene.h"
 #include <DxLib.h>
 #include <iostream>
-#include <string.h>
 #include <sstream>
 #include "../NetWork/NetWork.h"
+#include "../common/ImageMng.h"
+#include "../Scene/SceneMng.h"
+#include "../Input/PadState.h"
+#include "../Input/INPUT_ID.h"
 
 #include "../_debug/_DebugConOut.h"
 
@@ -39,16 +42,18 @@ TitleScene::TitleScene()
 			std::cin >> ip;
 
 			// ipÇ…ì¸óÕÇ≥ÇÍÇΩèÓïÒÇHostIPÇ…äiî[
-			std::istringstream iss(ip);
-			std::string a[4];
-			for (int i = 0; i < 4; i++)
+			std::istringstream iss{ ip };
+			std::string data;
+
+			auto GetIPNum = [&]()
 			{
-				std::getline(iss, a[i], '.');
-			}
-			hostIP.d1 = atoi(a[0].c_str());
-			hostIP.d2 = atoi(a[1].c_str());
-			hostIP.d3 = atoi(a[2].c_str());
-			hostIP.d4 = atoi(a[3].c_str());
+				getline(iss, data, '.');
+				return atoi(data.c_str());
+			};
+			hostIP.d1 = GetIPNum();
+			hostIP.d2 = GetIPNum();
+			hostIP.d3 = GetIPNum();
+			hostIP.d4 = GetIPNum();
 
 			TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
 
@@ -78,7 +83,7 @@ TitleScene::TitleScene()
 	}
 
 	TRACE("èÛë‘ : %dÇ≈Ç∑\n", lpNetWork.GetActive());
-
+	Init();
 }
 
 TitleScene::~TitleScene()
@@ -88,13 +93,38 @@ TitleScene::~TitleScene()
 void TitleScene::Init(void)
 {
 	GetDrawScreenSize(&screen_size_x_, &screen_size_y_);
+	input_ = std::make_unique<PadState>();
+	input_->SetUp(0);
+
+	pos_ = { 100,100 };
+	speed_ = 10;
+	rad_ = 0;
 }
 
 uniqueBase TitleScene::Update(uniqueBase scene)
 {
+	(*input_)();
+
+	auto move = [&](INPUT_ID id, Vector2 speed_)
+	{
+		if (input_->GetTrgData().at(id)[static_cast<int>(Trg::Now)])
+		{
+			pos_ += speed_;
+		}
+	};
+
+	move(INPUT_ID::BUTTON_LEFT, { -speed_,0 });
+	move(INPUT_ID::BUTTON_RIGHT, { speed_ ,0});
+	move(INPUT_ID::BUTTON_UP, { 0, -speed_ });
+	move(INPUT_ID::BUTTON_DOWN, { 0, speed_ });
+
+	lpNetWork.SetSendData(pos_);
+	lpNetWork.Update();
+	lpNetWork.GetReceiveData(pos_);
 	return scene;
 }
 
 void TitleScene::Draw()
 {
+	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("image03")[0],pos_.x,pos_.y,1,rad_,0 });
 }
