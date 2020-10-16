@@ -1,8 +1,10 @@
 #pragma once
-#include "../_debug/_DebugConOut.h"
+#include <map>
+#include <functional>
 #include <DxLib.h>
 #include "../common/Vector2.h"
 
+#include "../_debug/_DebugConOut.h"
 // ネットワークのモード用
 enum class NetWorkMode
 {
@@ -10,6 +12,16 @@ enum class NetWorkMode
 	HOST,
 	GUEST,
 	MAX
+};
+
+enum class ActiveState
+{
+	Non,						// 未設定
+	Wait,						// 接続待ち状態(ホスト用)
+	Init,						// 初期化(ゲーム開始準備中、ホスト/ゲスト兼用)
+	Stanby,						// 初期化済みの開始待ち(ホスト用)
+	Play,						// ゲーム中(ホスト/ゲスト兼用)
+	OFFLINE,
 };
 
 struct ReaceiveData
@@ -24,15 +36,19 @@ public:
 	virtual ~NetWorkState();
 
 	virtual NetWorkMode GetMode(void) { return NetWorkMode::OFFLINE; }		// モードの取得
-	bool GetActive(void);
+	ActiveState GetActive(void);
+	void SetActive(ActiveState state);										// 状態の更新
 	bool Update(void);														// 更新
-	virtual bool CheckConnect(void);										// 接続の確認
-	virtual bool ConnectHost(IPDATA hostIP);								// ホストに接続
-	virtual bool GetReceiveData(Vector2&);									// データの受け取り
-	virtual bool SetSendData(Vector2 pos);											// データを送る
+	
+	int GetNetHandle(void);													// ネットハンドルの取得
+
+	virtual bool CheckConnect(void) { return false; };						// 接続の確認(ホスト用)
+	virtual ActiveState ConnectHost(IPDATA hostIP);							// ホストに接続する(ゲスト:ホストは待機する)
+	virtual bool GetReceiveData(Vector2&) { return false; };				// データの受け取り
+	virtual bool SendMes(Vector2 pos) { return false; };				// データを送る
 protected:
 	const int portNum_ = 8086;												// ポート番号格納変数(番号は基本的に何でもいい)
-	bool active_;
+	ActiveState active_;
 	int netHandle_ = 0;														// ０以上：確立した接続を示すネットワークハンドル(int型の識別値)格納用
 };
 

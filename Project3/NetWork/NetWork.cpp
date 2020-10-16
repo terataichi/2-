@@ -44,7 +44,12 @@ bool NetWork::Update(void)
 	return state_->Update();
 }
 
-bool NetWork::GetActive(void)
+bool NetWork::CloseNetWork(void)
+{
+	return false;
+}
+
+ActiveState NetWork::GetActive(void)
 {
 	return state_->GetActive();
 }
@@ -54,12 +59,25 @@ bool NetWork::GetReceiveData(Vector2& pos)
 	return state_->GetReceiveData(pos);
 }
 
-bool NetWork::SetSendData(Vector2 pos)
+void NetWork::SendStanby(void)
 {
-	return state_->SetSendData(pos);
 }
 
-bool NetWork::ConnectHost(IPDATA hostIP)
+void NetWork::SendStart(void)
+{
+}
+
+bool NetWork::SendMes(MesData& data)
+{
+	return state_->SendMes(data);
+}
+
+bool NetWork::SendMes(MesData& data)
+{
+	return false;
+}
+
+ActiveState NetWork::ConnectHost(IPDATA hostIP)
 {
 	return state_->ConnectHost(hostIP);
 }

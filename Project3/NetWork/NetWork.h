@@ -5,6 +5,20 @@
 
 #define lpNetWork NetWork::GetInstance()
 
+enum class MesType
+{
+	STANBY,				// 初期化情報送信
+	GAME_START,			// ゲーム開始
+	POS
+};
+
+// 送るデータ
+struct MesData
+{
+	MesType type;
+	int data[2];
+};
+
 class NetWork
 {
 public:
@@ -18,10 +32,14 @@ public:
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 
 	bool Update(void);														// 更新
-	bool GetActive(void);													// 接続できているかどうか
+	bool CloseNetWork(void);
+	ActiveState GetActive(void);											// 接続できているかどうか
 	bool GetReceiveData(Vector2& pos);										// 送られてきたデータを受け取る
-	bool SetSendData(Vector2 pos);											// データを送信
-	bool ConnectHost(IPDATA hostIP);										// ホストに接続
+	void SendStanby(void);
+	void SendStart(void);
+
+	bool SendMes(MesData& data);											// データを送信
+	ActiveState ConnectHost(IPDATA hostIP);									// ホストに接続
 private:
 
 	struct NetWorkDeleter

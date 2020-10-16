@@ -2,18 +2,24 @@
 
 GuestState::GuestState()
 {
-	active_ = false;
+	active_ = ActiveState::Non;
 }
 
 GuestState::~GuestState()
 {
 }
 
-bool GuestState::ConnectHost(IPDATA hostIP)
+ActiveState GuestState::ConnectHost(IPDATA hostIP)
 {
 	// ０以上：確立した接続を示すネットワークハンドル(int型の識別値)
 	netHandle_ = ConnectNetWork(hostIP, portNum_);
-	return  active_ = (0 <= netHandle_);
+
+	// 接続出来たら次に行く
+	if (0 <= netHandle_)
+	{
+		return ActiveState::Init;
+	}
+	return  ActiveState::Non;
 }
 
 bool GuestState::SetSendData(Vector2 pos)

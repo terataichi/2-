@@ -2,41 +2,41 @@
 
 NetWorkState::NetWorkState()
 {
-	active_ = false;
+	active_ = ActiveState::Non;
+
+	netUpdateFunc_[ActiveState::Non] = std::bind(&NetWorkState::CheckConnect, this);
+	netUpdateFunc_[ActiveState::Init];
+	netUpdateFunc_[ActiveState::Stanby];
+	netUpdateFunc_[ActiveState::Play];
+	netUpdateFunc_[ActiveState::OFFLINE];
 }
 
 NetWorkState::~NetWorkState()
 {
 }
 
-bool NetWorkState::GetActive(void)
+ActiveState NetWorkState::GetActive(void)
 {
 	return active_;
 }
 
+void NetWorkState::SetActive(ActiveState state)
+{
+	active_ = state;
+}
+
 bool NetWorkState::Update(void)
 {
-	CheckConnect();
 
 	return false;
 }
 
-bool NetWorkState::CheckConnect(void)
+int NetWorkState::GetNetHandle(void)
 {
-	return false;
+	return netHandle_;
 }
 
-bool NetWorkState::ConnectHost(IPDATA hostIP)
+ActiveState NetWorkState::ConnectHost(IPDATA hostIP)
 {
-	return false;
-}
-
-bool NetWorkState::GetReceiveData(Vector2& pos)
-{
-	return false;
-}
-
-bool NetWorkState::SetSendData(Vector2 pos)
-{
-	return false;
+	return ActiveState::Wait;
 }
