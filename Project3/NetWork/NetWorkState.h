@@ -24,11 +24,6 @@ enum class ActiveState
 	OFFLINE,
 };
 
-struct ReaceiveData
-{
-	int x,y;
-};
-
 class NetWorkState
 {
 public:
@@ -39,13 +34,12 @@ public:
 	ActiveState GetActive(void);
 	void SetActive(ActiveState state);										// 状態の更新
 	bool Update(void);														// 更新
-	
+	bool CheckNetWork(void);												// 接続が切れていないかの確認
+
 	int GetNetHandle(void);													// ネットハンドルの取得
 
-	virtual bool CheckConnect(void) { return false; };						// 接続の確認(ホスト用)
-	virtual ActiveState ConnectHost(IPDATA hostIP);							// ホストに接続する(ゲスト:ホストは待機する)
-	virtual bool GetReceiveData(Vector2&) { return false; };				// データの受け取り
-	virtual bool SendMes(Vector2 pos) { return false; };				// データを送る
+	virtual bool CheckConnect(void) { return false; };						// 接続されたかの確認(ホスト用)
+	virtual bool ConnectHost(IPDATA hostIP) { return false; };				// ホストに接続する(ゲスト:ホストは待機する)
 protected:
 	const int portNum_ = 8086;												// ポート番号格納変数(番号は基本的に何でもいい)
 	ActiveState active_;

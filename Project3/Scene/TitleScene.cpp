@@ -25,8 +25,6 @@ TitleScene::TitleScene()
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);
 
 	updateMode_ = UpdateMode::SetNetWork;
-
-	TRACE("状態 : %dです\n", lpNetWork.GetActive());
 	Init();
 }
 
@@ -47,27 +45,14 @@ void TitleScene::Init(void)
 
 uniqueBase TitleScene::Update(uniqueBase scene)
 {
-	(*input_)();
-
 	// ネットワークのアップデート
 	func_[updateMode_]();
-
-	auto move = [&](INPUT_ID id, Vector2 speed_)
+	if (!lpNetWork.Update())
 	{
-		if (input_->GetTrgData().at(id)[static_cast<int>(Trg::Now)])
-		{
-			pos_ += speed_;
-		}
-	};
-
-	move(INPUT_ID::BUTTON_LEFT, { -speed_,0 });
-	move(INPUT_ID::BUTTON_RIGHT, { speed_ ,0});
-	move(INPUT_ID::BUTTON_UP, { 0, -speed_ });
-	move(INPUT_ID::BUTTON_DOWN, { 0, speed_ });
-
-	lpNetWork.SendMes(pos_);
-	lpNetWork.Update();
-	lpNetWork.GetReceiveData(pos_);
+		// 接続が切れた時にすべてをやり直す
+		lpNetWork.CloseNetWork();
+		updateMode_ = UpdateMode::SetNetWork;
+	}
 	return scene;
 }
 
@@ -78,6 +63,20 @@ void TitleScene::Draw()
 
 void TitleScene::PlayUpdate(void)
 {
+	(*input_)();
+
+	auto move = [&](INPUT_ID id, Vector2 speed_)
+	{
+		if (input_->GetTrgData().at(id)[static_cast<int>(Trg::Now)])
+		{
+			pos_ += speed_;
+		}
+	};
+
+	move(INPUT_ID::BUTTON_LEFT, { -speed_,0 });
+	move(INPUT_ID::BUTTON_RIGHT, { speed_ ,0 });
+	move(INPUT_ID::BUTTON_UP, { 0, -speed_ });
+	move(INPUT_ID::BUTTON_DOWN, { 0, speed_ });
 }
 
 void TitleScene::SetNetWorkMode(void)
@@ -110,22 +109,28 @@ void TitleScene::SetNetWorkMode(void)
 	switch (lpNetWork.GetNetWorkMode())
 	{
 	case NetWorkMode::OFFLINE:
-		TRACE("オフラインです")
+		TRACE("オフラインです");
+		updateMode_ = UpdateMode::Play;
 			break;
 	case NetWorkMode::HOST:
-		TRACE("ホストです")
+		TRACE("ホストです");
+		updateMode_ = UpdateMode::StartInit;
 			break;
 	case NetWorkMode::GUEST:
-		TRACE("ゲストです")
+		TRACE("ゲストです");
+		updateMode_ = UpdateMode::SetHostIP;
 			break;
 	default:
 		TRACE("エラー")
 			break;
 	}
+	TRACE("状態 : %dです\n", lpNetWork.GetActive());
 }
 
 void TitleScene::SetHostIP(void)
 {
+	TRACE("接続先のIPアドレスを入力してください");
+
 	IPDATA hostIP;		// ホストのIP
 	std::string ip;
 	std::cin >> ip;
@@ -146,10 +151,36 @@ void TitleScene::SetHostIP(void)
 
 	TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
 
-	lpNetWork.ConnectHost(hostIP);
+	if (lpNetWork.ConnectHost(hostIP))
+	{
+		updateMode_ = UpdateMode::StartInit;
+	}
 }
 
 void TitleScene::StartInit(void)
 {
+	if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
+	{
+		if (lpNetWork.CheckConnect() && lpNetWork.GetActive() == ActiveState::Init)
+		{
+			// 初期化情報の送信をして待機
+			TRACE("初期化情報の送信\n");
+			lpNetWork.SendStanby();
+		}
+	}
+	else if (lpNetWork.GetNetWorkMode() == NetWorkMode::GUEST)
+	{
+		if (lpNetWork.GetActive() == ActiveState::Init)
+		{
+			TRACE("初期化情報の受け取り\n");
 
+			// スタート情報の送信
+			lpNetWork.SendStart();
+		}
+	}
+	if (lpNetWork.GetActive() == ActiveState::Play)
+	{
+		TRACE("ゲームモードに移行します\n");
+		updateMode_ = UpdateMode::Play;
+	}
 }

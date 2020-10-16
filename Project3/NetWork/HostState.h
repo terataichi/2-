@@ -9,9 +9,8 @@ public:
 
 	NetWorkMode GetMode(void) override{ return NetWorkMode::HOST; }	// ƒ‚[ƒh‚Ìæ“¾
 
-	bool CheckPreparation(void);
-	bool CheckConnect(void);
-	bool GetReceiveData(Vector2& pos)override;
+	//ActiveState CheckPreparation(void);
+	bool CheckConnect(void) override;
 private:
 
 };

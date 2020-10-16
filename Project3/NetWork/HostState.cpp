@@ -4,23 +4,32 @@
 HostState::HostState()
 {
 	//active_ = !PreparationListenNetWork(portNum_);
+	bool flg;
+	flg = PreparationListenNetWork(portNum_) == 0 ? true : false;
+
 	active_ = ActiveState::Non;
+
+	if (flg)
+	{
+		// 接続待ちに入る
+		active_ = ActiveState::Wait;
+	}
 }
 
 HostState::~HostState()
 {
 }
 
-ActiveState HostState::CheckPreparation(void)
-{
-	bool flg;
-	flg = PreparationListenNetWork(portNum_) == 0 ? true : false;
-
-	// 接続待ち状態にする
-	if (flg) return ActiveState::Wait;
-
-	return ActiveState::Non;
-}
+//ActiveState HostState::CheckPreparation(void)
+//{
+//	bool flg;
+//	flg = PreparationListenNetWork(portNum_) == 0 ? true : false;
+//
+//	// 接続待ち状態にする
+//	if (flg) return ActiveState::Wait;
+//
+//	return ActiveState::Non;
+//}
 
 bool HostState::CheckConnect(void)
 {
@@ -29,31 +38,12 @@ bool HostState::CheckConnect(void)
 	if(handle != -1)
 	{
 		// 接続されてるのでこれ以上接続されないように止める
+		StopListenNetWork();
 		// 初期化状態に入る
 		netHandle_ = handle;
-		StopListenNetWork();
 		active_ = ActiveState::Init;
 
-		return true;
-	}
-	//if (GetLostNetWork() != -1)
-	//{
-	//	// 再接続の開始
-	//	PreparationListenNetWork(portNum_);
-	//	return false;
-	//}
-
-	return false;
-}
-
-bool HostState::GetReceiveData(Vector2& pos)
-{
-	if (GetNetWorkDataLength(netHandle_) > sizeof(ReaceiveData))
-	{
-		ReaceiveData data;
-		NetWorkRecv(netHandle_, &data, sizeof(ReaceiveData));
-
-		pos = { data.x,data.y };
+		TRACE("接続が確認されました");
 		return true;
 	}
 	return false;

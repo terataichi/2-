@@ -27,19 +27,20 @@ public:
 		return *sInstance_;
 	}
 
-	IPDATA GetIP();															// 自分のIPアドレスを取得
+	IPDATA GetIP(void);														// 自分のIPアドレスを取得
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
+	ActiveState GetActive(void);											// 接続先のステータス確認用
+	bool GetReceiveData(void);												// 送られてきたデータを受け取る
+	bool SendMes(MesData& data);											// データを送信
+	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 
+	bool CheckConnect(void);												// 接続できているか確認
 	bool Update(void);														// 更新
 	bool CloseNetWork(void);
-	ActiveState GetActive(void);											// 接続できているかどうか
-	bool GetReceiveData(Vector2& pos);										// 送られてきたデータを受け取る
 	void SendStanby(void);
 	void SendStart(void);
 
-	bool SendMes(MesData& data);											// データを送信
-	ActiveState ConnectHost(IPDATA hostIP);									// ホストに接続
 private:
 
 	struct NetWorkDeleter
@@ -55,6 +56,7 @@ private:
 
 	static std::unique_ptr<NetWork, NetWorkDeleter> sInstance_;
 
+	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
 };
 

@@ -3,12 +3,6 @@
 NetWorkState::NetWorkState()
 {
 	active_ = ActiveState::Non;
-
-	netUpdateFunc_[ActiveState::Non] = std::bind(&NetWorkState::CheckConnect, this);
-	netUpdateFunc_[ActiveState::Init];
-	netUpdateFunc_[ActiveState::Stanby];
-	netUpdateFunc_[ActiveState::Play];
-	netUpdateFunc_[ActiveState::OFFLINE];
 }
 
 NetWorkState::~NetWorkState()
@@ -27,16 +21,22 @@ void NetWorkState::SetActive(ActiveState state)
 
 bool NetWorkState::Update(void)
 {
+	// 接続が切れていないかチェック
+	return CheckNetWork();
+}
 
-	return false;
+bool NetWorkState::CheckNetWork(void)
+{
+	if (GetLostNetWork() != -1)
+	{
+		// 再接続の開始
+		TRACE("接続が切れました、再接続します");
+		return false;
+	}
+	return true;
 }
 
 int NetWorkState::GetNetHandle(void)
 {
 	return netHandle_;
-}
-
-ActiveState NetWorkState::ConnectHost(IPDATA hostIP)
-{
-	return ActiveState::Wait;
 }
