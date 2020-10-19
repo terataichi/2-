@@ -5,10 +5,10 @@
 
 std::unique_ptr<NetWork, NetWork::NetWorkDeleter> NetWork::sInstance_(new NetWork);
 
-ArrayIP NetWork::GetIP()
+ArrayIP NetWork::GetMyIP()
 {
 	ArrayIP ip;
-	GetMyIPAddress(ip,5);
+	GetMyIPAddress(&ip[0],5);
 	return ip;
 }
 

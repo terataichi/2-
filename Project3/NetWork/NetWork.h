@@ -30,7 +30,7 @@ public:
 		return *sInstance_;
 	}
 
-	ArrayIP GetIP(void);														// 自分のIPアドレスを取得
+	ArrayIP GetMyIP(void);														// 自分のIPアドレスを取得
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用

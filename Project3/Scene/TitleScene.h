@@ -44,6 +44,8 @@ private:
 	int speed_;
 	float rad_;
 
+	bool wasHost_;											// 前回のホストに接続したいかどうか管理用
+
 	std::unique_ptr<InputState> input_;
 };
 

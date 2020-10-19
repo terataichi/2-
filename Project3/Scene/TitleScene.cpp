@@ -17,14 +17,19 @@ TitleScene::TitleScene()
 	screen_size_x_ = 0;
 	screen_size_y_ = 0;
 
-	auto ip = lpNetWork.GetIP();
-	TRACE("%d.%d.%d.%d\n", ip.d1, ip.d2, ip.d3, ip.d4);
+	auto address = lpNetWork.GetMyIP();
+
+	for (auto ip : address)
+	{
+		TRACE("%d.%d.%d.%d\n", ip.d1, ip.d2, ip.d3, ip.d4);
+	}
 
 	func_[UpdateMode::SetHostIP] = std::bind(&TitleScene::SetHostIP, this);
 	func_[UpdateMode::SetNetWork] = std::bind(&TitleScene::SetNetWorkMode, this);
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);
 
+	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;
 	Init();
 }
@@ -82,10 +87,27 @@ void TitleScene::PlayUpdate(void)
 
 void TitleScene::SetNetWorkMode(void)
 {
-	int mode;			// モード選択用
+	int mode;												// モード選択用
+
+	// 前回のホストのIPアドレス取得
+	std::ifstream ifs("hostIp.txt");
+	std::string str;
+
+	bool fFlg = true;										// ファイルが開けているか						
+	if (ifs.fail())
+	{
+		str = "\n";
+		fFlg = false;
+	}
+	else
+	{
+		std::string ip;
+		getline(ifs, ip);
+		str = " 2 : 前回のホストに接続。前回のIPアドレス : " + ip + ", \n";
+	}
 
 	do {
-		std::cout << "モードを選択してください。\n 0 : ホスト,\n 1 : ゲスト,\n 2 : オフライン,\n" << std::endl;
+		std::cout << "モードを選択してください。\n 0 : ホスト,\n 1 : ゲスト,\n" << str <<" 3 : オフライン\n" << std::endl;
 		std::cin >> mode;
 
 		if (mode == 0)
@@ -98,9 +120,15 @@ void TitleScene::SetNetWorkMode(void)
 		}
 		else if (mode == 2)
 		{
-			std::ifstream ifs("hostIp.txt");
-
-			lpNetWork.SetNetWorkMode(NetWorkMode::GUEST);
+			if (!fFlg)
+			{
+				TRACE("正しく入力されてません、もう一度入力してください");
+			}
+			else
+			{
+				wasHost_ = true;
+				lpNetWork.SetNetWorkMode(NetWorkMode::GUEST);
+			}
 		}
 		else if (mode == 3)
 		{
@@ -110,7 +138,7 @@ void TitleScene::SetNetWorkMode(void)
 		{
 			TRACE("正しく入力されてません、もう一度入力してください");
 		}
-	} while (mode < 0 || mode > 2);
+	} while (mode < 0 || mode > 3);
 
 	// 結果発表
 	switch (lpNetWork.GetNetWorkMode())
@@ -136,11 +164,29 @@ void TitleScene::SetNetWorkMode(void)
 
 void TitleScene::SetHostIP(void)
 {
-	TRACE("接続先のIPアドレスを入力してください");
 
 	IPDATA hostIP;		// ホストのIP
 	std::string ip;
-	std::cin >> ip;
+
+	if(wasHost_)
+	{
+		// 前回のホストのIPアドレス取得
+		std::ifstream ifs("hostIp.txt");
+		if (ifs.fail())
+		{
+			TRACE("ファイルの読み込みに失敗しました。\n");
+			wasHost_ = false;
+			return;
+		}
+		// ファイルの内容を格納
+		getline(ifs, ip);
+		ifs.close();
+	}
+	else
+	{
+		TRACE("接続先のIPアドレスを入力してください\n");
+		std::cin >> ip;
+	}
 
 	// ipに入力された情報をHostIPに格納
 	std::istringstream iss{ ip };
@@ -158,15 +204,17 @@ void TitleScene::SetHostIP(void)
 
 	TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
 
-
+	std::ofstream ofs("hostIp.txt", std::ios::trunc);
+	ofs << ip;
+	ofs.close();
 	if (lpNetWork.ConnectHost(hostIP))
 	{
 		// ファイルへの書き込み
 		// なかったら新しくファイルを作ってくれる
 		// std::ios::trunc：今回はファイルを上書きしてかまわないので毎回新しくファイルを作り直す
-		std::ofstream autPutF("hostIp.txt",std::ios::trunc);
-		autPutF << ip;
-		autPutF.close();
+		std::ofstream ofs("hostIp.txt",std::ios::trunc);
+		ofs << ip;
+		ofs.close();
 
 		updateMode_ = UpdateMode::StartInit;
 	}
