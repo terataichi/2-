@@ -26,7 +26,7 @@ bool NetWork::SetNetWorkMode(NetWorkMode mode)
 		state_ = std::make_unique<GuestState>();
 		break;
 	default:
-		TRACE("例外：オフラインに設定します。");
+		TRACE("例外：オフラインに設定します。\n");
 		state_ = std::make_unique<NetWorkState>();
 		return false;
 		break;
@@ -58,7 +58,7 @@ bool NetWork::Update(void)
 				// ゲームスタートを受信時
 				if (data.type == MesType::GAME_START)
 				{
-					TRACE("合図を確認、ゲームを開始します\n");
+					TRACE("ゲストから通知を確認、ゲームを開始します\n");
 					state_->SetActive(ActiveState::Play);
 					return true;
 				}
@@ -74,6 +74,7 @@ bool NetWork::Update(void)
 
 			if (data.type == MesType::STANBY)
 			{
+				TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
 				recvStanby_ = true;
 				state_->SetActive(ActiveState::Play);
 				return true;
@@ -101,18 +102,6 @@ ActiveState NetWork::GetActive(void)
 	return state_->GetActive();
 }
 
-bool NetWork::GetReceiveData(void)
-{
-	if (GetNetWorkDataLength(state_->GetNetHandle()) > sizeof(MesData))
-	{
-		MesData data;
-		NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
-
-		return true;
-	}
-	return false;
-}
-
 void NetWork::SendStanby(void)
 {
 	// 初期化情報の送信
@@ -121,7 +110,7 @@ void NetWork::SendStanby(void)
 	state_->SetActive(ActiveState::Stanby);
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
 	{
-		TRACE("Stanby : 送信失敗");
+		TRACE("Stanby : 送信失敗\n");
 	}
 }
 
@@ -131,7 +120,7 @@ void NetWork::SendStart(void)
 	tmpData = { MesType::GAME_START, 0,0 };
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
 	{
-		TRACE("Start : 送信失敗");
+		TRACE("Start : 送信失敗\n");
 	}
 }
 
@@ -139,17 +128,27 @@ bool NetWork::SendMes(MesData& data)
 {
 	MesData tmpData;
 	tmpData = {MesType::POS, data.data[0],data.data[1] };
-	NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData));
+	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
+	{
+		TRACE("データの送信失敗\n");
+		return false;
+	}
 	return true;
 }
 
 bool NetWork::ConnectHost(IPDATA hostIP)
 {
-	return state_->ConnectHost(hostIP);
+	if (state_)
+	{
+		return state_->ConnectHost(hostIP);
+	}
+	TRACE("モードが設定されていません\n");
+	return false;
 }
 
 NetWork::NetWork()
 {
+	recvStanby_ = false;
 }
 
 NetWork::~NetWork()

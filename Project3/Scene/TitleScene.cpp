@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include "../NetWork/NetWork.h"
 #include "../common/ImageMng.h"
 #include "../Scene/SceneMng.h"
@@ -87,17 +88,23 @@ void TitleScene::SetNetWorkMode(void)
 		std::cout << "モードを選択してください。\n 0 : ホスト,\n 1 : ゲスト,\n 2 : オフライン,\n" << std::endl;
 		std::cin >> mode;
 
-		if (mode == 2)
-		{
-			lpNetWork.SetNetWorkMode(NetWorkMode::OFFLINE);
-		}
-		else if (mode == 0)
+		if (mode == 0)
 		{
 			lpNetWork.SetNetWorkMode(NetWorkMode::HOST);
 		}
 		else if (mode == 1)
 		{
 			lpNetWork.SetNetWorkMode(NetWorkMode::GUEST);
+		}
+		else if (mode == 2)
+		{
+			std::ifstream ifs("hostIp.txt");
+
+			lpNetWork.SetNetWorkMode(NetWorkMode::GUEST);
+		}
+		else if (mode == 3)
+		{
+			lpNetWork.SetNetWorkMode(NetWorkMode::OFFLINE);
 		}
 		else
 		{
@@ -151,8 +158,16 @@ void TitleScene::SetHostIP(void)
 
 	TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
 
+
 	if (lpNetWork.ConnectHost(hostIP))
 	{
+		// ファイルへの書き込み
+		// なかったら新しくファイルを作ってくれる
+		// std::ios::trunc：今回はファイルを上書きしてかまわないので毎回新しくファイルを作り直す
+		std::ofstream autPutF("hostIp.txt",std::ios::trunc);
+		autPutF << ip;
+		autPutF.close();
+
 		updateMode_ = UpdateMode::StartInit;
 	}
 }

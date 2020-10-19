@@ -30,7 +30,7 @@ bool NetWorkState::CheckNetWork(void)
 	if (GetLostNetWork() != -1)
 	{
 		// 再接続の開始
-		TRACE("接続が切れました、再接続します");
+		TRACE("接続が切れました、再接続します\n");
 		return false;
 	}
 	return true;

@@ -1,9 +1,12 @@
 #pragma once
 #include <memory>
+#include <array>
 #include <Dxlib.h>
 #include "NetWorkState.h"
 
 #define lpNetWork NetWork::GetInstance()
+
+using ArrayIP = std::array<int, 5>;
 
 enum class MesType
 {
@@ -31,7 +34,6 @@ public:
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
-	bool GetReceiveData(void);												// 送られてきたデータを受け取る
 	bool SendMes(MesData& data);											// データを送信
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 

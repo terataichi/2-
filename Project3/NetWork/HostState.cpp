@@ -43,7 +43,7 @@ bool HostState::CheckConnect(void)
 		netHandle_ = handle;
 		active_ = ActiveState::Init;
 
-		TRACE("接続が確認されました");
+		TRACE("接続が確認されました\n");
 		return true;
 	}
 	return false;
