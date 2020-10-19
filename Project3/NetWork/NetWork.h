@@ -6,7 +6,7 @@
 
 #define lpNetWork NetWork::GetInstance()
 
-using ArrayIP = std::array<int, 5>;
+using ArrayIP = std::array<IPDATA, 5>;
 
 enum class MesType
 {
@@ -30,7 +30,7 @@ public:
 		return *sInstance_;
 	}
 
-	IPDATA GetIP(void);														// 自分のIPアドレスを取得
+	ArrayIP GetIP(void);														// 自分のIPアドレスを取得
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
