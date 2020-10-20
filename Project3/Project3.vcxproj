@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(DXLIB_DIR);$(SolutionDir)\DXLIB_DIR;$(IncludePath)</IncludePath>
+    <IncludePath>$(DXLIB_DIR);$(SolutionDir)\tmxparser;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -173,8 +173,35 @@
     <ClInclude Include="Scene\BaseScene.h" />
     <ClInclude Include="Scene\SceneMng.h" />
     <ClInclude Include="Scene\TitleScene.h" />
+    <ClInclude Include="tmxparser\include\base64\base64.h" />
+    <ClInclude Include="tmxparser\include\TmxColor.h" />
+    <ClInclude Include="tmxparser\include\TmxEllipse.h" />
+    <ClInclude Include="tmxparser\include\TmxGroupLayer.h" />
+    <ClInclude Include="tmxparser\include\TmxImage.h" />
+    <ClInclude Include="tmxparser\include\TmxImageLayer.h" />
+    <ClInclude Include="tmxparser\include\TmxLayer.h" />
+    <ClInclude Include="tmxparser\include\TmxMap.h" />
+    <ClInclude Include="tmxparser\include\TmxMapTile.h" />
+    <ClInclude Include="tmxparser\include\TmxObject.h" />
+    <ClInclude Include="tmxparser\include\TmxObjectGroup.h" />
+    <ClInclude Include="tmxparser\include\TmxPoint.h" />
+    <ClInclude Include="tmxparser\include\TmxPolygon.h" />
+    <ClInclude Include="tmxparser\include\TmxPolyline.h" />
+    <ClInclude Include="tmxparser\include\TmxProperty.h" />
+    <ClInclude Include="tmxparser\include\TmxPropertySet.h" />
+    <ClInclude Include="tmxparser\include\TmxTerrain.h" />
+    <ClInclude Include="tmxparser\include\TmxTerrainArray.h" />
+    <ClInclude Include="tmxparser\include\TmxText.h" />
+    <ClInclude Include="tmxparser\include\TmxTile.h" />
+    <ClInclude Include="tmxparser\include\TmxTileLayer.h" />
+    <ClInclude Include="tmxparser\include\TmxTileOffset.h" />
+    <ClInclude Include="tmxparser\include\TmxTileset.h" />
+    <ClInclude Include="tmxparser\include\TmxUtil.h" />
     <ClInclude Include="_debug\_DebugConOut.h" />
     <ClInclude Include="_debug\_DebugDispOut.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tmxparser\include\Tmx.h.in" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

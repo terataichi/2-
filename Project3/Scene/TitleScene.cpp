@@ -29,6 +29,32 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);
 
+
+	TileMap map;
+	std::string data;
+
+	std::ifstream ifs("TileMap/stage.tmx");
+	if (ifs.fail())
+	{
+		TRACE("tmx ファイルが開けません\n");
+	}
+
+	// ipに入力された情報をHostIPに格納
+	getline(ifs, data);
+	//std::istringstream iss{ data };
+
+	//auto GetIPNum = [&]()
+	//{
+	//	getline(iss, data, '.');
+	//	return atoi(data.c_str());
+	//};
+
+
+
+
+
+
+
 	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;
 	Init();
@@ -43,7 +69,7 @@ void TitleScene::Init(void)
 	GetDrawScreenSize(&screen_size_x_, &screen_size_y_);
 	input_ = std::make_unique<PadState>();
 	input_->SetUp(0);
-
+	wasHost_ = false;
 	pos_ = { 100,100 };
 	speed_ = 10;
 	rad_ = 0;
@@ -58,6 +84,7 @@ uniqueBase TitleScene::Update(uniqueBase scene)
 		// 接続が切れた時にすべてをやり直す
 		lpNetWork.CloseNetWork();
 		updateMode_ = UpdateMode::SetNetWork;
+		wasHost_ = false;
 	}
 	return scene;
 }
@@ -202,11 +229,8 @@ void TitleScene::SetHostIP(void)
 	hostIP.d3 = GetIPNum();
 	hostIP.d4 = GetIPNum();
 
-	TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
+	//TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
 
-	std::ofstream ofs("hostIp.txt", std::ios::trunc);
-	ofs << ip;
-	ofs.close();
 	if (lpNetWork.ConnectHost(hostIP))
 	{
 		// ファイルへの書き込み

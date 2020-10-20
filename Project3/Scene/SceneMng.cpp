@@ -85,7 +85,7 @@ void SceneMng::Init(void)
 	end_ = true;
 }
 
-SceneMng::SceneMng() : screenSize_(800,600)
+SceneMng::SceneMng() : screenSize_(32 * 21,32 * 17)
 {
 	TRACE("シーンマネージャーの生成\n");
 	if (!SysInit())
