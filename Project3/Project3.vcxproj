@@ -156,6 +156,8 @@
     <ClCompile Include="Scene\BaseScene.cpp" />
     <ClCompile Include="Scene\SceneMng.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
+    <ClCompile Include="common\TileMap.cpp" />
+    <ClCompile Include="TMXParser-master\src\TMXParser.cpp" />
     <ClCompile Include="_debug\_DebugConOut.cpp" />
     <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
@@ -173,6 +175,12 @@
     <ClInclude Include="Scene\BaseScene.h" />
     <ClInclude Include="Scene\SceneMng.h" />
     <ClInclude Include="Scene\TitleScene.h" />
+    <ClInclude Include="common\TileMap.h" />
+    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml_utils.hpp" />
+    <ClInclude Include="TMXParser-master\include\TMXParser.h" />
     <ClInclude Include="tmxparser\include\base64\base64.h" />
     <ClInclude Include="tmxparser\include\TmxColor.h" />
     <ClInclude Include="tmxparser\include\TmxEllipse.h" />
@@ -197,11 +205,18 @@
     <ClInclude Include="tmxparser\include\TmxTileOffset.h" />
     <ClInclude Include="tmxparser\include\TmxTileset.h" />
     <ClInclude Include="tmxparser\include\TmxUtil.h" />
+    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml_utils.hpp" />
+    <ClInclude Include="TSXParser-master\include\TSXParser.h" />
     <ClInclude Include="_debug\_DebugConOut.h" />
     <ClInclude Include="_debug\_DebugDispOut.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="TMXParser-master\include\rapidxml\manual.html" />
     <None Include="tmxparser\include\Tmx.h.in" />
+    <None Include="TSXParser-master\include\rapidxml\manual.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

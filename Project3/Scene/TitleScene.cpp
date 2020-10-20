@@ -4,10 +4,12 @@
 #include <sstream>
 #include <fstream>
 #include "../NetWork/NetWork.h"
+#include "../common/TileMap.h"
 #include "../common/ImageMng.h"
 #include "../Scene/SceneMng.h"
 #include "../Input/PadState.h"
 #include "../Input/INPUT_ID.h"
+#include "../TMXParser-master/include/TMXParser.h"
 
 #include "../_debug/_DebugConOut.h"
 
@@ -29,30 +31,25 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);
 
+	chipData_.try_emplace(ChipLayer::BG);
+	chipData_.try_emplace(ChipLayer::ITEM);
+	chipData_.try_emplace(ChipLayer::OBJ);
+	chipData_.try_emplace(ChipLayer::CHAR);
 
-	TileMap map;
-	std::string data;
+	TMX::Parser mapData;
 
-	std::ifstream ifs("TileMap/stage.tmx");
-	if (ifs.fail())
+	mapData.load("TileMap/stage.tmx");
+
+	std::cout << mapData.tileLayer["Bg"].data.contents << std::endl;
+
+	std::istringstream iss{ mapData.tileLayer["Char"].data.contents };
+	std::string num;
+	int size = mapData.mapInfo.width * mapData.mapInfo.height;
+	for (int i = 0; i < size; i++)
 	{
-		TRACE("tmx ƒtƒ@ƒCƒ‹‚ªŠJ‚¯‚Ü‚¹‚ñ\n");
+		getline(iss, num, ',');
+		chipData_[ChipLayer::BG].emplace_back(atoi(num.c_str()));
 	}
-
-	// ip‚É“ü—Í‚³‚ê‚½î•ñ‚ðHostIP‚ÉŠi”[
-	getline(ifs, data);
-	//std::istringstream iss{ data };
-
-	//auto GetIPNum = [&]()
-	//{
-	//	getline(iss, data, '.');
-	//	return atoi(data.c_str());
-	//};
-
-
-
-
-
 
 
 	wasHost_ = false;

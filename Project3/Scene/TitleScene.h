@@ -7,28 +7,20 @@
 #include "../Input/InputState.h"
 #include "../NetWork/NetWorkState.h"
 
-
-struct TileMap
-{
-	std::string version;
-	std::string tiledversion;
-	std::string orientation;
-	std::string	renderorder;			// enumとかに変えたい
-	int width;							// タイルのマスの数(横)
-	int height;							// 　　　 "　　　　(縦)
-	int tileWidth;						// 1タイルのサイズ(横)
-	int tileHeight;						//　　　 "　　　　(縦)
-	int infinite;
-	int nextLayerID;					// layerの数
-	int nextObjectID;
-};
-
 enum class UpdateMode
 {
 	SetNetWork,
 	SetHostIP,
 	StartInit,
 	Play,
+};
+
+enum class ChipLayer
+{
+	BG,
+	ITEM,
+	OBJ,
+	CHAR
 };
 
 class TitleScene :
@@ -61,5 +53,7 @@ private:
 
 	bool wasHost_;											// 前回のホストに接続したいかどうか管理用
 	std::unique_ptr<InputState> input_;
+
+	std::map<ChipLayer, std::vector<int>>chipData_;
 };
 
