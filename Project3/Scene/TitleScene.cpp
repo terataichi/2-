@@ -9,7 +9,8 @@
 #include "../Scene/SceneMng.h"
 #include "../Input/PadState.h"
 #include "../Input/INPUT_ID.h"
-#include "../TMXParser-master/include/TMXParser.h"
+#include "../common/TileMap.h"
+//#include "../TMXParser-master/include/TMXParser.h"
 
 #include "../_debug/_DebugConOut.h"
 
@@ -31,25 +32,35 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);
 
-	chipData_.try_emplace(ChipLayer::BG);
-	chipData_.try_emplace(ChipLayer::ITEM);
-	chipData_.try_emplace(ChipLayer::OBJ);
-	chipData_.try_emplace(ChipLayer::CHAR);
+	//chipData_.try_emplace(ChipLayer::BG);
+	//chipData_.try_emplace(ChipLayer::ITEM);
+	//chipData_.try_emplace(ChipLayer::OBJ);
+	//chipData_.try_emplace(ChipLayer::CHAR);
 
-	TMX::Parser mapData;
+	//chipLayer_.try_emplace("Bg", ChipLayer::BG);
+	//chipLayer_.try_emplace("Item", ChipLayer::ITEM);
+	//chipLayer_.try_emplace("Obj", ChipLayer::OBJ);
+	//chipLayer_.try_emplace("Char", ChipLayer::CHAR);
 
-	mapData.load("TileMap/stage.tmx");
+	TileMap map;
+	map.LoadTmx("TileMap/Stage.tmx");
 
-	std::cout << mapData.tileLayer["Bg"].data.contents << std::endl;
+	//TMX::Parser mapData;
+	//mapData.load("TileMap/stage.tmx");
 
-	std::istringstream iss{ mapData.tileLayer["Char"].data.contents };
-	std::string num;
-	int size = mapData.mapInfo.width * mapData.mapInfo.height;
-	for (int i = 0; i < size; i++)
-	{
-		getline(iss, num, ',');
-		chipData_[ChipLayer::BG].emplace_back(atoi(num.c_str()));
-	}
+	//std::cout << mapData.tileLayer["Bg"].data.contents << std::endl;
+
+	//for (auto data : mapData.tileLayer)
+	//{
+	//	std::istringstream iss{ mapData.tileLayer["Char"].data.contents };
+	//	std::string num;
+	//	int size = mapData.mapInfo.width * mapData.mapInfo.height;
+	//	for (int i = 0; i < size; i++)
+	//	{
+	//		getline(iss, num, ',');
+	//		chipData_[ChipLayer::BG].emplace_back(atoi(num.c_str()));
+	//	}
+	//}   
 
 
 	wasHost_ = false;

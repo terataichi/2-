@@ -4,36 +4,22 @@
 
 #define lpTileMap TileMap::GetInstance()
 
+#define TMX_VERSION "1.4"
+
 class TileMap
 {
 public:
-	static TileMap& GetInstance(void)
-	{
-		return *sInstance_;
-	}
-
-	bool LoadTileMap(std::string TileName);
-
-private:
-
-	//	カスタムデリーター
-	struct TileMapDeleter
-	{
-		void operator () (TileMap* tileMap)const
-		{
-			delete tileMap;
-		}
-	};
-
 	TileMap();
 	~TileMap();
 
-	static std::unique_ptr<TileMap,TileMapDeleter> sInstance_;
+	bool LoadTmx(std::string file);
 
-	int version;
-	int tiledversion;
-	int orientation;
-	int renderorder;					// enumとかに変えたい
+private:
+	
+	std::string version;
+	std::string tiledversion;
+	std::string orientation;
+	std::string renderorder;			// enumとかに変えたい
 	int width;							// タイルのマスの数(横)
 	int height;							// 　　　 "　　　　(縦)
 	int tileWidth;						// 1タイルのサイズ(横)
