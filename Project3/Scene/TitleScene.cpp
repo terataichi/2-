@@ -42,7 +42,7 @@ TitleScene::TitleScene()
 	//chipLayer_.try_emplace("Obj", ChipLayer::OBJ);
 	//chipLayer_.try_emplace("Char", ChipLayer::CHAR);
 
-	TileMap map;
+	MapLoader::TileMap map;
 	map.LoadTmx("TileMap/Stage.tmx");
 
 	//TMX::Parser mapData;

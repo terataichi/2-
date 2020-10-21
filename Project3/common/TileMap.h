@@ -1,31 +1,46 @@
 #pragma once
-#include <memory>
+#include <vector>
+#include <map>
 #include <string>
-
-#define lpTileMap TileMap::GetInstance()
 
 #define TMX_VERSION "1.4"
 
-class TileMap
+using LayerMap = std::map<std::string, MapLoader::LayerData>;
+
+namespace MapLoader
 {
-public:
-	TileMap();
-	~TileMap();
+	struct LayerData
+	{
+		std::string name;
+		std::vector<int>chipData;
+		int id,
+			width,
+			heigth;
+	};
 
-	bool LoadTmx(std::string file);
+	struct MapData
+	{
+		std::string 
+			renderOrder;
+		int width,
+			height,
+			tileWidth,
+			tileHeight;
+	};
 
-private:
-	
-	std::string version;
-	std::string tiledversion;
-	std::string orientation;
-	std::string renderorder;			// enumとかに変えたい
-	int width;							// タイルのマスの数(横)
-	int height;							// 　　　 "　　　　(縦)
-	int tileWidth;						// 1タイルのサイズ(横)
-	int tileHeight;						//　　　 "　　　　(縦)
-	int infinite;
-	int nextLayerID;					// layerの数
-	int nextObjectID;
-};
+	class TileMap
+	{
+	public:
+		TileMap();
+		~TileMap();
+
+		bool LoadTmx(std::string file);
+
+		LayerMap GetLayerData(void);
+		MapData GetMapData(void);
+	private:
+		LayerMap layer_;
+		MapData mapData_;
+	};
+}
 

@@ -60,9 +60,6 @@
     <ClCompile Include="common\TileMap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="TMXParser-master\src\TMXParser.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Scene\BaseScene.h">
@@ -185,40 +182,20 @@
     <ClInclude Include="common\TileMap.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml.hpp">
+    <ClInclude Include="TileMap\rapidxml_utils.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml_iterators.hpp">
+    <ClInclude Include="TileMap\rapidxml.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml_print.hpp">
+    <ClInclude Include="TileMap\rapidxml_iterators.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="TMXParser-master\include\rapidxml\rapidxml_utils.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="TMXParser-master\include\TMXParser.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml_iterators.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml_print.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="TSXParser-master\include\rapidxml\rapidxml_utils.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="TSXParser-master\include\TSXParser.h">
+    <ClInclude Include="TileMap\rapidxml_print.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="tmxparser\include\Tmx.h.in" />
-    <None Include="TMXParser-master\include\rapidxml\manual.html" />
-    <None Include="TSXParser-master\include\rapidxml\manual.html" />
   </ItemGroup>
 </Project>
