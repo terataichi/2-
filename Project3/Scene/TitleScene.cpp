@@ -31,7 +31,7 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);;
 
-	map.LoadTmx("TileMap/Stage.tmx");
+	map.LoadTmx("TileMap/Stage01.tmx");
 
 	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;
@@ -73,24 +73,7 @@ void TitleScene::Draw()
 
 	//std::cout << map.GetLayerData()["Bg"].chipData;
 
-	auto layer = map.GetLayerData();
-	for (auto& data : layer)
-	{
-		Vector2 div{data.width ,data.heigth };
-		Vector2 size{ map.GetMapData().tileWidth,map.GetMapData().tileHeight };
-		
-		int i = 0;
-		for (auto chip : data.chipData)
-		{
-			//int chip = data.second.chipData[i];
-			Vector2 chipPos{ size.x * (i % div.x) + size.x / 2 ,size.y * (i / div.x) + size.y / 2 };
-			if (chip != 0)
-			{
-				lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("map",{4,3},size)[chip - 1], chipPos.x,chipPos.y,1,rad_,1 });
-			}
-			i++;
-		}
-	}
+
 }
 
 void TitleScene::PlayUpdate(void)

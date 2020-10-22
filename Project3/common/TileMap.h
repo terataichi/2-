@@ -7,42 +7,20 @@
 
 #define TMX_VERSION "1.4"
 
-
-struct LayerData
-{
-	std::string name;
-	std::vector<int>chipData;
-	int id,
-		width,
-		heigth;
-};
-
-struct MapData
-{
-	std::string 
-		renderOrder;
-	int width,
-		height,
-		tileWidth,
-		tileHeight;
-};
-
-using LayerVec = std::vector<LayerData>;
-
 class TileMap
 {
 public:
 	TileMap();
+	TileMap(std::string fileName);
 	~TileMap();
 
-	bool LoadTmx(std::string file);
-
-
-	LayerVec GetLayerData(void);
-	MapData GetMapData(void);
+	bool LoadTmx(std::string fileName);
+	bool DrawUpdate(void);								// 描画の更新
+	bool DrawMap(LayerData layerData);					// マップの描画
 private:
-	LayerVec layer_;
-	MapData mapData_;
+	void Init(void);									// 初期化
 	TmxLoader loader_;
+	LayerVec layerData_;
+	MapData mapData_;
 };
 
