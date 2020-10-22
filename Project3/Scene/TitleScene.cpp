@@ -9,7 +9,6 @@
 #include "../Scene/SceneMng.h"
 #include "../Input/PadState.h"
 #include "../Input/INPUT_ID.h"
-#include "../common/TileMap.h"
 //#include "../TMXParser-master/include/TMXParser.h"
 
 #include "../_debug/_DebugConOut.h"
@@ -30,38 +29,9 @@ TitleScene::TitleScene()
 	func_[UpdateMode::SetHostIP] = std::bind(&TitleScene::SetHostIP, this);
 	func_[UpdateMode::SetNetWork] = std::bind(&TitleScene::SetNetWorkMode, this);
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
-	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);
+	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);;
 
-	//chipData_.try_emplace(ChipLayer::BG);
-	//chipData_.try_emplace(ChipLayer::ITEM);
-	//chipData_.try_emplace(ChipLayer::OBJ);
-	//chipData_.try_emplace(ChipLayer::CHAR);
-
-	//chipLayer_.try_emplace("Bg", ChipLayer::BG);
-	//chipLayer_.try_emplace("Item", ChipLayer::ITEM);
-	//chipLayer_.try_emplace("Obj", ChipLayer::OBJ);
-	//chipLayer_.try_emplace("Char", ChipLayer::CHAR);
-
-	MapLoader::TileMap map;
 	map.LoadTmx("TileMap/Stage.tmx");
-
-	//TMX::Parser mapData;
-	//mapData.load("TileMap/stage.tmx");
-
-	//std::cout << mapData.tileLayer["Bg"].data.contents << std::endl;
-
-	//for (auto data : mapData.tileLayer)
-	//{
-	//	std::istringstream iss{ mapData.tileLayer["Char"].data.contents };
-	//	std::string num;
-	//	int size = mapData.mapInfo.width * mapData.mapInfo.height;
-	//	for (int i = 0; i < size; i++)
-	//	{
-	//		getline(iss, num, ',');
-	//		chipData_[ChipLayer::BG].emplace_back(atoi(num.c_str()));
-	//	}
-	//}   
-
 
 	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;
@@ -100,6 +70,27 @@ uniqueBase TitleScene::Update(uniqueBase scene)
 void TitleScene::Draw()
 {
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("image03")[0],pos_.x,pos_.y,1,rad_,0 });
+
+	//std::cout << map.GetLayerData()["Bg"].chipData;
+
+	auto layer = map.GetLayerData();
+	for (auto& data : layer)
+	{
+		Vector2 div{data.width ,data.heigth };
+		Vector2 size{ map.GetMapData().tileWidth,map.GetMapData().tileHeight };
+		
+		int i = 0;
+		for (auto chip : data.chipData)
+		{
+			//int chip = data.second.chipData[i];
+			Vector2 chipPos{ size.x * (i % div.x) + size.x / 2 ,size.y * (i / div.x) + size.y / 2 };
+			if (chip != 0)
+			{
+				lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("map",{4,3},size)[chip - 1], chipPos.x,chipPos.y,1,rad_,1 });
+			}
+			i++;
+		}
+	}
 }
 
 void TitleScene::PlayUpdate(void)

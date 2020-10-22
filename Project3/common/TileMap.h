@@ -3,44 +3,46 @@
 #include <map>
 #include <string>
 
+#include "../TmxLoader.h"
+
 #define TMX_VERSION "1.4"
 
-using LayerMap = std::map<std::string, MapLoader::LayerData>;
 
-namespace MapLoader
+struct LayerData
 {
-	struct LayerData
-	{
-		std::string name;
-		std::vector<int>chipData;
-		int id,
-			width,
-			heigth;
-	};
+	std::string name;
+	std::vector<int>chipData;
+	int id,
+		width,
+		heigth;
+};
 
-	struct MapData
-	{
-		std::string 
-			renderOrder;
-		int width,
-			height,
-			tileWidth,
-			tileHeight;
-	};
+struct MapData
+{
+	std::string 
+		renderOrder;
+	int width,
+		height,
+		tileWidth,
+		tileHeight;
+};
 
-	class TileMap
-	{
-	public:
-		TileMap();
-		~TileMap();
+using LayerVec = std::vector<LayerData>;
 
-		bool LoadTmx(std::string file);
+class TileMap
+{
+public:
+	TileMap();
+	~TileMap();
 
-		LayerMap GetLayerData(void);
-		MapData GetMapData(void);
-	private:
-		LayerMap layer_;
-		MapData mapData_;
-	};
-}
+	bool LoadTmx(std::string file);
+
+
+	LayerVec GetLayerData(void);
+	MapData GetMapData(void);
+private:
+	LayerVec layer_;
+	MapData mapData_;
+	TmxLoader loader_;
+};
 

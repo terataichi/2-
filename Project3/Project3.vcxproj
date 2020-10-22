@@ -157,6 +157,7 @@
     <ClCompile Include="Scene\SceneMng.cpp" />
     <ClCompile Include="Scene\TitleScene.cpp" />
     <ClCompile Include="common\TileMap.cpp" />
+    <ClCompile Include="TmxLoader.cpp" />
     <ClCompile Include="_debug\_DebugConOut.cpp" />
     <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
@@ -179,6 +180,7 @@
     <ClInclude Include="TileMap\rapidxml_iterators.hpp" />
     <ClInclude Include="TileMap\rapidxml_print.hpp" />
     <ClInclude Include="TileMap\rapidxml_utils.hpp" />
+    <ClInclude Include="TmxLoader.h" />
     <ClInclude Include="tmxparser\include\base64\base64.h" />
     <ClInclude Include="tmxparser\include\TmxColor.h" />
     <ClInclude Include="tmxparser\include\TmxEllipse.h" />

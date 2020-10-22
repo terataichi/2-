@@ -6,6 +6,7 @@
 #include "../common/Vector2.h"
 #include "../Input/InputState.h"
 #include "../NetWork/NetWorkState.h"
+#include "../common/TileMap.h"
 
 enum class UpdateMode
 {
@@ -54,6 +55,7 @@ private:
 	bool wasHost_;											// 前回のホストに接続したいかどうか管理用
 	std::unique_ptr<InputState> input_;
 
+	TileMap map;
 	//std::map<std::string, ChipLayer> chipLayer_;
 	//std::map<ChipLayer, std::vector<int>>chipData_;
 };

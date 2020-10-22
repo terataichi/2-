@@ -9,7 +9,7 @@ VecInt& ImageMng::GetHandle(std::string name)
 	if (imgMap_.find(name) == imgMap_.end())
 	{
 		imgMap_[name].resize(1);
-		imgMap_[name][0] = LoadGraph(("image/" + name + ".png").c_str());
+		imgMap_[name][0] = LoadGraph(("Image/" + name + ".png").c_str());
 	}
 	return imgMap_[name];
 }
@@ -21,7 +21,7 @@ VecInt& ImageMng::GetHandle(std::string name, Vector2 divSize, Vector2 size)
 	if (imgMap_.find(name) == imgMap_.end())
 	{
 		imgMap_[name].resize(divSize.x * divSize.y);
-		LoadDivGraph(("image/" + name + ".png").c_str(), divSize.x * divSize.y, divSize.x, divSize.y, size.x, size.y, &imgMap_[name][0]);
+		LoadDivGraph(("Image/" + name + ".png").c_str(), divSize.x * divSize.y, divSize.x, divSize.y, size.x, size.y, &imgMap_[name][0]);
 	}
 
 	return imgMap_[name];

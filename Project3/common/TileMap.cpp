@@ -8,8 +8,7 @@
 #include "../TileMap/rapidxml.hpp"
 #include "../TileMap/rapidxml_utils.hpp"
 
-bool MapLoader::
-TileMap::LoadTmx(std::string fileName)
+bool TileMap::LoadTmx(std::string fileName)
 {
     std::string version = TMX_VERSION;                  // 現在のファイルのVersionを定義して格納しておく
     rapidxml::xml_document<> doc;                       // 
@@ -21,7 +20,7 @@ TileMap::LoadTmx(std::string fileName)
     rapidxml::xml_node<>* root_node;
     root_node = doc.first_node("map");
 
-    //  各情報の取り出し
+    //  ﾏｯﾌﾟの中身を見るよ(確認用)
     for (rapidxml::xml_attribute<>* data = root_node->first_attribute();
         data != nullptr;
         data = data->next_attribute())
@@ -29,13 +28,19 @@ TileMap::LoadTmx(std::string fileName)
         std::cout << data->name() << "[" << data->value() << "]" << std::endl;
     }
 
+    //  各レイヤー情報の取り出し
+    mapData_.width = atoi(root_node->first_attribute("width")->value());
+    mapData_.height = atoi(root_node->first_attribute("height")->value());
+    mapData_.tileWidth = atoi(root_node->first_attribute("tilewidth")->value());
+    mapData_.tileHeight = atoi(root_node->first_attribute("tileheight")->value());
+
 
     //  各レイヤー情報の取り出し
     for (rapidxml::xml_node<>* layer_node = root_node->first_node("layer");
         layer_node != nullptr;
         layer_node = layer_node->next_sibling("layer"))
     {
-        MapLoader::LayerData layer;
+        LayerData layer;
 
         // 基本情報の格納
         layer.name = layer_node->first_attribute("name")->value();
@@ -51,41 +56,44 @@ TileMap::LoadTmx(std::string fileName)
         // チップデータの格納
         rapidxml::xml_node<>* data_node = layer_node->first_node("data");
         std::string data = data_node->value();
+ 
         std::istringstream iss{ data };
         std::string num;
 
-        layer.chipData.resize(layer.width * layer.heigth);
-        for (int i = 0; i < layer.width * layer.heigth; i++)
+        layer.chipData.resize(layer.width * layer.heigth + 1);
+        //for (int i = 0; i <= layer.width * layer.heigth; i++)
+        for(auto& data : layer.chipData)
         {
             getline(iss, num, ',');
-            layer.chipData.push_back(atoi(num.c_str()));
+            data = atoi(num.c_str());
             std::cout << num;
         }
+
+        // 情報の追加
+        layer_.emplace_back(layer);
     }
 
-    root_node->first_attribute();
+    //root_node->first_attribute();
+
 
 	return true;
 }
 
-LayerMap MapLoader::TileMap::GetLayerData(void)
+LayerVec TileMap::GetLayerData(void)
 {
     return layer_;
 }
 
-MapLoader::MapData MapLoader::TileMap::GetMapData(void)
+MapData TileMap::GetMapData(void)
 {
     return mapData_;
 }
 
-MapLoader::
 TileMap::TileMap()
 {
-
-
+    loader_.Loader("TileMap/Stage.tmx");
 }
 
-MapLoader::
 TileMap::~TileMap()
 {
 }
