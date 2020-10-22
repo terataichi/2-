@@ -31,7 +31,7 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);;
 
-	map.LoadTmx("TileMap/Stage01.tmx");
+	map_.LoadTmx("TileMap/Stage01.tmx");
 
 	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;
@@ -72,7 +72,7 @@ void TitleScene::Draw()
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("image03")[0],pos_.x,pos_.y,1,rad_,0 });
 
 	//std::cout << map.GetLayerData()["Bg"].chipData;
-
+	map_.DrawUpdate();
 
 }
 

@@ -38,9 +38,12 @@ bool TileMap::LoadTmx(std::string fileName)
 	return true;
 }
 
-bool TileMap::DrawUpdate(void)
+void TileMap::DrawUpdate(void)
 {
-    return false;
+	for (auto data : layerData_)
+	{
+		DrawMap(data);
+	}
 }
 
 bool TileMap::DrawMap(LayerData layerData)

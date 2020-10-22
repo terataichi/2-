@@ -15,10 +15,9 @@ public:
 	~TileMap();
 
 	bool LoadTmx(std::string fileName);
-	bool DrawUpdate(void);								// 描画の更新
-	bool DrawMap(LayerData layerData);					// マップの描画
+	void DrawUpdate(void);								// 描画の更新
 private:
-	void Init(void);									// 初期化
+	bool DrawMap(LayerData layerData);					// マップの描画
 	TmxLoader loader_;
 	LayerVec layerData_;
 	MapData mapData_;

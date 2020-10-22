@@ -55,7 +55,7 @@ private:
 	bool wasHost_;											// 前回のホストに接続したいかどうか管理用
 	std::unique_ptr<InputState> input_;
 
-	TileMap map;
+	TileMap map_;
 	//std::map<std::string, ChipLayer> chipLayer_;
 	//std::map<ChipLayer, std::vector<int>>chipData_;
 };
