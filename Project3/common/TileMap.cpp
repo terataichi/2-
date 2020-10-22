@@ -35,6 +35,7 @@ bool TileMap::LoadTmx(std::string fileName)
 
 	layerData_ = loader_.GetLayerData();
 	mapData_ = loader_.GetMapData();
+	ImageName_ = loader_.GetImageName();
 	return true;
 }
 
@@ -59,7 +60,7 @@ bool TileMap::DrawMap(LayerData layerData)
 		Vector2 chipPos{ size.x * (i % div.x) + size.x / 2 ,size.y * (i / div.x) + size.y / 2 };
 		if (chip != 0)
 		{
-			lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("map",{4,3},size)[chip - 1], chipPos.x,chipPos.y,1,0,1 });
+			lpSceneMng.AddDrawQue({ lpImageMng.GetHandle(ImageName_.c_str(),{4,3},size)[chip - 1], chipPos.x,chipPos.y,1,0.0f,1 });
 		}
 		i++;
 	}

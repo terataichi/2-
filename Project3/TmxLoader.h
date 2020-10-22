@@ -36,6 +36,7 @@ public:
 	//rapidxml::xml_node<>& GetNode(std::string nodeName);
 	LayerVec GetLayerData(void);
 	MapData GetMapData(void);
+	std::string GetImageName(void);
 private:
 	bool LoadTsx(std::string fileName);
 
@@ -44,5 +45,8 @@ private:
 	std::string ImageName_;
 	LayerVec layerData_;
 	MapData mapData_;
+
+
+	rapidxml::xml_document<> doc;
 };
 

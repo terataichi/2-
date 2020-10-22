@@ -31,7 +31,11 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);;
 
-	map_.LoadTmx("TileMap/Stage01.tmx");
+	if (!map_.LoadTmx("TileMap/Stage01.tmx"))
+	{
+		TRACE("ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s\n");
+		return;
+	}
 
 	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;

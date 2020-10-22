@@ -13,9 +13,7 @@ TmxLoader::~TmxLoader()
 
 bool TmxLoader::LoadTmx(std::string fileName)
 {
-    rapidxml::xml_document<> doc;                       // 
-    rapidxml::file<>file(fileName.c_str());
-
+    rapidxml::file<> file(fileName.c_str());
     doc.parse<0>(file.data());
 
     rapidxml::xml_node<>* root_node;
@@ -96,9 +94,8 @@ bool TmxLoader::LoadTmx(std::string fileName)
 
 bool TmxLoader::LoadTsx(std::string fileName)
 {
-    rapidxml::xml_document<> doc;
     std::string tsxFile = fileName;
-    rapidxml::file<>file(tsxFile.c_str());
+    rapidxml::file<> file(tsxFile.c_str());
     doc.parse<0>(file.data());
 
     rapidxml::xml_node<>* root_node = doc.first_node("tileset");
@@ -115,7 +112,7 @@ bool TmxLoader::LoadTsx(std::string fileName)
     std::string str = tileset_node->first_attribute("source")->value();
     ImageName_ = str.substr(str.find_first_of("I"));
 
-    return true;;
+    return true;
 }
 
 LayerVec TmxLoader::GetLayerData(void)
@@ -126,4 +123,9 @@ LayerVec TmxLoader::GetLayerData(void)
 MapData TmxLoader::GetMapData(void)
 {
     return mapData_;
+}
+
+std::string TmxLoader::GetImageName(void)
+{
+	return ImageName_;
 }

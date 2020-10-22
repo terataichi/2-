@@ -21,5 +21,6 @@ private:
 	TmxLoader loader_;
 	LayerVec layerData_;
 	MapData mapData_;
+	std::string ImageName_;
 };
 
