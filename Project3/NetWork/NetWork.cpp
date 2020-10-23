@@ -2,13 +2,15 @@
 #include "HostState.h"
 #include "GestState.h"
 #include <DxLib.h>
+#include <fstream>
+#include <iostream>
 
 std::unique_ptr<NetWork, NetWork::NetWorkDeleter> NetWork::sInstance_(new NetWork);
 
 ArrayIP NetWork::GetMyIP()
 {
 	ArrayIP ip;
-	GetMyIPAddress(&ip[0],5);
+	GetMyIPAddress(&ip[0],ip.size());
 	return ip;
 }
 
@@ -79,6 +81,49 @@ bool NetWork::Update(void)
 				state_->SetActive(ActiveState::Play);
 				return true;
 			}
+			if (data.type == MesType::TMX_SIZE)
+			{
+				tmxSize_ = data.data[0];
+				RevBox.resize(tmxSize_);
+				TRACE("TMXデータサイズは：%d\n",data.data[0]);
+				return true;
+			}
+			if (data.type == MesType::TMX_DATA)
+			{
+				RevBox[data.data[0]] = data.data[1];
+
+				char tmp = data.data[1];
+				tmp_++;
+
+				if (data.data[1] == INT_MAX)
+				{
+					std::fstream fs("tmxDara.txt",std::ios::out);
+
+					if (!fs)
+					{
+						return false;
+					}
+
+					for (auto data : RevBox)
+					{
+						fs.write((char*)&data, sizeof(data));
+					}
+					fs.close();
+					return false;
+				}
+
+				TRACE("%c", tmp);
+				if (tmp_ == tmxSize_)
+				{
+					std::ofstream ofs("tmxDara.txt", std::ios::trunc);
+					for (auto box : RevBox)
+					{
+						ofs << box;
+						std::cout << box;
+					}
+				}
+				return true;
+			}
 		}
 	}
 
@@ -126,9 +171,7 @@ void NetWork::SendStart(void)
 
 bool NetWork::SendMes(MesData& data)
 {
-	MesData tmpData;
-	tmpData = {MesType::POS, data.data[0],data.data[1] };
-	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &data, sizeof(MesData)) == -1)
 	{
 		TRACE("データの送信失敗\n");
 		return false;
@@ -149,6 +192,7 @@ bool NetWork::ConnectHost(IPDATA hostIP)
 NetWork::NetWork()
 {
 	recvStanby_ = false;
+	tmp_ = 0;
 }
 
 NetWork::~NetWork()

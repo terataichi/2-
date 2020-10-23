@@ -31,13 +31,12 @@ TitleScene::TitleScene()
 	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);;
 
-	if (!map_.LoadTmx("TileMap/Stage01.tmx"))
+	if (!tileMap_.LoadTmx("TileMap/Stage01.tmx"))
 	{
 		TRACE("ファイルの読み込みに失敗\n");
 		return;
 	}
 
-	wasHost_ = false;
 	updateMode_ = UpdateMode::SetNetWork;
 	Init();
 }
@@ -55,6 +54,7 @@ void TitleScene::Init(void)
 	pos_ = { 100,100 };
 	speed_ = 10;
 	rad_ = 0;
+	wasHost_ = false;
 }
 
 uniqueBase TitleScene::Update(uniqueBase scene)
@@ -76,7 +76,7 @@ void TitleScene::Draw()
 	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("image03")[0],pos_.x,pos_.y,1,rad_,0 });
 
 	//std::cout << map.GetLayerData()["Bg"].chipData;
-	map_.DrawUpdate();
+	tileMap_.DrawUpdate();
 
 }
 
@@ -238,6 +238,7 @@ void TitleScene::StartInit(void)
 		{
 			// 初期化情報の送信をして待機
 			TRACE("初期化情報の送信\n");
+			tileMap_.SendTmxSizeData();
 			lpNetWork.SendStanby();
 		}
 	}
@@ -245,7 +246,7 @@ void TitleScene::StartInit(void)
 	{
 		if (lpNetWork.GetActive() == ActiveState::Init)
 		{
-			TRACE("初期化情報の受け取り\n");
+			//TRACE("初期化情報の受け取り\n");
 
 			// スタート情報の送信
 			lpNetWork.SendStart();

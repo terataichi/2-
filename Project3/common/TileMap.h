@@ -14,10 +14,18 @@ public:
 	TileMap(std::string fileName);
 	~TileMap();
 
-	bool LoadTmx(std::string fileName);
+	bool LoadTmx(std::string fileName);					// TMXファイル読み込み
+	bool SendTmxSizeData(void);							// TMXファイルのサイズを取得して送信
+	bool SendTmxData(void);								// TMXファイルのデータ送信
 	void DrawUpdate(void);								// 描画の更新
+	LayerVec GetLayerData(void);
+	MapData GetMapData(void);
 private:
 	bool DrawMap(LayerData layerData);					// マップの描画
+
+
+
+	// 読み込んだTMXファイルの情報保存用
 	TmxLoader loader_;
 	LayerVec layerData_;
 	MapData mapData_;

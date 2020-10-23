@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <array>
+#include <vector>
 #include <Dxlib.h>
 #include "NetWorkState.h"
 
@@ -8,10 +9,14 @@
 
 using ArrayIP = std::array<IPDATA, 5>;
 
+using TmxVec = std::vector<char>;
+
 enum class MesType
 {
 	STANBY,				// 初期化情報送信
 	GAME_START,			// ゲーム開始
+	TMX_SIZE,			// TMXファイルのサイズ
+	TMX_DATA,			// TMXテータ
 	POS
 };
 
@@ -30,7 +35,7 @@ public:
 		return *sInstance_;
 	}
 
-	ArrayIP GetMyIP(void);														// 自分のIPアドレスを取得
+	ArrayIP GetMyIP(void);													// 自分のIPアドレスを取得
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
@@ -58,7 +63,12 @@ private:
 
 	static std::unique_ptr<NetWork, NetWorkDeleter> sInstance_;
 
+
+	int tmxSize_;															// Tmxファイルサイズ保存用変数 
+	TmxVec RevBox;
+
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
+	int tmp_;
 };
 

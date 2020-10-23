@@ -36,11 +36,12 @@ public:
 	void Draw() override;
 
 private:
-	void PlayUpdate(void);
+	void PlayUpdate(void);											
+	// 状態別アップデートの呼び出し先
+	std::map<UpdateMode, std::function<void(void)>> func_;
 	void SetNetWorkMode(void);
 	void SetHostIP(void);
 	void StartInit(void);
-	std::map<UpdateMode, std::function<void(void)>> func_;
 
 	int screen_size_x_;
 	int screen_size_y_;
@@ -55,7 +56,7 @@ private:
 	bool wasHost_;											// 前回のホストに接続したいかどうか管理用
 	std::unique_ptr<InputState> input_;
 
-	TileMap map_;
+	TileMap tileMap_;
 	//std::map<std::string, ChipLayer> chipLayer_;
 	//std::map<ChipLayer, std::vector<int>>chipData_;
 };

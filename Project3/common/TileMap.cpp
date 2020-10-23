@@ -5,6 +5,7 @@
 #include "Vector2.h"
 #include "ImageMng.h"
 #include "../Scene/SceneMng.h"
+#include "../NetWork/NetWork.h"
 
 // rappidXml
 #include "../TileMap/rapidxml.hpp"
@@ -14,6 +15,8 @@
 
 TileMap::TileMap()
 {
+	mapData_ = MapData{};
+	layerData_ = LayerVec{};
 }
 
 TileMap::TileMap(std::string fileName)
@@ -39,6 +42,31 @@ bool TileMap::LoadTmx(std::string fileName)
 	return true;
 }
 
+bool TileMap::SendTmxSizeData(void)
+{
+	std::ifstream ifs{ loader_.GetTmxFileName() };
+	ifs.seekg(0, std::ios_base::end);
+
+	MesData data{ MesType::TMX_SIZE, ifs.tellg() };
+	
+	return lpNetWork.SendMes(data);
+}
+
+bool TileMap::SendTmxData(void)
+{
+	//std::ifstream ifs{ loader_.GetTmxFileName() };
+
+	//char ch;
+	//while (ifs.get(ch))
+	//{
+	//	std::cout << ch;
+	//}
+
+	//MesData data{MesType::TMX_DATA, }
+	//return lpNetWork.SendMes();
+	return false;
+}
+
 void TileMap::DrawUpdate(void)
 {
 	for (auto data : layerData_)
@@ -47,9 +75,19 @@ void TileMap::DrawUpdate(void)
 	}
 }
 
+LayerVec TileMap::GetLayerData(void)
+{
+	return layerData_;
+}
+
+MapData TileMap::GetMapData(void)
+{
+	return mapData_;
+}
+
 bool TileMap::DrawMap(LayerData layerData)
 {
-
+	// ’·‚¢‚Ì‚Åƒ[ƒJƒ‹•Ï”‚ÉŠi”[
 	Vector2 div{ layerData.width ,layerData.heigth };
 	Vector2 size{ loader_.GetMapData().tileWidth,loader_.GetMapData().tileHeight };
 
@@ -64,5 +102,5 @@ bool TileMap::DrawMap(LayerData layerData)
 		}
 		i++;
 	}
-    return false;
+    return true;
 }

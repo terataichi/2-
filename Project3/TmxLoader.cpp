@@ -25,6 +25,7 @@ bool TmxLoader::LoadTmx(std::string fileName)
         return false;
     }
 
+    tmxFileName_ = fileName;
     //  Ï¯Ìß‚Ì’†g‚ğ•Û‘¶
     for (rapidxml::xml_attribute<>* data = root_node->first_attribute();
         data != nullptr;
@@ -128,4 +129,9 @@ MapData TmxLoader::GetMapData(void)
 std::string TmxLoader::GetImageName(void)
 {
 	return ImageName_;
+}
+
+std::string TmxLoader::GetTmxFileName(void)
+{
+    return tmxFileName_;
 }

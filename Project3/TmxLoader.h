@@ -37,12 +37,14 @@ public:
 	LayerVec GetLayerData(void);
 	MapData GetMapData(void);
 	std::string GetImageName(void);
+	std::string GetTmxFileName(void);
 private:
 	bool LoadTsx(std::string fileName);
 
 	std::string version_;											// 現在のファイルのVersionを定義して格納しておく
+	std::string tmxFileName_;										// Tmxファイル名保存
 	std::string tsxFileName_;										// Tsxファイル名保存
-	std::string ImageName_;
+	std::string ImageName_;											// タイルの画像取得
 	LayerVec layerData_;
 	MapData mapData_;
 

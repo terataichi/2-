@@ -74,7 +74,7 @@ bool SceneMng::SysInit(void)
 	{
 		return false;
 	}
-
+	SetAlwaysRunFlag(true);
 	_dbgSetup(255,255,255);
 	_dbgSetAlpha(255);
 	return true;
