@@ -76,6 +76,29 @@ bool NetWork::Update(void)
 
 			if (data.type == MesType::STANBY)
 			{
+
+				std::fstream fs("tmxData.tmx", std::ios::out);
+
+				if (!fs)
+				{
+					TRACE("書き込み用のファイルが開けません\n");
+					return false;
+				}
+
+				// データの受け取り
+				for (auto data : RevBox)
+				{
+					char* ch = reinterpret_cast<char*>(&data);
+					for (int i = 0; i < sizeof(data); i++)
+					{
+						if (ch[i] != 0)
+						{
+							fs << ch[i];
+						}
+					}
+				}
+				fs.close();
+
 				TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
 				recvStanby_ = true;
 				state_->SetActive(ActiveState::Play);
@@ -95,33 +118,7 @@ bool NetWork::Update(void)
 				char tmp = data.data[1];
 				tmp_++;
 
-				if (data.data[1] == INT_MAX)
-				{
-					std::fstream fs("tmxDara.txt",std::ios::out);
-
-					if (!fs)
-					{
-						return false;
-					}
-
-					for (auto data : RevBox)
-					{
-						fs.write((char*)&data, sizeof(data));
-					}
-					fs.close();
-					return false;
-				}
-
-				TRACE("%c", tmp);
-				if (tmp_ == tmxSize_)
-				{
-					std::ofstream ofs("tmxDara.txt", std::ios::trunc);
-					for (auto box : RevBox)
-					{
-						ofs << box;
-						std::cout << box;
-					}
-				}
+				TRACE("%c", RevBox[data.data[0]]);
 				return true;
 			}
 		}
@@ -193,6 +190,7 @@ NetWork::NetWork()
 {
 	recvStanby_ = false;
 	tmp_ = 0;
+	tmxSize_ = 0;
 }
 
 NetWork::~NetWork()

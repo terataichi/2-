@@ -47,24 +47,47 @@ bool TileMap::SendTmxSizeData(void)
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 	ifs.seekg(0, std::ios_base::end);
 
-	MesData data{ MesType::TMX_SIZE, ifs.tellg() };
+	MesData data{ MesType::TMX_SIZE, static_cast<int>(ifs.tellg()) };
 	
 	return lpNetWork.SendMes(data);
 }
 
 bool TileMap::SendTmxData(void)
 {
-	//std::ifstream ifs{ loader_.GetTmxFileName() };
+	std::ifstream ifs{ loader_.GetTmxFileName() };
 
+	int cnt = 0;
+	int j = 0;
+	char *ch = reinterpret_cast<char*>(&j);
+	while (!ifs.eof())
+	{
+		for (int i = 0; i < sizeof(j); i++)
+		{
+			if (!ifs.get(ch[i]))
+			{
+				//ch[i] = 0;
+			}
+			std::cout << ch[i];
+		}
+
+		MesData data{ MesType::TMX_DATA, cnt, j };
+		lpNetWork.SendMes(data);
+		cnt++;
+	}
+
+	//int cnt = 0;
 	//char ch;
-	//while (ifs.get(ch))
+	//ifs.get(ch);
+	//while (!ifs.eof())
 	//{
 	//	std::cout << ch;
+	//	MesData data{ MesType::TMX_DATA, {cnt,static_cast<int>(ch)} };
+	//	lpNetWork.SendMes(data);
+	//	ifs.get(ch);
+	//	cnt++;
 	//}
 
-	//MesData data{MesType::TMX_DATA, }
-	//return lpNetWork.SendMes();
-	return false;
+	return true;
 }
 
 void TileMap::DrawUpdate(void)

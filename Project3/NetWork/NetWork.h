@@ -9,7 +9,7 @@
 
 using ArrayIP = std::array<IPDATA, 5>;
 
-using TmxVec = std::vector<char>;
+using TmxVec = std::vector<int>;
 
 enum class MesType
 {

@@ -239,6 +239,7 @@ void TitleScene::StartInit(void)
 			// 初期化情報の送信をして待機
 			TRACE("初期化情報の送信\n");
 			tileMap_.SendTmxSizeData();
+			tileMap_.SendTmxData();
 			lpNetWork.SendStanby();
 		}
 	}
@@ -248,12 +249,13 @@ void TitleScene::StartInit(void)
 		{
 			//TRACE("初期化情報の受け取り\n");
 
-			// スタート情報の送信
-			lpNetWork.SendStart();
+
 		}
 	}
 	if (lpNetWork.GetActive() == ActiveState::Play)
 	{
+		// スタート情報の送信
+		lpNetWork.SendStart();
 		TRACE("ゲームモードに移行します\n");
 		updateMode_ = UpdateMode::Play;
 	}
