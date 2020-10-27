@@ -58,7 +58,7 @@ bool NetWork::Update(void)
 				NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
 
 				// ゲームスタートを受信時
-				if (data.type == MesType::GAME_START)
+				if (static_cast<MesType>(data.type) == MesType::GAME_START)
 				{
 					TRACE("ゲストから通知を確認、ゲームを開始します\n");
 					state_->SetActive(ActiveState::Play);
@@ -74,10 +74,16 @@ bool NetWork::Update(void)
 			MesData data;
 			NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
 
-			if (data.type == MesType::STANBY)
+			if (static_cast<MesType>(data.type) == MesType::STANBY)
 			{
-
 				std::fstream fs("tmxData.tmx", std::ios::out);
+
+				//std::ifstream ifs("Stage01.tmx");
+				//if (ifs.fail())
+				//{
+				//	TRACE("ファイルの読み込みに失敗しました。\n");
+				//	return;
+				//}
 
 				if (!fs)
 				{
@@ -91,34 +97,38 @@ bool NetWork::Update(void)
 					char* ch = reinterpret_cast<char*>(&data);
 					for (int i = 0; i < sizeof(data); i++)
 					{
-						if (ch[i] != 0)
+						if (ch[i] != 0 && ch[i] != EOF)
 						{
+							if (ch[i] == '\r')
+							{
+								continue;
+							}
 							fs << ch[i];
+							TRACE("%c", ch[i]);
 						}
 					}
 				}
-				fs.close();
 
 				TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
 				recvStanby_ = true;
 				state_->SetActive(ActiveState::Play);
 				return true;
 			}
-			if (data.type == MesType::TMX_SIZE)
+			if (static_cast<MesType>(data.type) == MesType::TMX_SIZE)
 			{
 				tmxSize_ = data.data[0];
 				RevBox.resize(tmxSize_);
 				TRACE("TMXデータサイズは：%d\n",data.data[0]);
 				return true;
 			}
-			if (data.type == MesType::TMX_DATA)
+			if (static_cast<MesType>(data.type) == MesType::TMX_DATA)
 			{
-				RevBox[data.data[0]] = data.data[1];
+				RevBox[data.id] = data.data[0];
+				RevBox[data.id + 1] = data.data[1];
 
 				char tmp = data.data[1];
 				tmp_++;
 
-				TRACE("%c", RevBox[data.data[0]]);
 				return true;
 			}
 		}
@@ -148,7 +158,7 @@ void NetWork::SendStanby(void)
 {
 	// 初期化情報の送信
 	MesData tmpData;
-	tmpData = { MesType::STANBY, 0,0 };
+	tmpData = { static_cast<int>(MesType::STANBY),0, 0,0 };
 	state_->SetActive(ActiveState::Stanby);
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
 	{
@@ -159,7 +169,7 @@ void NetWork::SendStanby(void)
 void NetWork::SendStart(void)
 {
 	MesData tmpData;
-	tmpData = { MesType::GAME_START, 0,0 };
+	tmpData = { static_cast<int>(MesType::GAME_START),0, 0,0 };
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
 	{
 		TRACE("Start : 送信失敗\n");

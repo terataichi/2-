@@ -2,6 +2,7 @@
 #include <memory>
 #include <map>
 #include <functional>
+#include <chrono>
 #include "BaseScene.h"
 #include "../common/Vector2.h"
 #include "../Input/InputState.h"
@@ -57,6 +58,10 @@ private:
 	std::unique_ptr<InputState> input_;
 
 	TileMap tileMap_;
+
+	bool flg_ = false;
+	std::chrono::system_clock::time_point  start;
+
 	//std::map<std::string, ChipLayer> chipLayer_;
 	//std::map<ChipLayer, std::vector<int>>chipData_;
 };

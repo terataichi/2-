@@ -47,7 +47,7 @@ bool TileMap::SendTmxSizeData(void)
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 	ifs.seekg(0, std::ios_base::end);
 
-	MesData data{ MesType::TMX_SIZE, static_cast<int>(ifs.tellg()) };
+	MesData data{ static_cast<int>(MesType::TMX_SIZE), static_cast<int>(ifs.tellg()) };
 	
 	return lpNetWork.SendMes(data);
 }
@@ -70,7 +70,7 @@ bool TileMap::SendTmxData(void)
 			std::cout << ch[i];
 		}
 
-		MesData data{ MesType::TMX_DATA, cnt, j };
+		MesData data{ static_cast<int>(MesType::TMX_DATA), cnt, j };
 		lpNetWork.SendMes(data);
 		cnt++;
 	}

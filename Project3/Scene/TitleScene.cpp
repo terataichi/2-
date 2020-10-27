@@ -232,6 +232,7 @@ void TitleScene::SetHostIP(void)
 
 void TitleScene::StartInit(void)
 {
+	std::chrono::system_clock::time_point  end;
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
 		if (lpNetWork.CheckConnect() && lpNetWork.GetActive() == ActiveState::Init)
@@ -248,12 +249,22 @@ void TitleScene::StartInit(void)
 		if (lpNetWork.GetActive() == ActiveState::Init)
 		{
 			//TRACE("初期化情報の受け取り\n");
-
+			if (!flg_)
+			{
+				start = std::chrono::system_clock::now();
+				flg_ = true;
+			}
 
 		}
 	}
 	if (lpNetWork.GetActive() == ActiveState::Play)
 	{
+		end = std::chrono::system_clock::now();
+		// 秒に変換
+		auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+		//TRACE("受け取りから送るまでかかった時間は : %d\n", time);
+		std::cout << time << std::endl;
+
 		// スタート情報の送信
 		lpNetWork.SendStart();
 		TRACE("ゲームモードに移行します\n");

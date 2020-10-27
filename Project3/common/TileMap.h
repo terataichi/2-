@@ -24,7 +24,6 @@ private:
 	bool DrawMap(LayerData layerData);					// マップの描画
 
 
-
 	// 読み込んだTMXファイルの情報保存用
 	TmxLoader loader_;
 	LayerVec layerData_;

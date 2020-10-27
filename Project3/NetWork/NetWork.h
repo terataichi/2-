@@ -20,12 +20,20 @@ enum class MesType
 	POS
 };
 
-// 送るデータ
 struct MesData
 {
-	MesType type;
+	unsigned int type: 5;
+	unsigned int id : 16;
+	unsigned int : 0;
 	int data[2];
 };
+
+// 送るデータ
+//struct MesData
+//{
+//	MesType type;
+//	int data[2];
+//};
 
 class NetWork
 {
