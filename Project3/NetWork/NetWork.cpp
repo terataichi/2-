@@ -4,6 +4,7 @@
 #include <DxLib.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 std::unique_ptr<NetWork, NetWork::NetWorkDeleter> NetWork::sInstance_(new NetWork);
 
@@ -78,12 +79,14 @@ bool NetWork::Update(void)
 			{
 				std::fstream fs("tmxData.tmx", std::ios::out);
 
-				//std::ifstream ifs("Stage01.tmx");
-				//if (ifs.fail())
-				//{
-				//	TRACE("ファイルの読み込みに失敗しました。\n");
-				//	return;
-				//}
+				std::ifstream ifs("TileMap/Stage01.tmx");
+				if (ifs.fail())
+				{
+					TRACE("ファイルの読み込みに失敗しました。\n");
+					return false;
+				}
+				std::string file;
+				getline(ifs, file);
 
 				if (!fs)
 				{
@@ -91,7 +94,18 @@ bool NetWork::Update(void)
 					return false;
 				}
 
-				// データの受け取り
+				// XML部分の先頭の書き込み
+				std::string tmp("csv");
+				//std::string::size_type pos = file.find(tmp) + 2;
+
+				//pos = file.find(tmp, pos + tmp.length());
+
+				int lastNum = file.find(tmp);
+				int firstNum = 0;
+
+				auto d =  file.substr(firstNum, lastNum);
+				fs << d;
+				// データの書き込み
 				for (auto data : RevBox)
 				{
 					char* ch = reinterpret_cast<char*>(&data);
@@ -104,6 +118,7 @@ bool NetWork::Update(void)
 								continue;
 							}
 							fs << ch[i];
+							fs << ',';
 							TRACE("%c", ch[i]);
 						}
 					}
