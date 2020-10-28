@@ -85,8 +85,6 @@ bool NetWork::Update(void)
 					TRACE("ファイルの読み込みに失敗しました。\n");
 					return false;
 				}
-				std::string file;
-				getline(ifs, file);
 
 				if (!fs)
 				{
@@ -95,31 +93,88 @@ bool NetWork::Update(void)
 				}
 
 				// XML部分の先頭の書き込み
-				std::string tmp("csv");
-				//std::string::size_type pos = file.find(tmp) + 2;
-
-				//pos = file.find(tmp, pos + tmp.length());
-
-				int lastNum = file.find(tmp);
-				int firstNum = 0;
-
-				auto d =  file.substr(firstNum, lastNum);
-				fs << d;
+				std::string file;
+				int count = 0;
+				int taichi = 24;
+				unsigned int maskbuf = 4278190080;
 				// データの書き込み
-				for (auto data : RevBox)
+				while (getline(ifs, file))
 				{
-					char* ch = reinterpret_cast<char*>(&data);
-					for (int i = 0; i < sizeof(data); i++)
+
+					if (file.find("<") != -1)
 					{
-						if (ch[i] != 0 && ch[i] != EOF)
+						fs << file;
+						fs << '\n';
+					}
+					else
+					{
+						int test = 0;
+						int tmp = 0;
+						int tmp2 = 0;
+
+						while (test < (17 * 21))
 						{
-							if (ch[i] == '\r')
+							if (count < RevBox.size())
 							{
-								continue;
+								
+								//unsigned char* ch = reinterpret_cast<unsigned char*>(&RevBox[count]);
+								unsigned int num = RevBox[count];
+
+								
+								//mask += maskbuf;
+								//auto tmmmmp = INT_MAX;
+								for (int i = 0; i < sizeof(RevBox[count]); i++)
+								{
+									
+									/*if (ch[i] != 0 && ch[i] != EOF)
+									{*/
+										tmp++;
+										auto number = (num & maskbuf);
+										number = number >> taichi;
+										taichi -= 8;
+										maskbuf = maskbuf >> 8;
+										if (taichi < 0)
+										{
+											taichi = 24;
+											maskbuf = 4278190080;
+											if (i < 3)
+											{
+												num = RevBox[count + 1];
+											}
+										}
+
+										fs << number;
+										fs << ',';
+										if (tmp % 21 == 0)
+										{
+											tmp2++;
+											fs << "\n";
+										}
+										//TRACE("%c", ch[i]);
+										std::cout << number;
+										test++;
+										if (tmp2 >= 17)
+										{
+											count--;
+											break;
+										}
+										
+									/*}
+									else
+									{
+										std::cout << "ﾖｼｯ" << std::endl;
+									}*/
+								}
+								count++;
 							}
-							fs << ch[i];
-							fs << ',';
-							TRACE("%c", ch[i]);
+							else
+							{
+								test = INT_MAX;
+							}
+						}
+						for (int i = 0; i < 17 - 1; i++)
+						{
+							getline(ifs, file);
 						}
 					}
 				}
