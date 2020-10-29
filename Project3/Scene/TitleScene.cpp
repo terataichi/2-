@@ -37,6 +37,7 @@ TitleScene::TitleScene()
 		return;
 	}
 
+
 	updateMode_ = UpdateMode::SetNetWork;
 	Init();
 }
@@ -55,6 +56,7 @@ void TitleScene::Init(void)
 	speed_ = 10;
 	rad_ = 0;
 	wasHost_ = false;
+	tileMap_.SendTmxData();
 }
 
 uniqueBase TitleScene::Update(uniqueBase scene)

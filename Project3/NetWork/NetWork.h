@@ -11,7 +11,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using TmxVec = std::vector<int>;
 
-enum class MesType
+enum class MesType:unsigned char
 {
 	STANBY,				// 初期化情報送信
 	GAME_START,			// ゲーム開始
@@ -22,10 +22,17 @@ enum class MesType
 
 struct MesData
 {
-	unsigned int type: 5;
-	unsigned int id : 16;
-	unsigned int : 0;
+	MesType type;
+	unsigned short id;
+	unsigned char  cdata;
 	int data[2];
+};
+
+union UnionData
+{
+	char cData[8];
+	int iData[2];
+	long long IData;
 };
 
 // 送るデータ
@@ -78,5 +85,6 @@ private:
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
 	int tmp_;
+	ArrayIP ip_;
 };
 

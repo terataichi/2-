@@ -10,9 +10,8 @@ std::unique_ptr<NetWork, NetWork::NetWorkDeleter> NetWork::sInstance_(new NetWor
 
 ArrayIP NetWork::GetMyIP()
 {
-	ArrayIP ip;
-	GetMyIPAddress(&ip[0],ip.size());
-	return ip;
+	GetMyIPAddress(&ip_[0],ip_.size());
+	return ip_;
 }
 
 bool NetWork::SetNetWorkMode(NetWorkMode mode)
@@ -228,7 +227,7 @@ void NetWork::SendStanby(void)
 {
 	// ‰Šú‰»î•ñ‚Ì‘—M
 	MesData tmpData;
-	tmpData = { static_cast<int>(MesType::STANBY),0, 0,0 };
+	tmpData = {(MesType::STANBY),0, 0,0 };
 	state_->SetActive(ActiveState::Stanby);
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
 	{
@@ -239,7 +238,7 @@ void NetWork::SendStanby(void)
 void NetWork::SendStart(void)
 {
 	MesData tmpData;
-	tmpData = { static_cast<int>(MesType::GAME_START),0, 0,0 };
+	tmpData = {(MesType::GAME_START),0, 0,0 };
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
 	{
 		TRACE("Start : ‘—M¸”s\n");
@@ -271,6 +270,7 @@ NetWork::NetWork()
 	recvStanby_ = false;
 	tmp_ = 0;
 	tmxSize_ = 0;
+	ip_ = ArrayIP{};
 }
 
 NetWork::~NetWork()

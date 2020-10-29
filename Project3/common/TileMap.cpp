@@ -47,43 +47,117 @@ bool TileMap::SendTmxSizeData(void)
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 	ifs.seekg(0, std::ios_base::end);
 
-	MesData data{ static_cast<int>(MesType::TMX_SIZE), static_cast<int>(ifs.tellg()) };
+	MesData data{ MesType::TMX_SIZE, static_cast<int>(ifs.tellg()) };
 	
 	return lpNetWork.SendMes(data);
 }
 
 bool TileMap::SendTmxData(void)
 {
+	// 数字データは持ってるけどファイル操作の練習
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 
-	int cnt = 0;
-	int j = 0;
-	char *ch = reinterpret_cast<char*>(&j);
+	UnionData unionData{ 0 };
+	std::string fileData;
+	std::string numData;
+	std::stringstream lineData;
+
+	auto SetLineData = [&]()
+	{
+		lineData.clear();
+		getline(ifs, fileData);
+		lineData << fileData;
+	};
+
+	auto CInt = [&](std::string str)
+	{
+		std::stringstream ss;
+		char ch;
+		ss << str;
+		ss >> ch;
+		return static_cast<int>(ch);
+	};
+
+	int sousin = 0;
+
 	while (!ifs.eof())
 	{
-		for (int i = 0; i < sizeof(j); i++)
+		// 欲しいデータが来るまで空うち
+		do 
 		{
-			if (!ifs.get(ch[i]))
+			if (ifs.eof())
 			{
-				//ch[i] = 0;
+				break;
 			}
-			std::cout << ch[i];
-		}
+			getline(ifs, fileData);
+		} while (fileData.find("data encoding") == std::string::npos);
 
-		MesData data{ static_cast<int>(MesType::TMX_DATA), cnt, j };
-		lpNetWork.SendMes(data);
-		cnt++;
+		// 抜けてきたらからここから数字を取り出す
+		int count = 0;
+		SetLineData();
+		do
+		{
+			if (ifs.eof())
+			{
+				break;
+			}
+			// 読み終わったら次の行をもらってくる
+			if (!lineData)
+			{
+				SetLineData();
+			}
+
+
+			getline(lineData, numData, ',');
+			unionData.cData[count % 8] = CInt(numData);
+			unionData.cData[count % 8] <<= 4;
+
+			count++;
+			if (count % 16 == 0)
+			{
+				MesData data{ MesType::TMX_DATA, sousin,0,unionData.iData[0],unionData.iData[1] };
+				//lpNetWork.SendMes(data);
+				sousin++;
+			}
+
+		} while (fileData.find("/data") == std::string::npos);
 	}
+	std::cout << sousin << std::endl;
+
+	//for (auto layer : layerData_)
+	//{
+	//	int num = 0;
+	//	int dataNum = 0;
+	//	UnionData unionData{ 0 };
+	//	for (auto chipData : layer.chipData)
+	//	{
+	//		unionData.cData[num] = (chipData << 4);
+
+	//		num++;
+	//		if (num % 8 == 0)
+	//		{
+
+	//			break;
+	//		}
+	//	}
+	//}
 
 	//int cnt = 0;
-	//char ch;
-	//ifs.get(ch);
+	//int j = 0;
+	//char *ch = reinterpret_cast<char*>(&j);
 	//while (!ifs.eof())
 	//{
-	//	std::cout << ch;
-	//	MesData data{ MesType::TMX_DATA, {cnt,static_cast<int>(ch)} };
+	//	for (int i = 0; i < sizeof(j); i++)
+	//	{
+	//		if (!ifs.get(ch[i]))
+	//		{
+	//			//ch[i] = 0;
+	//		}
+	//		std::cout << ch[i];
+	//	}
+
+	//	MesData data{ MesType::TMX_DATA, cnt, j };
 	//	lpNetWork.SendMes(data);
-	//	ifs.get(ch);
 	//	cnt++;
 	//}
 
