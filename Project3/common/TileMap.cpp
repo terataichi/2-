@@ -47,7 +47,7 @@ bool TileMap::SendTmxSizeData(void)
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 	ifs.seekg(0, std::ios_base::end);
 
-	MesData data{ MesType::TMX_SIZE, static_cast<int>(ifs.tellg()) };
+	MesData data{ MesType::TMX_SIZE, 0,0,static_cast<int>(ifs.tellg()),0 };
 	
 	return lpNetWork.SendMes(data);
 }
@@ -69,16 +69,12 @@ bool TileMap::SendTmxData(void)
 		lineData << fileData;
 	};
 
-	auto CInt = [&](std::string str)
+	auto ChangeInt = [&](std::string str)
 	{
-		std::stringstream ss;
-		char ch;
-		ss << str;
-		ss >> ch;
-		return static_cast<int>(ch);
+		return atoi(str.c_str());
 	};
 
-	int sousin = 0;
+	int sendID = 0;
 
 	while (!ifs.eof())
 	{
@@ -107,59 +103,26 @@ bool TileMap::SendTmxData(void)
 				SetLineData();
 			}
 
-
-			getline(lineData, numData, ',');
-			unionData.cData[count % 8] = CInt(numData);
-			unionData.cData[count % 8] <<= 4;
+			if (getline(lineData, numData, ','))
+			{
+				unionData.cData[count % 8] = ChangeInt(numData);
+			}
+			if (getline(lineData, numData, ','))
+			{
+				unionData.cData[count % 8] |= (ChangeInt(numData) << 4);
+			}
 
 			count++;
-			if (count % 16 == 0)
+			if (count % 8 == 0)
 			{
-				MesData data{ MesType::TMX_DATA, sousin,0,unionData.iData[0],unionData.iData[1] };
-				//lpNetWork.SendMes(data);
-				sousin++;
+				MesData data{ MesType::TMX_DATA, sendID,0,unionData.iData[0],unionData.iData[1] };
+				lpNetWork.SendMes(data);
+				sendID++;
 			}
 
 		} while (fileData.find("/data") == std::string::npos);
 	}
-	std::cout << sousin << std::endl;
-
-	//for (auto layer : layerData_)
-	//{
-	//	int num = 0;
-	//	int dataNum = 0;
-	//	UnionData unionData{ 0 };
-	//	for (auto chipData : layer.chipData)
-	//	{
-	//		unionData.cData[num] = (chipData << 4);
-
-	//		num++;
-	//		if (num % 8 == 0)
-	//		{
-
-	//			break;
-	//		}
-	//	}
-	//}
-
-	//int cnt = 0;
-	//int j = 0;
-	//char *ch = reinterpret_cast<char*>(&j);
-	//while (!ifs.eof())
-	//{
-	//	for (int i = 0; i < sizeof(j); i++)
-	//	{
-	//		if (!ifs.get(ch[i]))
-	//		{
-	//			//ch[i] = 0;
-	//		}
-	//		std::cout << ch[i];
-	//	}
-
-	//	MesData data{ MesType::TMX_DATA, cnt, j };
-	//	lpNetWork.SendMes(data);
-	//	cnt++;
-	//}
+	std::cout << sendID << std::endl;
 
 	return true;
 }
