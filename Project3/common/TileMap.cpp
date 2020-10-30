@@ -59,11 +59,13 @@ bool TileMap::SendTmxData(void)
 
 	UnionData unionData{ 0 };
 	std::string fileData;
-	std::string numData;
 	std::stringstream lineData;
+	int count = 0;
+
 
 	auto SetLineData = [&]()
 	{
+		lineData.str("");
 		lineData.clear();
 		getline(ifs, fileData);
 		lineData << fileData;
@@ -81,46 +83,48 @@ bool TileMap::SendTmxData(void)
 		// 欲しいデータが来るまで空うち
 		do 
 		{
+			getline(ifs, fileData);
 			if (ifs.eof())
 			{
 				break;
 			}
-			getline(ifs, fileData);
 		} while (fileData.find("data encoding") == std::string::npos);
 
 		// 抜けてきたらからここから数字を取り出す
-		int count = 0;
-		SetLineData();
-		do
+		if (!ifs.eof())
 		{
-			if (ifs.eof())
+			SetLineData();
+			while (fileData.find("/data") == std::string::npos)
 			{
-				break;
-			}
-			// 読み終わったら次の行をもらってくる
-			if (!lineData)
-			{
-				SetLineData();
-			}
+				std::string numData;
+				getline(lineData, numData, ',');
+				if (numData.size())
+				{
+					if (count % 2 == 1)
+					{
+						unionData.cData[(count / 2) % 8] |= ChangeInt(numData) << 4;
+					}
+					else
+					{
+						unionData.cData[(count / 2) % 8] = ChangeInt(numData);
+					}
 
-			if (getline(lineData, numData, ','))
-			{
-				unionData.cData[count % 8] = ChangeInt(numData);
-			}
-			if (getline(lineData, numData, ','))
-			{
-				unionData.cData[count % 8] |= (ChangeInt(numData) << 4);
-			}
+					count++;
+					if (count % 16 == 0)
+					{
+						MesData data{ MesType::TMX_DATA, sendID,0,unionData.iData[0],unionData.iData[1] };
+						lpNetWork.SendMes(data);
+						sendID++;
+					}
+				}
 
-			count++;
-			if (count % 8 == 0)
-			{
-				MesData data{ MesType::TMX_DATA, sendID,0,unionData.iData[0],unionData.iData[1] };
-				lpNetWork.SendMes(data);
-				sendID++;
+				// 読み終わったら次の行をもらってくる
+				if (lineData.eof())
+				{
+					SetLineData();
+				}
 			}
-
-		} while (fileData.find("/data") == std::string::npos);
+		}
 	}
 	std::cout << sendID << std::endl;
 

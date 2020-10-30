@@ -7,10 +7,6 @@
 
 #define lpNetWork NetWork::GetInstance()
 
-using ArrayIP = std::array<IPDATA, 5>;
-
-using TmxVec = std::vector<int>;
-
 enum class MesType:unsigned char
 {
 	STANBY,				// 初期化情報送信
@@ -34,6 +30,11 @@ union UnionData
 	int iData[2];
 	long long IData;
 };
+
+
+using ArrayIP = std::array<IPDATA, 5>;
+
+using TmxVec = std::vector<UnionData>;
 
 // 送るデータ
 //struct MesData

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <istream>
 
 std::unique_ptr<NetWork, NetWork::NetWorkDeleter> NetWork::sInstance_(new NetWork);
 
@@ -76,9 +77,9 @@ bool NetWork::Update(void)
 
 			if (static_cast<MesType>(data.type) == MesType::STANBY)
 			{
-				std::fstream fs("tmxData.tmx", std::ios::out);
+				std::ofstream fs("TileMap/SendData.tmx", std::ios::out);
 
-				std::ifstream ifs("TileMap/Stage01.tmx");
+				std::ifstream ifs("TileMap/Stage01_FileData.dat");
 				if (ifs.fail())
 				{
 					TRACE("ファイルの読み込みに失敗しました。\n");
@@ -91,93 +92,60 @@ bool NetWork::Update(void)
 					return false;
 				}
 
-				// XML部分の先頭の書き込み
-				std::string file;
-				int count = 0;
-				int taichi = 24;
-				unsigned int maskbuf = 4278190080;
-				// データの書き込み
-				while (getline(ifs, file))
+				std::string str;
+				do
 				{
+					getline(ifs, str);
+					fs << str << std::endl;
 
-					if (file.find("<") != -1)
+					if (ifs.eof())
 					{
-						fs << file;
-						fs << '\n';
+						break;
 					}
-					else
+				} while (str.find("data encoding") == std::string::npos);
+
+				int count = 0;
+				for (auto box : RevBox)
+				{
+					for (int i = 0; i < 8; i++)
 					{
-						int test = 0;
-						int tmp = 0;
-						int tmp2 = 0;
-
-						while (test < (17 * 21))
+						for (int j = 0; j < 2; j++)
 						{
-							if (count < RevBox.size())
+							fs << (box.cData[i] >> (4 * j) & 0x0f);
+
+							count++;
+							if (count % 21 != 0)
 							{
-								
-								//unsigned char* ch = reinterpret_cast<unsigned char*>(&RevBox[count]);
-								unsigned int num = RevBox[count];
-
-								
-								//mask += maskbuf;
-								//auto tmmmmp = INT_MAX;
-								for (int i = 0; i < sizeof(RevBox[count]); i++)
-								{
-									
-									/*if (ch[i] != 0 && ch[i] != EOF)
-									{*/
-										tmp++;
-										auto number = (num & maskbuf);
-										number = number >> taichi;
-										taichi -= 8;
-										maskbuf = maskbuf >> 8;
-										if (taichi < 0)
-										{
-											taichi = 24;
-											maskbuf = 4278190080;
-											if (i < 3)
-											{
-												num = RevBox[count + 1];
-											}
-										}
-
-										fs << number;
-										fs << ',';
-										if (tmp % 21 == 0)
-										{
-											tmp2++;
-											fs << "\n";
-										}
-										//TRACE("%c", ch[i]);
-										std::cout << number;
-										test++;
-										if (tmp2 >= 17)
-										{
-											count--;
-											break;
-										}
-										
-									/*}
-									else
-									{
-										std::cout << "ﾖｼｯ" << std::endl;
-									}*/
-								}
-								count++;
+								fs << ',';
 							}
 							else
 							{
-								test = INT_MAX;
+								if (count % (21 * 17) != 0)
+								{
+									fs << ',';
+									fs << std::endl;
+								}
+								else
+								{
+									fs << std::endl;
+									do
+									{
+										getline(ifs, str);
+										if (ifs.eof())
+										{
+											TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
+											recvStanby_ = true;
+											state_->SetActive(ActiveState::Play);
+											return true;
+										}
+										fs << str << std::endl;
+									} while (str.find("data encoding") == std::string::npos);
+								}
 							}
-						}
-						for (int i = 0; i < 17 - 1; i++)
-						{
-							getline(ifs, file);
 						}
 					}
 				}
-
+				
 				TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
 				recvStanby_ = true;
 				state_->SetActive(ActiveState::Play);
@@ -192,10 +160,9 @@ bool NetWork::Update(void)
 			}
 			if (static_cast<MesType>(data.type) == MesType::TMX_DATA)
 			{
-				RevBox[data.id] = data.data[0];
-				RevBox[data.id + 1] = data.data[1];
+				RevBox[data.id].iData[0] = data.data[0];
+				RevBox[data.id].iData[1] = data.data[1];
 
-				char tmp = data.data[1];
 				tmp_++;
 
 				return true;
