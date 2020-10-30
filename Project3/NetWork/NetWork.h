@@ -1,4 +1,6 @@
 #pragma once
+#include <thread>
+#include <mutex>
 #include <memory>
 #include <array>
 #include <vector>
@@ -64,6 +66,7 @@ public:
 	void SendStanby(void);
 	void SendStart(void);
 
+	void RunUpDate(void);													// マルチスレッド
 private:
 
 	struct NetWorkDeleter
@@ -87,5 +90,8 @@ private:
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
 	int tmp_;
 	ArrayIP ip_;
+
+	std::thread update_;
+	std::mutex lock_;
 };
 

@@ -24,9 +24,11 @@ bool NetWork::SetNetWorkMode(NetWorkMode mode)
 		break;
 	case NetWorkMode::HOST:
 		state_ = std::make_unique<HostState>();
+		RunUpDate();
 		break;
 	case NetWorkMode::GUEST:
 		state_ = std::make_unique<GuestState>();
+		RunUpDate();
 		break;
 	default:
 		TRACE("例外：オフラインに設定します。\n");
@@ -49,133 +51,145 @@ bool NetWork::CheckConnect(void)
 
 bool NetWork::Update(void)
 {
-	if (GetNetWorkMode() == NetWorkMode::HOST)
+	while (ProcessMessage() == 0)
 	{
-		if (state_->GetActive() == ActiveState::Stanby)
+		if (GetNetWorkMode() == NetWorkMode::HOST)
+		{
+			if (state_->GetActive() == ActiveState::Stanby)
+			{
+				if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesData))
+				{
+					MesData data;
+					NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
+
+					// ゲームスタートを受信時
+					if (static_cast<MesType>(data.type) == MesType::GAME_START)
+					{
+						TRACE("ゲストから通知を確認、ゲームを開始します\n");
+						state_->SetActive(ActiveState::Play);
+						continue;
+					}
+				}
+			}
+		}
+		else if (GetNetWorkMode() == NetWorkMode::GUEST)
 		{
 			if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesData))
 			{
 				MesData data;
 				NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
 
-				// ゲームスタートを受信時
-				if (static_cast<MesType>(data.type) == MesType::GAME_START)
+				if (static_cast<MesType>(data.type) == MesType::STANBY)
 				{
-					TRACE("ゲストから通知を確認、ゲームを開始します\n");
-					state_->SetActive(ActiveState::Play);
-					return true;
-				}
-			}
-		}
-	}
-	else if (GetNetWorkMode() == NetWorkMode::GUEST)
-	{
-		if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesData))
-		{
-			MesData data;
-			NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
+					std::ofstream fs("TileMap/SendData.tmx", std::ios::out);
 
-			if (static_cast<MesType>(data.type) == MesType::STANBY)
-			{
-				std::ofstream fs("TileMap/SendData.tmx", std::ios::out);
-
-				std::ifstream ifs("TileMap/Stage01_FileData.dat");
-				if (ifs.fail())
-				{
-					TRACE("ファイルの読み込みに失敗しました。\n");
-					return false;
-				}
-
-				if (!fs)
-				{
-					TRACE("書き込み用のファイルが開けません\n");
-					return false;
-				}
-
-				std::string str;
-				do
-				{
-					getline(ifs, str);
-					fs << str << std::endl;
-
-					if (ifs.eof())
+					std::ifstream ifs("TileMap/Stage01_FileData.dat");
+					if (ifs.fail())
 					{
-						break;
+						TRACE("ファイルの読み込みに失敗しました。\n");
+						continue;
 					}
-				} while (str.find("data encoding") == std::string::npos);
 
-				int count = 0;
-				for (auto box : RevBox)
-				{
-					for (int i = 0; i < 8; i++)
+					if (!fs)
 					{
-						for (int j = 0; j < 2; j++)
+						TRACE("書き込み用のファイルが開けません\n");
+						continue;
+					}
+
+					std::string str;
+					do
+					{
+						getline(ifs, str);
+						fs << str << std::endl;
+
+						if (ifs.eof())
 						{
-							fs << (box.cData[i] >> (4 * j) & 0x0f);
+							break;
+						}
+					} while (str.find("data encoding") == std::string::npos);
+
+					int count = 0;
+					for (auto box : RevBox)
+					{
+						for (int i = 0; i < 16; i++)
+						{
+							// 文字の挿入
+							fs << (box.cData[(i / 2) % 8] >> (4 * (i % 2)) & 0x0f);
 
 							count++;
+
+							// 文字を入れるときに最後の行以外にコロンを入れる
 							if (count % 21 != 0)
 							{
 								fs << ',';
+								continue;
 							}
-							else
+
+							// 行終わりチェック
+							if (count % (21 * 17) != 0)
 							{
-								if (count % (21 * 17) != 0)
+								fs << ',';
+								fs << std::endl;
+								continue;
+							}
+
+							fs << std::endl;
+							bool flg = false;
+							do
+							{
+								getline(ifs, str);
+
+								// ファイル読み込み完了
+								if (ifs.eof())
 								{
-									fs << ',';
-									fs << std::endl;
+									TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
+									recvStanby_ = true;
+									state_->SetActive(ActiveState::Play);
+									flg = true;
+									break;
 								}
-								else
-								{
-									fs << std::endl;
-									do
-									{
-										getline(ifs, str);
-										if (ifs.eof())
-										{
-											TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
-											recvStanby_ = true;
-											state_->SetActive(ActiveState::Play);
-											return true;
-										}
-										fs << str << std::endl;
-									} while (str.find("data encoding") == std::string::npos);
-								}
+								fs << str << std::endl;
+							} while (str.find("data encoding") == std::string::npos);
+
+							if (flg)
+							{
+								break;
 							}
 						}
 					}
 				}
-				
-				TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
-				recvStanby_ = true;
-				state_->SetActive(ActiveState::Play);
-				return true;
-			}
-			if (static_cast<MesType>(data.type) == MesType::TMX_SIZE)
-			{
-				tmxSize_ = data.data[0];
-				RevBox.resize(tmxSize_);
-				TRACE("TMXデータサイズは：%d\n",data.data[0]);
-				return true;
-			}
-			if (static_cast<MesType>(data.type) == MesType::TMX_DATA)
-			{
-				RevBox[data.id].iData[0] = data.data[0];
-				RevBox[data.id].iData[1] = data.data[1];
+				if (static_cast<MesType>(data.type) == MesType::TMX_SIZE)
+				{
+					tmxSize_ = data.data[0];
+					RevBox.resize(tmxSize_);
+					TRACE("TMXデータサイズは：%d\n", data.data[0]);
+					continue;
+				}
+				if (static_cast<MesType>(data.type) == MesType::TMX_DATA)
+				{
+					RevBox[data.id].iData[0] = data.data[0];
+					RevBox[data.id].iData[1] = data.data[1];
 
-				tmp_++;
+					tmp_++;
 
-				return true;
+					continue;
+				}
 			}
+		}
+
+		if (!state_->Update())
+		{
+			// 使ったものをリセットする
+			recvStanby_ = false;
 		}
 	}
 
-	if (!state_->Update())
+	// オフライン以外だったら切断するよ
+	if (state_->GetMode() != NetWorkMode::OFFLINE)
 	{
-		// 使ったものをリセットする
-		recvStanby_ = false;
-		return false;
+		CloseNetWork();
 	}
+
 	return true;
 }
 
@@ -210,6 +224,12 @@ void NetWork::SendStart(void)
 	{
 		TRACE("Start : 送信失敗\n");
 	}
+}
+
+void NetWork::RunUpDate(void)
+{
+	std::thread update(&NetWork::Update, this);
+	update.detach();
 }
 
 bool NetWork::SendMes(MesData& data)

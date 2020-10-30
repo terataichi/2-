@@ -63,13 +63,6 @@ uniqueBase TitleScene::Update(uniqueBase scene)
 {
 	// ネットワークのアップデート
 	func_[updateMode_]();
-	if (!lpNetWork.Update())
-	{
-		// 接続が切れた時にすべてをやり直す
-		lpNetWork.CloseNetWork();
-		updateMode_ = UpdateMode::SetNetWork;
-		wasHost_ = false;
-	}
 	return scene;
 }
 
