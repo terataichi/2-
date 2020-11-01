@@ -2,6 +2,8 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <map>
+#include <functional>
 #include <array>
 #include <vector>
 #include <Dxlib.h>
@@ -37,6 +39,8 @@ union UnionData
 using ArrayIP = std::array<IPDATA, 5>;
 
 using TmxVec = std::vector<UnionData>;
+
+using MesTypeFunc = std::map<MesType, std::function<bool(MesData& data)>>;
 
 // 送るデータ
 //struct MesData
@@ -80,6 +84,8 @@ private:
 	NetWork();
 	~NetWork();
 
+	void InitFunc(void);													// ファンクション初期化用
+
 	static std::unique_ptr<NetWork, NetWorkDeleter> sInstance_;
 
 
@@ -91,7 +97,10 @@ private:
 	int tmp_;
 	ArrayIP ip_;
 
-	std::thread update_;
+	MesTypeFunc guestRevMap_;												// メッセージ管理用マップ
+	MesTypeFunc hostRevMap_;												// メッセージ管理用マップ
+
+	//std::thread update_;
 	std::mutex lock_;
 };
 
