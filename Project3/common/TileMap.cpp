@@ -159,10 +159,11 @@ bool TileMap::DrawMap(LayerData layerData)
 	for (auto chip : layerData.chipData)
 	{
 		//int chip = data.second.chipData[i];
-		Vector2 chipPos{ size.x * (i % div.x) + size.x / 2 ,size.y * (i / div.x) + size.y / 2 };
+		Vector2 chipPos{ size.x * (i % div.x),size.y * (i / div.x)};
 		if (chip != 0)
 		{
-			lpSceneMng.AddDrawQue({ lpImageMng.GetHandle(ImageName_.c_str(),{4,3},size)[chip - 1], chipPos.x,chipPos.y,1,0.0f,1 });
+			auto image = lpImageMng.GetHandle(ImageName_.c_str(), { 4,3 }, size)[chip - 1];
+			DrawGraph(chipPos.x, chipPos.y, image, true);
 		}
 		i++;
 	}
