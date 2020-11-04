@@ -13,18 +13,26 @@
 
 enum class MesType:unsigned char
 {
-	STANBY,				// 初期化情報送信
-	GAME_START,			// ゲーム開始
-	TMX_SIZE,			// TMXファイルのサイズ
-	TMX_DATA,			// TMXテータ
+	STANBY,							// 初期化情報送信
+	GAME_START,						// ゲーム開始
+	TMX_SIZE,						// TMXファイルのサイズ
+	TMX_DATA,						// TMXテータ
 	POS
 };
 
-struct MesData
+struct TmxDataSize
+{
+	int sendNum;					// 何回データを送るか
+	int oneSize;					// 一回で送るデータ量
+	int allSize;					// 合計で送られる量
+};
+
+struct MesH
 {
 	MesType type;
-	unsigned short id;
+	unsigned short id;				// 何番目の情報化
 	unsigned char  cdata;
+	unsigned int length;			// データのサイズ
 	int data[2];
 };
 
@@ -40,7 +48,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using TmxVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::map<MesType, std::function<bool(MesData& data)>>;
+using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data)>>;
 
 // 送るデータ
 //struct MesData
@@ -61,7 +69,7 @@ public:
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
-	bool SendMes(MesData& data);											// データを送信
+	bool SendMes(MesH& data);											// データを送信
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 
 	bool CheckConnect(void);												// 接続できているか確認

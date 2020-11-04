@@ -47,7 +47,7 @@ bool TileMap::SendTmxSizeData(void)
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 	ifs.seekg(0, std::ios_base::end);
 
-	MesData data{ MesType::TMX_SIZE, 0,0,static_cast<int>(ifs.tellg()),0 };
+	MesH data{ MesType::TMX_SIZE, 0,0,static_cast<int>(ifs.tellg()),0 };
 	
 	return lpNetWork.SendMes(data);
 }
@@ -112,7 +112,7 @@ bool TileMap::SendTmxData(void)
 					count++;
 					if (count % 16 == 0)
 					{
-						MesData data{ MesType::TMX_DATA, sendID,0,unionData.iData[0],unionData.iData[1] };
+						MesH data{ MesType::TMX_DATA, sendID,0,unionData.iData[0],unionData.iData[1] };
 						lpNetWork.SendMes(data);
 						sendID++;
 					}

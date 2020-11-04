@@ -53,11 +53,13 @@ bool NetWork::Update(void)
 {
 	while (ProcessMessage() == 0)
 	{
-
-		if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesData))
+		// ヘッダー部の受信
+		if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesH))
 		{
-			MesData data;
-			NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesData));
+			MesH data;
+			NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesH));
+
+			
 
 			if (state_->GetMode() == NetWorkMode::HOST)
 			{
@@ -105,10 +107,10 @@ ActiveState NetWork::GetActive(void)
 void NetWork::SendStanby(void)
 {
 	// 初期化情報の送信
-	MesData tmpData;
+	MesH tmpData;
 	tmpData = {(MesType::STANBY),0, 0,0 };
 	state_->SetActive(ActiveState::Stanby);
-	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesH)) == -1)
 	{
 		TRACE("Stanby : 送信失敗\n");
 	}
@@ -116,9 +118,9 @@ void NetWork::SendStanby(void)
 
 void NetWork::SendStart(void)
 {
-	MesData tmpData;
+	MesH tmpData;
 	tmpData = {(MesType::GAME_START),0, 0,0 };
-	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesData)) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesH)) == -1)
 	{
 		TRACE("Start : 送信失敗\n");
 	}
@@ -130,9 +132,9 @@ void NetWork::RunUpDate(void)
 	update.detach();
 }
 
-bool NetWork::SendMes(MesData& data)
+bool NetWork::SendMes(MesH& data)
 {
-	if (NetWorkSend(state_->GetNetHandle(), &data, sizeof(MesData)) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &data, sizeof(MesH)) == -1)
 	{
 		TRACE("データの送信失敗\n");
 		return false;
@@ -165,7 +167,7 @@ NetWork::~NetWork()
 void NetWork::InitFunc(void)
 {
 	// ---- ホスト ---
-	auto hostStanby = [&](MesData& data)
+	auto hostStanby = [&](MesH& data)
 	{
 		// ゲームスタートを受信時
 		if (static_cast<MesType>(data.type) == MesType::GAME_START)
@@ -179,7 +181,7 @@ void NetWork::InitFunc(void)
 
 
 	// ---- ゲスト ---
-	auto guestStanby = [&](MesData& data)
+	auto guestStanby = [&](MesH& data)
 	{
 
 		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
@@ -262,16 +264,18 @@ void NetWork::InitFunc(void)
 		return true;
 	};
 
-	auto tmx_Size = [&](MesData& data)
+	auto tmx_Size = [&](MesH& data)
 	{
 		// データの受け取り
+		TmxDataSize size;
+
 		tmxSize_ = data.data[0];
 		RevBox.resize(tmxSize_);
 		TRACE("TMXデータサイズは：%d\n", data.data[0]);
 		return true;
 	};
 
-	auto  tmx_Data = [&](MesData& data)
+	auto  tmx_Data = [&](MesH& data)
 	{
 		RevBox[data.id].iData[0] = data.data[0];
 		RevBox[data.id].iData[1] = data.data[1];
