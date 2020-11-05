@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include "../common/Vector2.h"
-#include "../Scene/TitleScene.h"
+#include "../Scene/LoginScene.h"
 
 #define lpSceneMng SceneMng::GetInstance()
 

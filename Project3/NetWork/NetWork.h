@@ -108,6 +108,10 @@ private:
 	MesTypeFunc guestRevMap_;												// メッセージ管理用マップ
 	MesTypeFunc hostRevMap_;												// メッセージ管理用マップ
 
+	std::chrono::system_clock::time_point  start;
+	std::chrono::system_clock::time_point  end;
+
+
 	//std::thread update_;
 	std::mutex lock_;
 };

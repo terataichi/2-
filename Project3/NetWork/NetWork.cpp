@@ -158,6 +158,7 @@ NetWork::NetWork()
 	tmp_ = 0;
 	tmxSize_ = 0;
 	ip_ = ArrayIP{};
+	InitFunc();
 }
 
 NetWork::~NetWork()
@@ -183,7 +184,6 @@ void NetWork::InitFunc(void)
 	// ---- ゲスト ---
 	auto guestStanby = [&](MesH& data)
 	{
-
 		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
 
 		std::ifstream ifs("TileMap/Stage01_FileData.dat");					// ヘッダー読み込み用
@@ -256,6 +256,11 @@ void NetWork::InitFunc(void)
 				// 読み込みが終わったので終了
 				if (getlineHeader())
 				{
+					end = std::chrono::system_clock::now();
+					// 秒に変換
+					auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+					//TRACE("受け取りから送るまでかかった時間は : %d\n", time);
+					std::cout << time << std::endl;
 					break;
 				}
 			}
@@ -272,6 +277,7 @@ void NetWork::InitFunc(void)
 		tmxSize_ = data.data[0];
 		RevBox.resize(tmxSize_);
 		TRACE("TMXデータサイズは：%d\n", data.data[0]);
+		start = std::chrono::system_clock::now();
 		return true;
 	};
 
@@ -279,7 +285,6 @@ void NetWork::InitFunc(void)
 	{
 		RevBox[data.id].iData[0] = data.data[0];
 		RevBox[data.id].iData[1] = data.data[1];
-		tmp_++;
 		return true;
 	};
 

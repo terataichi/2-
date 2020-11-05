@@ -1,4 +1,4 @@
-#include "TitleScene.h"
+#include "LoginScene.h"
 #include <DxLib.h>
 #include <iostream>
 #include <sstream>
@@ -9,11 +9,14 @@
 #include "../Scene/SceneMng.h"
 #include "../Input/PadState.h"
 #include "../Input/INPUT_ID.h"
+#include "GameScene.h"
+#include "CrossOverScene.h"
+
 //#include "../TMXParser-master/include/TMXParser.h"
 
 #include "../_debug/_DebugConOut.h"
 
-TitleScene::TitleScene()
+LoginScene::LoginScene()
 {
 	TRACE("タイトルシーンの生成\n");
 	screen_size_x_ = 0;
@@ -26,10 +29,10 @@ TitleScene::TitleScene()
 		TRACE("%d.%d.%d.%d\n", ip.d1, ip.d2, ip.d3, ip.d4);
 	}
 
-	func_[UpdateMode::SetHostIP] = std::bind(&TitleScene::SetHostIP, this);
-	func_[UpdateMode::SetNetWork] = std::bind(&TitleScene::SetNetWorkMode, this);
-	func_[UpdateMode::Play] = std::bind(&TitleScene::PlayUpdate, this);
-	func_[UpdateMode::StartInit] = std::bind(&TitleScene::StartInit, this);;
+	func_[UpdateMode::SetHostIP] = std::bind(&LoginScene::SetHostIP, this);
+	func_[UpdateMode::SetNetWork] = std::bind(&LoginScene::SetNetWorkMode, this);
+	func_[UpdateMode::Play] = std::bind(&LoginScene::PlayUpdate, this);
+	func_[UpdateMode::StartInit] = std::bind(&LoginScene::StartInit, this);;
 
 	if (!tileMap_.LoadTmx("TileMap/Stage01.tmx"))
 	{
@@ -42,11 +45,11 @@ TitleScene::TitleScene()
 	Init();
 }
 
-TitleScene::~TitleScene()
+LoginScene::~LoginScene()
 {
 }
 
-void TitleScene::Init(void)
+void LoginScene::Init(void)
 {
 	GetDrawScreenSize(&screen_size_x_, &screen_size_y_);
 	input_ = std::make_unique<PadState>();
@@ -57,25 +60,27 @@ void TitleScene::Init(void)
 	rad_ = 0;
 	wasHost_ = false;
 	//tileMap_.SendTmxData();
+	DrawOwnScene();
 }
 
-uniqueBase TitleScene::Update(uniqueBase scene)
+uniqueBase LoginScene::Update(uniqueBase scene)
 {
 	// ネットワークのアップデート
-	func_[updateMode_]();
+	if (!func_[updateMode_]() || lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
+	{
+		return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<GameScene>());
+	}
+	DrawOwnScene();
 	return scene;
 }
 
-void TitleScene::Draw()
+void LoginScene::DrawOwnScene()
 {
-	lpSceneMng.AddDrawQue({ lpImageMng.GetHandle("image03")[0],pos_.x,pos_.y,1,rad_,0 });
-
-	//std::cout << map.GetLayerData()["Bg"].chipData;
-	tileMap_.DrawUpdate();
-
+	SetDrawScreen(drawScreen_);
+	DrawBox(100, 100, 200, 200, 0xfffff, true);
 }
 
-void TitleScene::PlayUpdate(void)
+bool LoginScene::PlayUpdate(void)
 {
 	(*input_)();
 
@@ -91,9 +96,10 @@ void TitleScene::PlayUpdate(void)
 	move(INPUT_ID::BUTTON_RIGHT, { speed_ ,0 });
 	move(INPUT_ID::BUTTON_UP, { 0, -speed_ });
 	move(INPUT_ID::BUTTON_DOWN, { 0, speed_ });
+	return true;
 }
 
-void TitleScene::SetNetWorkMode(void)
+bool LoginScene::SetNetWorkMode(void)
 {
 	int mode;												// モード選択用
 
@@ -168,15 +174,17 @@ void TitleScene::SetNetWorkMode(void)
 			break;
 	}
 	TRACE("状態 : %dです\n", lpNetWork.GetActive());
+
+	return true;
 }
 
-void TitleScene::SetHostIP(void)
+bool LoginScene::SetHostIP(void)
 {
 
 	IPDATA hostIP;		// ホストのIP
 	std::string ip;
 
-	if(wasHost_)
+	auto readHostIP = [&]()
 	{
 		// 前回のホストのIPアドレス取得
 		std::ifstream ifs("hostIp.txt");
@@ -184,11 +192,21 @@ void TitleScene::SetHostIP(void)
 		{
 			TRACE("ファイルの読み込みに失敗しました。\n");
 			wasHost_ = false;
-			return;
+			return false;
 		}
 		// ファイルの内容を格納
 		getline(ifs, ip);
 		ifs.close();
+		return true;
+	};
+
+	if(wasHost_)
+	{
+		if (!readHostIP())
+		{
+			TRACE("接続先のIPアドレスを入力してください\n");
+			std::cin >> ip;
+		}
 	}
 	else
 	{
@@ -223,11 +241,12 @@ void TitleScene::SetHostIP(void)
 
 		updateMode_ = UpdateMode::StartInit;
 	}
+
+	return true;
 }
 
-void TitleScene::StartInit(void)
+bool LoginScene::StartInit(void)
 {
-	std::chrono::system_clock::time_point  end;
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
 		if (lpNetWork.CheckConnect() && lpNetWork.GetActive() == ActiveState::Init)
@@ -238,31 +257,25 @@ void TitleScene::StartInit(void)
 			tileMap_.SendTmxData();
 			lpNetWork.SendStanby();
 		}
+		if (lpNetWork.GetActive() == ActiveState::Play)
+		{
+			return false;
+		}
 	}
 	else if (lpNetWork.GetNetWorkMode() == NetWorkMode::GUEST)
 	{
 		if (lpNetWork.GetActive() == ActiveState::Init)
 		{
 			//TRACE("初期化情報の受け取り\n");
-			if (!flg_)
-			{
-				start = std::chrono::system_clock::now();
-				flg_ = true;
-			}
-
 		}
 	}
 	if (lpNetWork.GetActive() == ActiveState::Play)
 	{
-		end = std::chrono::system_clock::now();
-		// 秒に変換
-		auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-		//TRACE("受け取りから送るまでかかった時間は : %d\n", time);
-		std::cout << time << std::endl;
-
 		// スタート情報の送信
 		lpNetWork.SendStart();
 		TRACE("ゲームモードに移行します\n");
 		updateMode_ = UpdateMode::Play;
+		return false;
 	}
+	return true;
 }
