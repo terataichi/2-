@@ -48,10 +48,13 @@ bool TileMap::SendTmxSizeData(void)
 	ifs.seekg(0, std::ios_base::end);
 
 	UnionVec vecData;
-	UnionData mData{ MesType::TMX_SIZE, 0,0,sizeof(int) };
+	vecData.resize(3);
+	UnionHeader mData{ MesType::TMX_SIZE, 0,0,sizeof(int) };
+
 	// ÉfÅ[É^èÓïÒÇÃí«â¡
-	vecData.emplace_back(mData);
-	vecData.emplace_back(ifs.tellg());
+	vecData[0].iData = mData.iData[0];
+	vecData[1].iData = mData.iData[1];
+	vecData[2].iData = ifs.tellg();
 
 	lpNetWork.SendMes(vecData);
 
@@ -135,8 +138,10 @@ bool TileMap::SendTmxData(void)
 	}
 	std::cout << sendID << std::endl;
 
-	UnionData mData{ MesType::TMX_DATA,0,0,sizeof(UnionData) * sendID };
-	vecData.emplace(vecData.begin(), mData);
+	UnionHeader mData{ MesType::TMX_DATA,0,0,sizeof(UnionData) * sendID };
+	//vecData.emplace(vecData.begin(), mData.iData[1]);
+	//vecData.emplace(vecData.begin(), mData.iData[0]);
+
 	lpNetWork.SendMes(vecData);
 
 	return true;

@@ -35,11 +35,16 @@ struct MesH
 	unsigned int length;			// データのサイズ
 };
 
-union UnionData
+union UnionHeader
 {
 	MesH mesH;
-	char cData[8];
-	int iData[2];
+	int iData[8];
+};
+
+union UnionData
+{
+	char cData[4];
+	int iData;
 };
 
 
