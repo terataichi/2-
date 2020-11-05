@@ -47,9 +47,15 @@ bool TileMap::SendTmxSizeData(void)
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 	ifs.seekg(0, std::ios_base::end);
 
-	MesH data{ MesType::TMX_SIZE, 0,0,static_cast<int>(ifs.tellg()),0 };
-	
-	return lpNetWork.SendMes(data);
+	UnionVec vecData;
+	UnionData mData{ MesType::TMX_SIZE, 0,0,sizeof(int) };
+	// データ情報の追加
+	vecData.emplace_back(mData);
+	vecData.emplace_back(ifs.tellg());
+
+	lpNetWork.SendMes(vecData);
+
+	return true;
 }
 
 bool TileMap::SendTmxData(void)
@@ -57,10 +63,12 @@ bool TileMap::SendTmxData(void)
 	// 数字データは持ってるけどファイル操作の練習
 	std::ifstream ifs{ loader_.GetTmxFileName() };
 
-	UnionData unionData{ 0 };
 	std::string fileData;
 	std::stringstream lineData;
 	int count = 0;
+
+	UnionData unionData{};
+	UnionVec vecData;
 
 
 	auto SetLineData = [&]()
@@ -111,9 +119,8 @@ bool TileMap::SendTmxData(void)
 
 					count++;
 					if (count % 16 == 0)
-					{
-						MesH data{ MesType::TMX_DATA, sendID,0,unionData.iData[0],unionData.iData[1] };
-						lpNetWork.SendMes(data);
+					{ 
+						vecData.emplace_back(unionData);
 						sendID++;
 					}
 				}
@@ -127,6 +134,10 @@ bool TileMap::SendTmxData(void)
 		}
 	}
 	std::cout << sendID << std::endl;
+
+	UnionData mData{ MesType::TMX_DATA,0,0,sizeof(UnionData) * sendID };
+	vecData.emplace(vecData.begin(), mData);
+	lpNetWork.SendMes(vecData);
 
 	return true;
 }

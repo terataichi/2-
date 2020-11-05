@@ -43,6 +43,6 @@ public:
 protected:
 	const int portNum_ = 8086;												// ポート番号格納変数(番号は基本的に何でもいい)
 	ActiveState active_;
-	int netHandle_ = 0;														// ０以上：確立した接続を示すネットワークハンドル(int型の識別値)格納用
+	int netHandle_ = -1;														// ０以上：確立した接続を示すネットワークハンドル(int型の識別値)格納用
 };
 
