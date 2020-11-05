@@ -232,7 +232,7 @@ void NetWork::SendStanby(void)
 	//MesH tmpData;
 	//tmpData = { MesType::STANBY,0, 0,0 };
 	state_->SetActive(ActiveState::Stanby);
-	if (NetWorkSend(state_->GetNetHandle(), &vecData, vecData.size()) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &vecData[0], vecData.size() * sizeof(UnionData)) == -1)
 	{
 		TRACE("Stanby : 送信失敗\n");
 	}
@@ -250,7 +250,7 @@ void NetWork::SendStart(void)
 
 	//MesH tmpData;
 	//tmpData = {(MesType::GAME_START),0, 0,0 };
-	if (NetWorkSend(state_->GetNetHandle(), &vecData, vecData.size()) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &vecData[0], vecData.size() * sizeof(UnionData)) == -1)
 	{
 		TRACE("Start : 送信失敗\n");
 	}
@@ -264,19 +264,9 @@ void NetWork::RunUpDate(void)
 
 bool NetWork::SendMes(UnionVec& data)
 {
-	if (NetWorkSend(state_->GetNetHandle(), &data, data.size()) == -1)
+	if (NetWorkSend(state_->GetNetHandle(), &data[0], data.size() * sizeof(UnionData)) == -1)
 	{
 		TRACE("ヘッダー部の送信失敗\n");
-		return false;
-	}
-	return true;
-}
-
-bool NetWork::SendUnionData(UnionVec& data)
-{
-	if (NetWorkSend(state_->GetNetHandle(), &data, data.size()) == -1)
-	{
-		TRACE("ユニオンデータの送信失敗\n");
 		return false;
 	}
 	return true;

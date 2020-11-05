@@ -48,6 +48,7 @@ bool TileMap::SendTmxSizeData(void)
 	ifs.seekg(0, std::ios_base::end);
 
 	UnionVec vecData;
+	vecData.reserve(3);
 	vecData.resize(3);
 	UnionHeader mData{ MesType::TMX_SIZE, 0,0,sizeof(int) };
 
@@ -64,83 +65,86 @@ bool TileMap::SendTmxSizeData(void)
 bool TileMap::SendTmxData(void)
 {
 	// 数字データは持ってるけどファイル操作の練習
-	std::ifstream ifs{ loader_.GetTmxFileName() };
+	//std::ifstream ifs{ loader_.GetTmxFileName() };
 
-	std::string fileData;
-	std::stringstream lineData;
-	int count = 0;
+	//std::string fileData;
+	//std::stringstream lineData;
+	//int count = 0;
 
-	UnionData unionData{};
+	//UnionData unionData{};
+	//UnionVec vecData;
+
+
+	//auto SetLineData = [&]()
+	//{
+	//	lineData.str("");
+	//	lineData.clear();
+	//	getline(ifs, fileData);
+	//	lineData << fileData;
+	//};
+
+	//auto ChangeInt = [&](std::string str)
+	//{
+	//	return atoi(str.c_str());
+	//};
+
+	//int sendID = 0;
+
+	//while (!ifs.eof())
+	//{
+	//	// 欲しいデータが来るまで空うち
+	//	do 
+	//	{
+	//		getline(ifs, fileData);
+	//		if (ifs.eof())
+	//		{
+	//			break;
+	//		}
+	//	} while (fileData.find("data encoding") == std::string::npos);
+
+	//	// 抜けてきたらからここから数字を取り出す
+	//	if (!ifs.eof())
+	//	{
+	//		SetLineData();
+	//		while (fileData.find("/data") == std::string::npos)
+	//		{
+	//			std::string numData;
+	//			getline(lineData, numData, ',');
+	//			if (numData.size())
+	//			{
+	//				if (count % 2 == 1)
+	//				{
+	//					unionData.cData[(count / 2) % 8] |= ChangeInt(numData) << 4;
+	//				}
+	//				else
+	//				{
+	//					unionData.cData[(count / 2) % 8] = ChangeInt(numData);
+	//				}
+
+	//				count++;
+	//				if (count % 16 == 0)
+	//				{ 
+	//					vecData.emplace_back(unionData);
+	//					sendID++;
+	//				}
+	//			}
+
+	//			// 読み終わったら次の行をもらってくる
+	//			if (lineData.eof())
+	//			{
+	//				SetLineData();
+	//			}
+	//		}
+	//	}
+	//}
+	//std::cout << sendID << std::endl;
+
 	UnionVec vecData;
-
-
-	auto SetLineData = [&]()
-	{
-		lineData.str("");
-		lineData.clear();
-		getline(ifs, fileData);
-		lineData << fileData;
-	};
-
-	auto ChangeInt = [&](std::string str)
-	{
-		return atoi(str.c_str());
-	};
-
-	int sendID = 0;
-
-	while (!ifs.eof())
-	{
-		// 欲しいデータが来るまで空うち
-		do 
-		{
-			getline(ifs, fileData);
-			if (ifs.eof())
-			{
-				break;
-			}
-		} while (fileData.find("data encoding") == std::string::npos);
-
-		// 抜けてきたらからここから数字を取り出す
-		if (!ifs.eof())
-		{
-			SetLineData();
-			while (fileData.find("/data") == std::string::npos)
-			{
-				std::string numData;
-				getline(lineData, numData, ',');
-				if (numData.size())
-				{
-					if (count % 2 == 1)
-					{
-						unionData.cData[(count / 2) % 8] |= ChangeInt(numData) << 4;
-					}
-					else
-					{
-						unionData.cData[(count / 2) % 8] = ChangeInt(numData);
-					}
-
-					count++;
-					if (count % 16 == 0)
-					{ 
-						vecData.emplace_back(unionData);
-						sendID++;
-					}
-				}
-
-				// 読み終わったら次の行をもらってくる
-				if (lineData.eof())
-				{
-					SetLineData();
-				}
-			}
-		}
-	}
-	std::cout << sendID << std::endl;
-
-	UnionHeader mData{ MesType::TMX_DATA,0,0,sizeof(UnionData) * sendID };
-	//vecData.emplace(vecData.begin(), mData.iData[1]);
-	//vecData.emplace(vecData.begin(), mData.iData[0]);
+	vecData.resize(3);
+	UnionHeader mData{ MesType::TMX_DATA,0,0,sizeof(UnionData)};
+	vecData[0].iData = mData.iData[0];
+	vecData[1].iData = mData.iData[1];
+	vecData[2].iData = 100;
 
 	lpNetWork.SendMes(vecData);
 

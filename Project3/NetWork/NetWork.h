@@ -75,7 +75,6 @@ public:
 	ActiveState GetActive(void);											// 接続先のステータス確認用
 
 	bool SendMes(UnionVec& data);											// 送信
-	bool SendUnionData(UnionVec& data);										// ユニオンデータ
 
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 
