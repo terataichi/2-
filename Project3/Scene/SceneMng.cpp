@@ -10,14 +10,13 @@ SceneMng* SceneMng::sInstance_;
 void SceneMng::Run(void)
 {
 
-	activeScene_ = std::make_unique<TitleScene>();
+	activeScene_ = std::make_unique<LoginScene>();
 
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE) && end_)
 	{
 		_dbgStartDraw();
 
 		activeScene_ = (*activeScene_).Update(std::move(activeScene_));			// 現在のシーンアップデート
-		(*activeScene_).Draw();													// キューを投げる
 
 		Draw();																	// すべて描画
 	}
@@ -39,28 +38,9 @@ void SceneMng::Draw(void)
 {
 	_dbgAddDraw();
 
-	// リストのソート
-	std::sort(drawList_.begin(), drawList_.end(), [](drawQueT que1, drawQueT que2)
-		{
-			return (std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que1))) >
-				(std::tie(std::get<static_cast<int>(DrawQue::ZOrder)>(que2)));
-		});
-
 	SetDrawScreen(DX_SCREEN_BACK);
-	ClearDrawScreen();
-
-	for (auto que : drawList_)
-	{
-		int id, x, y;
-		double ex;
-		float angle;
-
-		std::tie(id, x, y, ex, angle, std::ignore) = que;
-
-		DrawRotaGraph(x,y, ex, angle, id, true);
-	}
-
-	drawList_.clear();
+	ClsDrawScreen();
+	(*activeScene_).Draw();
 	ScreenFlip();
 }
 

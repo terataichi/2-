@@ -25,24 +25,24 @@ enum class ChipLayer
 	CHAR
 };
 
-class TitleScene :
+class LoginScene :
 	public BaseScene
 {
 public:
-	TitleScene();
-	~TitleScene();
+	LoginScene();
+	~LoginScene();
 
 	void Init(void) override;
 	uniqueBase Update(uniqueBase scene) override;
-	void Draw() override;
+	void DrawOwnScene()override;
 
 private:
-	void PlayUpdate(void);											
+	bool PlayUpdate(void);
 	// 状態別アップデートの呼び出し先
-	std::map<UpdateMode, std::function<void(void)>> func_;
-	void SetNetWorkMode(void);
-	void SetHostIP(void);
-	void StartInit(void);
+	std::map<UpdateMode, std::function<bool(void)>> func_;
+	bool SetNetWorkMode(void);
+	bool SetHostIP(void);
+	bool StartInit(void);
 
 	int screen_size_x_;
 	int screen_size_y_;
@@ -60,7 +60,6 @@ private:
 	TileMap tileMap_;
 
 	bool flg_ = false;
-	std::chrono::system_clock::time_point  start;
 
 	//std::map<std::string, ChipLayer> chipLayer_;
 	//std::map<ChipLayer, std::vector<int>>chipData_;

@@ -1,19 +1,21 @@
 #include "BaseScene.h"
+#include <DxLib.h>
+#include "SceneMng.h"
 
 BaseScene::BaseScene()
 {
+	drawScreen_ = MakeScreen(lpSceneMng.screenSize_.x, lpSceneMng.screenSize_.y, true);
 }
 
 BaseScene::~BaseScene()
 {
 }
 
-//void BaseScene::SetMenuFlg(bool set)
-//{
-//	menuFlg_ = set;
-//}
-
-bool BaseScene::nextUpdate(void)
+void BaseScene::Draw()
 {
-	return true;
+	DrawGraph(0, 0, drawScreen_, true);
+}
+
+void BaseScene::DrawOwnScene()
+{
 }
