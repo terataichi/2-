@@ -30,25 +30,24 @@ struct TmxDataSize
 struct MesH
 {
 	MesType type;
-	unsigned short id;				// 何番目の情報化
 	unsigned char  cdata;
+	unsigned short id;				// 何番目の情報化
 	unsigned int length;			// データのサイズ
-	int data[2];
 };
 
 union UnionData
 {
+	MesH mesH;
 	char cData[8];
 	int iData[2];
-	long long IData;
 };
 
 
 using ArrayIP = std::array<IPDATA, 5>;
 
-using TmxVec = std::vector<UnionData>;
+using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data)>>;
+using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data, UnionVec& vec)>>;
 
 // 送るデータ
 //struct MesData
@@ -69,7 +68,10 @@ public:
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
-	bool SendMes(MesH& data);											// データを送信
+
+	bool SendMes(UnionVec& data);											// 送信
+	bool SendUnionData(UnionVec& data);										// ユニオンデータ
+
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 
 	bool CheckConnect(void);												// 接続できているか確認
@@ -98,7 +100,7 @@ private:
 
 
 	int tmxSize_;															// Tmxファイルサイズ保存用変数 
-	TmxVec RevBox;
+	UnionVec revBox_;
 
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態

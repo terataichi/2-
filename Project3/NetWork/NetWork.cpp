@@ -53,35 +53,155 @@ bool NetWork::Update(void)
 {
 	while (ProcessMessage() == 0)
 	{
+
+		if (!state_->Update())
+		{
+			// 使ったものをリセットする
+			recvStanby_ = false;
+			continue;
+		}
+		auto handle = state_->GetNetHandle();
+		if (handle == -1)
+		{
+			continue;
+		}
+
 		// ヘッダー部の受信
 		if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesH))
 		{
 			MesH data;
 			NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesH));
 
-			
+			// データの大きさ分送られてくる
+			UnionVec SendVec;
+			SendVec.resize(data.length);
+			if (GetNetWorkDataLength(state_->GetNetHandle()) >= data.length)
+			{
+				NetWorkRecv(state_->GetNetHandle(), &SendVec, data.length);
+				continue;
+			}
+			NetWorkRecv(state_->GetNetHandle(), &SendVec, data.length);
+
 
 			if (state_->GetMode() == NetWorkMode::HOST)
 			{
-				if (hostRevMap_.find(data.type) != hostRevMap_.end())
+
+				if (state_->GetActive() == ActiveState::Stanby)
 				{
-					hostRevMap_[data.type](data);
+					// ゲームスタートを受信時
+					if (static_cast<MesType>(data.type) == MesType::GAME_START)
+					{
+						TRACE("ゲストから通知を確認、ゲームを開始します\n");
+						state_->SetActive(ActiveState::Play);
+						continue;
+					}
 				}
 			}
 			else if (state_->GetMode() == NetWorkMode::GUEST)
 			{
-				if (guestRevMap_.find(data.type) != guestRevMap_.end())
+				if (data.type == MesType::STANBY)
 				{
-					guestRevMap_[data.type](data);
+					std::ofstream fs("TileMap/SendData.tmx", std::ios::out);
+
+					std::ifstream ifs("TileMap/Stage01_FileData.dat");
+					if (ifs.fail())
+					{
+						TRACE("ファイルの読み込みに失敗しました。\n");
+						continue;
+					}
+
+					if (!fs)
+					{
+						TRACE("書き込み用のファイルが開けません\n");
+						continue;
+					}
+
+					std::string str;
+					do
+					{
+						getline(ifs, str);
+						fs << str << std::endl;
+
+						if (ifs.eof())
+						{
+							break;
+						}
+					} while (str.find("data encoding") == std::string::npos);
+
+					int count = 0;
+					for (auto box : revBox_)
+					{
+						for (int i = 0; i < 16; i++)
+						{
+							// 文字の挿入
+							fs << (box.cData[(i / 2) % 8] >> (4 * (i % 2)) & 0x0f);
+
+							count++;
+
+							// 文字を入れるときに最後の行以外にコロンを入れる
+							if (count % 21 != 0)
+							{
+								fs << ',';
+								continue;
+							}
+
+							// 行終わりチェック
+							if (count % (21 * 17) != 0)
+							{
+								fs << ',';
+								fs << std::endl;
+								continue;
+							}
+
+							fs << std::endl;
+							bool flg = false;
+							do
+							{
+								getline(ifs, str);
+
+								// ファイル読み込み完了
+								if (ifs.eof())
+								{
+									TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
+									recvStanby_ = true;
+									state_->SetActive(ActiveState::Play);
+									flg = true;
+									break;
+								}
+								fs << str << std::endl;
+							} while (str.find("data encoding") == std::string::npos);
+
+							if (flg)
+							{
+								break;
+							}
+						}
+					}
+				}
+				if (data.type == MesType::TMX_SIZE)
+				{
+					tmxSize_ = SendVec[1].iData[0] + SendVec[1].iData[1];
+					revBox_.resize(tmxSize_);
+					TRACE("TMXデータサイズは：%d\n", tmxSize_);
+					continue;
+				}
+				if (data.type == MesType::TMX_DATA)
+				{
+					for (auto a : SendVec)
+					{
+
+					}
+					revBox_.
+					continue;
 				}
 			}
 		}
 
-		if (!state_->Update())
-		{
-			// 使ったものをリセットする
-			recvStanby_ = false;
-		}
+
+		//if (guestRevMap_.find(data.type) != guestRevMap_.end())
+		//{
+		//	guestRevMap_[data.type](data, SendVec);
+		//}
 	}
 
 	// オフライン以外だったら切断するよ
@@ -108,7 +228,7 @@ void NetWork::SendStanby(void)
 {
 	// 初期化情報の送信
 	MesH tmpData;
-	tmpData = {(MesType::STANBY),0, 0,0 };
+	tmpData = {(MesType::STANBY),5, 0,0 };
 	state_->SetActive(ActiveState::Stanby);
 	if (NetWorkSend(state_->GetNetHandle(), &tmpData, sizeof(MesH)) == -1)
 	{
@@ -132,11 +252,21 @@ void NetWork::RunUpDate(void)
 	update.detach();
 }
 
-bool NetWork::SendMes(MesH& data)
+bool NetWork::SendMes(UnionVec& data)
 {
 	if (NetWorkSend(state_->GetNetHandle(), &data, sizeof(MesH)) == -1)
 	{
-		TRACE("データの送信失敗\n");
+		TRACE("ヘッダー部の送信失敗\n");
+		return false;
+	}
+	return true;
+}
+
+bool NetWork::SendUnionData(UnionVec& data)
+{
+	if (NetWorkSend(state_->GetNetHandle(), &data, data.size()) == -1)
+	{
+		TRACE("ユニオンデータの送信失敗\n");
 		return false;
 	}
 	return true;
@@ -167,131 +297,131 @@ NetWork::~NetWork()
 
 void NetWork::InitFunc(void)
 {
-	// ---- ホスト ---
-	auto hostStanby = [&](MesH& data)
-	{
-		// ゲームスタートを受信時
-		if (static_cast<MesType>(data.type) == MesType::GAME_START)
-		{
-			TRACE("ゲストから通知を確認、ゲームを開始します\n");
-			state_->SetActive(ActiveState::Play);
-			return true;
-		}
-		return false;
-	};
+	//// ---- ホスト ---
+	//auto hostStanby = [&](MesH& data,UnionVec& vec)
+	//{
+	//	// ゲームスタートを受信時
+	//	if (data.type == MesType::GAME_START)
+	//	{
+	//		TRACE("ゲストから通知を確認、ゲームを開始します\n");
+	//		state_->SetActive(ActiveState::Play);
+	//		return true;
+	//	}
+	//	return false;
+	//};
 
 
-	// ---- ゲスト ---
-	auto guestStanby = [&](MesH& data)
-	{
-		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
+	//// ---- ゲスト ---
+	//auto guestStanby = [&](MesH& data, UnionVec& vec)
+	//{
+	//	std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
 
-		std::ifstream ifs("TileMap/Stage01_FileData.dat");					// ヘッダー読み込み用
-		if (ifs.fail())
-		{
-			TRACE("読み込み用ファイルが開けません\n");
-			return false;
-		}
+	//	std::ifstream ifs("TileMap/Stage01_FileData.dat");					// ヘッダー読み込み用
+	//	if (ifs.fail())
+	//	{
+	//		TRACE("読み込み用ファイルが開けません\n");
+	//		return false;
+	//	}
 
-		if (ofs.fail())
-		{
-			TRACE("書き込み用のファイルが開けません\n");
-			return false;
-		}
+	//	if (ofs.fail())
+	//	{
+	//		TRACE("書き込み用のファイルが開けません\n");
+	//		return false;
+	//	}
 
-		// ヘッダー部分の書き込み用ラムダ式
-		std::string str;
-		auto getlineHeader = [&]()
-		{
-			do
-			{
-				getline(ifs, str);
-				ofs << str << std::endl;
+	//	// ヘッダー部分の書き込み用ラムダ式
+	//	std::string str;
+	//	auto getlineHeader = [&]()
+	//	{
+	//		do
+	//		{
+	//			getline(ifs, str);
+	//			ofs << str << std::endl;
 
-				// ヘッダーの読み込み完了チェック
-				if (ifs.eof())
-				{
-					TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
-					recvStanby_ = true;
-					state_->SetActive(ActiveState::Play);
-					return true;
-				}
-			} while (str.find("data encoding") == std::string::npos);
+	//			// ヘッダーの読み込み完了チェック
+	//			if (ifs.eof())
+	//			{
+	//				TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
+	//				recvStanby_ = true;
+	//				state_->SetActive(ActiveState::Play);
+	//				return true;
+	//			}
+	//		} while (str.find("data encoding") == std::string::npos);
 
-			return false;
-		};
+	//		return false;
+	//	};
 
 
-		// 最初に一回読み込んでおく
-		getlineHeader();
+	//	// 最初に一回読み込んでおく
+	//	getlineHeader();
 
-		// データを書き込む
-		int count = 0;
-		for (auto box : RevBox)
-		{
-			for (int i = 0; i < 16; i++)
-			{
-				// 文字の挿入
-				ofs << (box.cData[(i / 2) % 8] >> (4 * (i % 2)) & 0x0f);
+	//	// データを書き込む
+	//	int count = 0;
+	//	for (auto box : revBox_)
+	//	{
+	//		for (int i = 0; i < 16; i++)
+	//		{
+	//			// 文字の挿入
+	//			ofs << (box.cData[(i / 2) % 8] >> (4 * (i % 2)) & 0x0f);
 
-				count++;
+	//			count++;
 
-				// 文字を入れるときに最後の行以外にコロンを入れる
-				if (count % 21 != 0)
-				{
-					ofs << ',';
-					continue;
-				}
+	//			// 文字を入れるときに最後の行以外にコロンを入れる
+	//			if (count % 21 != 0)
+	//			{
+	//				ofs << ',';
+	//				continue;
+	//			}
 
-				// 行終わりチェック
-				if (count % (21 * 17) != 0)
-				{
-					ofs << ',';
-					ofs << std::endl;
-					continue;
-				}
+	//			// 行終わりチェック
+	//			if (count % (21 * 17) != 0)
+	//			{
+	//				ofs << ',';
+	//				ofs << std::endl;
+	//				continue;
+	//			}
 
-				ofs << std::endl;
+	//			ofs << std::endl;
 
-				// 読み込みが終わったので終了
-				if (getlineHeader())
-				{
-					end = std::chrono::system_clock::now();
-					// 秒に変換
-					auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-					//TRACE("受け取りから送るまでかかった時間は : %d\n", time);
-					std::cout << time << std::endl;
-					break;
-				}
-			}
-		}
+	//			// 読み込みが終わったので終了
+	//			if (getlineHeader())
+	//			{
+	//				end = std::chrono::system_clock::now();
+	//				// 秒に変換
+	//				auto time = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	//				//TRACE("受け取りから送るまでかかった時間は : %d\n", time);
+	//				std::cout << time << std::endl;
+	//				break;
+	//			}
+	//		}
+	//	}
 
-		return true;
-	};
+	//	return true;
+	//};
 
-	auto tmx_Size = [&](MesH& data)
-	{
-		// データの受け取り
-		TmxDataSize size;
+	//auto tmx_Size = [&](MesH& data, UnionVec& vec)
+	//{
+	//	// データの受け取り
+	//	TmxDataSize size;
 
-		tmxSize_ = data.data[0];
-		RevBox.resize(tmxSize_);
-		TRACE("TMXデータサイズは：%d\n", data.data[0]);
-		start = std::chrono::system_clock::now();
-		return true;
-	};
+	//	tmxSize_ = vec[0].iData[0];
+	//	revBox_.resize(tmxSize_);
+	//	TRACE("TMXデータサイズは：%d\n", tmxSize_);
+	//	start = std::chrono::system_clock::now();
+	//	return true;
+	//};
 
-	auto  tmx_Data = [&](MesH& data)
-	{
-		RevBox[data.id].iData[0] = data.data[0];
-		RevBox[data.id].iData[1] = data.data[1];
-		return true;
-	};
+	//auto  tmx_Data = [&](MesH& data, UnionVec& vec)
+	//{
+	//	revBox_ = vec.data[0];
+	//	revBox_ = vec.data[1];
+	//	return true;
+	//};
 
-	hostRevMap_.try_emplace(MesType::STANBY, hostStanby );
+	//hostRevMap_.try_emplace(MesType::STANBY, hostStanby );
 
-	guestRevMap_.try_emplace(MesType::STANBY, guestStanby);
-	guestRevMap_.try_emplace(MesType::TMX_DATA, tmx_Data);
-	guestRevMap_.try_emplace(MesType::TMX_SIZE, tmx_Size);
+	//guestRevMap_.try_emplace(MesType::STANBY, guestStanby);
+	//guestRevMap_.try_emplace(MesType::TMX_DATA, tmx_Data);
+	//guestRevMap_.try_emplace(MesType::TMX_SIZE, tmx_Size);
 
 }

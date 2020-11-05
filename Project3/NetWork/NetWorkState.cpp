@@ -30,6 +30,7 @@ bool NetWorkState::CheckNetWork(void)
 	if (GetLostNetWork() != -1)
 	{
 		// ÄÚ‘±‚ÌŠJn
+		netHandle_ = -1;
 		TRACE("Ú‘±‚ªØ‚ê‚Ü‚µ‚½AÄÚ‘±‚µ‚Ü‚·\n");
 		return false;
 	}
