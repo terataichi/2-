@@ -20,13 +20,6 @@ enum class MesType:unsigned char
 	POS
 };
 
-struct TmxDataSize
-{
-	int sendNum;					// 何回データを送るか
-	int oneSize;					// 一回で送るデータ量
-	int allSize;					// 合計で送られる量
-};
-
 struct MesH
 {
 	MesType type;
@@ -38,13 +31,14 @@ struct MesH
 union UnionHeader
 {
 	MesH mesH;
-	int iData[8];
+	unsigned int iData[2];
 };
 
 union UnionData
 {
-	char cData[4];
+	unsigned int uiData;
 	int iData;
+	char cData[4];
 };
 
 
@@ -52,7 +46,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data, UnionVec& vec)>>;
+using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data)>>;
 
 // 送るデータ
 //struct MesData
@@ -74,6 +68,7 @@ public:
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
 
+	void SetHeader(UnionHeader header, UnionVec& vec);						// ヘッダー部をくっつける
 	bool SendMes(UnionVec& data);											// 送信
 
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
@@ -114,9 +109,10 @@ private:
 	MesTypeFunc guestRevMap_;												// メッセージ管理用マップ
 	MesTypeFunc hostRevMap_;												// メッセージ管理用マップ
 
-	std::chrono::system_clock::time_point  start;
-	std::chrono::system_clock::time_point  end;
+	std::chrono::system_clock::time_point  start_;
+	std::chrono::system_clock::time_point  end_;
 
+	std::thread update;
 
 	//std::thread update_;
 	std::mutex lock_;

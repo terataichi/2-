@@ -73,7 +73,7 @@ bool TmxLoader::LoadTmx(std::string fileName)
         {
             getline(iss, num, ',');
             data = atoi(num.c_str());
-            std::cout << num;
+            //std::cout << num;
         }
 
         // î•ñ‚Ì’Ç‰Á
