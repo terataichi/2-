@@ -241,7 +241,7 @@ void NetWork::InitFunc(void)
 			do
 			{
 				getline(ifs, str);
-				ofs << str << std::endl;
+				ofs << str;
 
 				// ヘッダーの読み込み完了チェック
 				if (ifs.eof())
