@@ -51,6 +51,7 @@ bool NetWork::CheckConnect(void)
 
 bool NetWork::Update(void)
 {
+
 	while (ProcessMessage() == 0)
 	{
 
@@ -149,7 +150,7 @@ void NetWork::SendStart(void)
 
 void NetWork::RunUpDate(void)
 {
-	update=std::thread(&NetWork::Update, this);
+	update = std::thread(&NetWork::Update, this);
 	update.detach();
 }
 
@@ -159,13 +160,37 @@ void NetWork::SetHeader(UnionHeader header, UnionVec& vec)
 	vec.insert(vec.begin(), { header.iData[0] });
 }
 
-bool NetWork::SendMes(UnionVec& data)
+bool NetWork::SendMes(MesType type,UnionVec data)
 {
+
+	// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
+	UnionHeader header{ type,0,0 };
+	SetHeader(header, data);
+
+	// 送信データ長を求める
+	int a = (data.size() < 500) ? data.size() : 500;
+
+	// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる。
+
+	do
+	{
+
+	} while (data.size() < a);
+
+
+
 	if (NetWorkSend(state_->GetNetHandle(), &data[0], data.size() * sizeof(UnionData)) == -1)
 	{
 		TRACE("ヘッダー部の送信失敗\n");
 		return false;
 	}
+	return true;
+}
+
+bool NetWork::SendMes(MesType type)
+{
+	UnionVec vec;
+	SendMes(type, vec);
 	return true;
 }
 

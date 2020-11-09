@@ -13,6 +13,7 @@
 
 enum class MesType:unsigned char
 {
+	NON = 100,						// 送信が失敗したときに0が来るケースが多いからスタート位置を変える
 	STANBY,							// 初期化情報送信
 	GAME_START,						// ゲーム開始
 	TMX_SIZE,						// TMXファイルのサイズ
@@ -23,9 +24,9 @@ enum class MesType:unsigned char
 struct MesH
 {
 	MesType type;
-	unsigned char  cdata;
-	unsigned short id;				// 何番目の情報化
-	unsigned int length;			// データのサイズ
+	unsigned char  next;			// データ送信を分割する場合に、次があるかないか
+	unsigned short sendID;			// 分割時の番号
+	unsigned int length;			// 分割かどうかにかかわらず、単一のデータのサイズ
 };
 
 union UnionHeader
@@ -48,13 +49,6 @@ using UnionVec = std::vector<UnionData>;
 
 using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data)>>;
 
-// 送るデータ
-//struct MesData
-//{
-//	MesType type;
-//	int data[2];
-//};
-
 class NetWork
 {
 public:
@@ -69,7 +63,8 @@ public:
 	ActiveState GetActive(void);											// 接続先のステータス確認用
 
 	void SetHeader(UnionHeader header, UnionVec& vec);						// ヘッダー部をくっつける
-	bool SendMes(UnionVec& data);											// 送信
+	bool SendMes(MesType header,UnionVec data);								// 送信
+	bool SendMes(MesType type);												// 
 
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 
