@@ -52,11 +52,9 @@ bool TileMap::SendTmxSizeData(void)
 	// データ情報の追加
 	vecData[0].iData = static_cast<int>(ifs.tellg());
 
-	UnionHeader mData{ MesType::TMX_SIZE, 1,0,1 };
-	lpNetWork.SetHeader(mData, vecData);
-	lpNetWork.SendMes(vecData);
-
-	return true;
+	//UnionHeader mData{ MesType::TMX_SIZE, 1,0,1 };
+	//lpNetWork.SetHeader(mData, vecData);
+	return lpNetWork.SendMes(MesType::TMX_SIZE, vecData);
 }
 
 bool TileMap::SendTmxData(void)
@@ -69,8 +67,7 @@ bool TileMap::SendTmxData(void)
 	int count = 0;
 
 	UnionData unionData{};
-	UnionVec vecData;
-
+	UnionVec packetData;
 
 	auto SetLineData = [&]()
 	{
@@ -121,7 +118,7 @@ bool TileMap::SendTmxData(void)
 					count++;
 					if (count % 8 == 0)
 					{ 
-						vecData.emplace_back(unionData);
+						packetData.emplace_back(unionData);
 						sendID++;
 					}
 				}
@@ -136,29 +133,18 @@ bool TileMap::SendTmxData(void)
 	}
 	if (count % 8 != 0)
 	{
-		vecData.emplace_back(unionData);
+		packetData.emplace_back(unionData);
 		sendID++;
 	}
 	std::cout << sendID << std::endl;
 
+	// TMXSIZEの送信
+	SendTmxSizeData();
 
-	//UnionVec vecData;
-	//vecData.resize(layerData_.size() * layerData_[0].chipData.size());
-
-	//int cnt = 0;
-	//for (auto layer : layerData_)
-	//{
-	//	for (auto data : layer.chipData)
-	//	{
-	//		vecData[cnt].iData = data;
-	//		cnt++;
-	//	}
-	//}
-
-	UnionHeader mData{ MesType::TMX_DATA,0,0,vecData.size() };
-	lpNetWork.SetHeader(mData, vecData);
-
-	lpNetWork.SendMes(vecData);
+	// 今作ったDATAの送信
+	//UnionHeader mData{ MesType::TMX_DATA,0,0,vecData.size() };
+	//lpNetWork.SetHeader(mData, vecData);
+	lpNetWork.SendMes(MesType::TMX_DATA, packetData);
 
 	return true;
 }

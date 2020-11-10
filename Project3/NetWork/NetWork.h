@@ -9,6 +9,8 @@
 #include <Dxlib.h>
 #include "NetWorkState.h"
 
+#define HEADER_COUNT 2
+
 #define lpNetWork NetWork::GetInstance()
 
 enum class MesType:unsigned char
@@ -47,7 +49,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data)>>;
+using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data, UnionVec& packet)>>;
 
 class NetWork
 {
@@ -89,6 +91,7 @@ private:
 	~NetWork();
 
 	void InitFunc(void);													// ファンクション初期化用
+	void Init(void);
 
 	static std::unique_ptr<NetWork, NetWorkDeleter> sInstance_;
 
@@ -108,6 +111,8 @@ private:
 	std::chrono::system_clock::time_point  end_;
 
 	std::thread update;
+
+	unsigned int sendLength_;												// 送信バイト長(イントで割る)
 
 	//std::thread update_;
 	std::mutex lock_;

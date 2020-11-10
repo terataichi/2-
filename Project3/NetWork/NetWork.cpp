@@ -51,52 +51,73 @@ bool NetWork::CheckConnect(void)
 
 bool NetWork::Update(void)
 {
-
+	MesH revHeader{};
+	UnionVec tmpPacket{};
+	int writePos = 0;
 	while (ProcessMessage() == 0)
 	{
 
 		if (!state_->Update())
 		{
 			// 使ったものをリセットする
+			//state_.reset();
 			recvStanby_ = false;
 			continue;
 		}
 		auto handle = state_->GetNetHandle();
 		if (handle == -1)
 		{
+			//TRACE("ハンドルの取得に失敗しました\n");
 			continue;
 		}
 
-		// ヘッダー部の受信
-		if (GetNetWorkDataLength(state_->GetNetHandle()) >= sizeof(MesH))
+		// データの長さチェック
+		if (GetNetWorkDataLength(handle) >= sizeof(MesH))
 		{
-			MesH data;
-			NetWorkRecv(state_->GetNetHandle(), &data, sizeof(MesH));
+			// これ以上データがないとき
+			// ※ヘッダー部を受信する前情報
+			if (!revHeader.next)
+			{
+				tmpPacket.clear();
+				writePos = 0;
+			}
+
+			// ヘッダー部の受信
+			NetWorkRecv(handle, &revHeader, sizeof(MesH));
+
+			// データがある場合
+			if (revHeader.length)
+			{
+				tmpPacket.resize(tmpPacket.size() + revHeader.length);
+
+				// データの受け取り
+				NetWorkRecv(handle, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+				writePos = tmpPacket.size();
+			}
+
+			// まだデータが残ってる場合
+			if (revHeader.next)
+			{
+				continue;
+			}
 
 			// データの大きさ分送られてくる
-
 			if (state_->GetMode() == NetWorkMode::HOST)
 			{
-				if (hostRevMap_.find(data.type) != hostRevMap_.end())
+				if (hostRevMap_.find(revHeader.type) != hostRevMap_.end())
 				{
-					hostRevMap_[data.type](data);
+					hostRevMap_[revHeader.type](revHeader, tmpPacket);
 				}
 			}
 			else if (state_->GetMode() == NetWorkMode::GUEST)
 			{
-				if (guestRevMap_.find(data.type) != guestRevMap_.end())
+				if (guestRevMap_.find(revHeader.type) != guestRevMap_.end())
 				{
-					guestRevMap_[data.type](data);
+					guestRevMap_[revHeader.type](revHeader, tmpPacket);
 				}
 			}
-			TRACE("type : %d\n", data.type);
+			TRACE("type : %d\n", revHeader.type);
 		}
-
-
-		//if (guestRevMap_.find(data.type) != guestRevMap_.end())
-		//{
-		//	guestRevMap_[data.type](data, SendVec);
-		//}
 	}
 
 	// オフライン以外だったら切断するよ
@@ -122,30 +143,14 @@ ActiveState NetWork::GetActive(void)
 void NetWork::SendStanby(void)
 {
 	// 初期化情報の送信
-	UnionVec vecData;
-	UnionHeader mData{ MesType::STANBY,0, 0,0 };
-
-	SetHeader(mData, vecData);
 	state_->SetActive(ActiveState::Stanby);
-
-	if (NetWorkSend(state_->GetNetHandle(), &vecData[0], vecData.size() * sizeof(UnionData)) == -1)
-	{
-		TRACE("Stanby : 送信失敗\n");
-	}
+	SendMes(MesType::STANBY);
 }
 
 void NetWork::SendStart(void)
 {
 	// 初期化情報の送信
-	UnionVec vecData;
-
-	UnionHeader mData{ MesType::GAME_START,0, 0,0 };
-
-	SetHeader(mData, vecData);
-	if (NetWorkSend(state_->GetNetHandle(), &vecData[0], vecData.size() * sizeof(UnionData)) == -1)
-	{
-		TRACE("Start : 送信失敗\n");
-	}
+	SendMes(MesType::GAME_START);
 }
 
 void NetWork::RunUpDate(void)
@@ -154,44 +159,70 @@ void NetWork::RunUpDate(void)
 	update.detach();
 }
 
-void NetWork::SetHeader(UnionHeader header, UnionVec& vec)
+void NetWork::SetHeader(UnionHeader header, UnionVec& packet)
 {
-	vec.insert(vec.begin(), { header.iData[1] });
-	vec.insert(vec.begin(), { header.iData[0] });
+	packet.insert(packet.begin(), { header.iData[1] });
+	packet.insert(packet.begin(), { header.iData[0] });
 }
 
-bool NetWork::SendMes(MesType type,UnionVec data)
+bool NetWork::SendMes(MesType type,UnionVec packet)
 {
+	if (state_->GetNetHandle() == -1)
+	{
+		return false;
+	}
 
 	// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
 	UnionHeader header{ type,0,0 };
-	SetHeader(header, data);
-
-	// 送信データ長を求める
-	int a = (data.size() < 500) ? data.size() : 500;
+	SetHeader(header, packet);
 
 	// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる。
-
 	do
 	{
+		// 送信データ長を求める
+		int sendCount = (packet.size() < 500 / sizeof(UnionData)) ? packet.size() : 500 / sizeof(UnionData);
 
-	} while (data.size() < a);
+		// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる
+		header.mesH.length = sendCount - HEADER_COUNT;
+
+		// 分割しないといけないかどうか
+		if (packet.size() == sendCount)
+		{
+			TRACE("分割しません\n");
+			header.mesH.next = 0;
+		}
+		else
+		{
+			TRACE("分割します\n");
+			TRACE("%d回目\n", header.mesH.sendID);
+			header.mesH.next = 1;
+		}
+
+		// ヘッダー情報の更新
+		packet[0].iData = header.iData[0];
+		packet[1].iData = header.iData[1];
 
 
+		// データの送信
+		NetWorkSend(state_->GetNetHandle(), packet.data(), sendCount * sizeof(UnionData));
 
-	if (NetWorkSend(state_->GetNetHandle(), &data[0], data.size() * sizeof(UnionData)) == -1)
-	{
-		TRACE("ヘッダー部の送信失敗\n");
-		return false;
-	}
+		// 送った要素のみ削除
+		packet.erase(packet.begin() + HEADER_COUNT, packet.begin() + sendCount);
+
+		// 送る度にカウント++
+		header.mesH.sendID++;
+
+		// 一度は送ってほしいからdo
+		// 分割データが送り終わるまでループ
+	} while (packet.size() > HEADER_COUNT);
+
 	return true;
 }
 
 bool NetWork::SendMes(MesType type)
 {
-	UnionVec vec;
-	SendMes(type, vec);
-	return true;
+	UnionVec vec{};
+	return SendMes(type, vec);
 }
 
 bool NetWork::ConnectHost(IPDATA hostIP)
@@ -206,10 +237,7 @@ bool NetWork::ConnectHost(IPDATA hostIP)
 
 NetWork::NetWork()
 {
-	recvStanby_ = false;
-	tmp_ = 0;
-	tmxSize_ = 0;
-	ip_ = ArrayIP{};
+	Init();
 	InitFunc();
 }
 
@@ -224,7 +252,7 @@ NetWork::~NetWork()
 void NetWork::InitFunc(void)
 {
 	// ---- ホスト ---
-	auto hostStanby = [&](MesH& data)
+	auto hostStanby = [&](MesH& data,UnionVec& packet)
 	{
 		// ゲームスタートを受信時
 		if (state_->GetActive() == ActiveState::Stanby)
@@ -242,7 +270,7 @@ void NetWork::InitFunc(void)
 
 
 	// ---- ゲスト ---
-	auto guestStanby = [&](MesH& data)
+	auto guestStanby = [&](MesH& data, UnionVec& packet)
 	{
 		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
 
@@ -329,37 +357,27 @@ void NetWork::InitFunc(void)
 		return true;
 	};
 
-	auto tmx_Size = [&](MesH& data)
+	auto tmx_Size = [&](MesH& data, UnionVec& packet)
 	{
-		if (data.length > 0)
-		{
-			if (GetNetWorkDataLength(state_->GetNetHandle()) <= static_cast<int>(data.length))
-			{
-				TRACE("データがLengthより小さいです\n");
-			}
-			UnionVec SendVec;
-			SendVec.resize(data.length);
-			NetWorkRecv(state_->GetNetHandle(), &SendVec[0], sizeof(int) * data.length);
-
-			tmxSize_ = SendVec[0].iData;
-			revBox_.resize(tmxSize_);
-		}
+		tmxSize_ = packet[0].iData;
+		revBox_.resize(tmxSize_);
 
 		TRACE("TMXデータサイズは：%d\n", tmxSize_);
 		start_ = std::chrono::system_clock::now();
 		return true;
 	};
 
-	auto  tmx_Data = [&](MesH& data)
+	auto  tmx_Data = [&](MesH& data, UnionVec& packet)
 	{
-		if (data.length > 0)
-		{
-			if (GetNetWorkDataLength(state_->GetNetHandle()) <= static_cast<int>(data.length))
-			{
-				TRACE("データがLengthより小さいです\n");
-			}
-			NetWorkRecv(state_->GetNetHandle(), &revBox_[0], data.length * sizeof(UnionData));
-		}
+		//if (data.length > 0)
+		//{
+		//	if (GetNetWorkDataLength(state_->GetNetHandle()) <= static_cast<int>(data.length))
+		//	{
+		//		TRACE("データがLengthより小さいです\n");
+		//	}
+		//	NetWorkRecv(state_->GetNetHandle(), &revBox_[0], data.length * sizeof(UnionData));
+		//}
+		revBox_ = packet;
 		return true;
 	};
 
@@ -368,5 +386,34 @@ void NetWork::InitFunc(void)
 	guestRevMap_.try_emplace(MesType::STANBY, guestStanby);
 	guestRevMap_.try_emplace(MesType::TMX_DATA, tmx_Data);
 	guestRevMap_.try_emplace(MesType::TMX_SIZE, tmx_Size);
+
+}
+
+void NetWork::Init(void)
+{
+	recvStanby_ = false;
+	tmp_ = 0;
+	tmxSize_ = 0;
+	ip_ = ArrayIP{};
+	sendLength_ = 0;
+
+
+	// バイト長の読み込み
+	std::ifstream ifs("init/setting.txt");
+	if (ifs.fail())
+	{
+		TRACE("ファイルの読み込みに失敗しました。\n");
+		return;
+	}
+	// ファイルの内容を格納
+	std::string data;
+	getline(ifs, data);
+	if (data.find("byte"))
+	{
+		std::istringstream is{ data.substr(data.find_first_of("\"")+ 1, data.find_last_of("\"") - 1)};
+		std::string length;
+		getline(is, length);
+		sendLength_ = atoi(length.c_str());
+	}
 
 }

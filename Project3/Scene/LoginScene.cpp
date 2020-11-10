@@ -187,7 +187,7 @@ bool LoginScene::SetHostIP(void)
 	auto readHostIP = [&]()
 	{
 		// 前回のホストのIPアドレス取得
-		std::ifstream ifs("hostIp.txt");
+		std::ifstream ifs("init/hostIp.txt");
 		if (ifs.fail())
 		{
 			TRACE("ファイルの読み込みに失敗しました。\n");
@@ -253,7 +253,6 @@ bool LoginScene::StartInit(void)
 		{
 			// 初期化情報の送信をして待機
 			TRACE("初期化情報の送信\n");
-			tileMap_.SendTmxSizeData();
 			tileMap_.SendTmxData();
 			lpNetWork.SendStanby();
 		}
