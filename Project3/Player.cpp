@@ -9,6 +9,7 @@ Player::Player()
 	vel_ = { 4,4 };
 	rad_ = 0;
 	dir_ = DIR::DOWN;
+	animCnt_ = 0;
 }
 
 Player::Player(Vector2& pos)
@@ -17,6 +18,7 @@ Player::Player(Vector2& pos)
 	vel_ = { 1,1 };
 	rad_ = 0;
 	dir_ = DIR::DOWN;
+	animCnt_ = 0;
 
 	dirMap_.try_emplace(DIR::DOWN, Vector2{ 0,vel_.y });
 	dirMap_.try_emplace(DIR::LEFT, Vector2{ -vel_.x,0 });
@@ -54,7 +56,10 @@ void Player::Draw()
 {
 	auto handle = lpImageMng.GetHandle("Image/bomberman.png", { 5,4 }, { 32,32 });
 
-	DrawGraph(pos_.x, pos_.y,handle[0], true);
+
+	auto tmpCnt = (animCnt_ / 30);
+	DrawGraph(pos_.x, pos_.y,handle[((tmpCnt % 4) * 5) + static_cast<int>(dir_) ], true);
+	animCnt_++;
 }
 
 bool Player::CheckWall(LayerVec& vecLayer)

@@ -25,6 +25,7 @@ private:
 
 	std::map<DIR, Vector2> dirMap_;			// ƒL[‚ªŒü‚«‚ÅˆÚ“®—Ê‚ª“ü‚é
 
+	int animCnt_;
 	int id_;
 };
 
