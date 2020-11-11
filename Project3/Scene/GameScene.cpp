@@ -17,7 +17,7 @@ GameScene::~GameScene()
 uniqueBase GameScene::Update(uniqueBase scene)
 {
     DrawOwnScene();
-    player_->Draw();
+    player_->Update(tileMap_.GetLayerData());
     return scene;
 }
 
@@ -25,6 +25,7 @@ void GameScene::DrawOwnScene(void)
 {
     SetDrawScreen(drawScreen_);
     tileMap_.DrawUpdate();
+    player_->Draw();
 }
 
 void GameScene::Init(void)

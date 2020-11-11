@@ -181,7 +181,7 @@ std::vector<Vector2> TileMap::GetCharChipPos()
 			{
 				if (data == 4)
 				{
-					chipPos.emplace_back(Vector2{cnt % div.x, cnt / div.y });
+					chipPos.emplace_back(Vector2{cnt % div.x, cnt / div.x });
 				}
 				cnt++;
 			}
