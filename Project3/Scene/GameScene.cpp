@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include "../_debug/_DebugConOut.h"
 #include "../NetWork/NetWork.h"
+#include "../Player.h"
 
 GameScene::GameScene()
 {
@@ -16,6 +17,7 @@ GameScene::~GameScene()
 uniqueBase GameScene::Update(uniqueBase scene)
 {
     DrawOwnScene();
+    player_->Draw();
     return scene;
 }
 
@@ -36,6 +38,11 @@ void GameScene::Init(void)
             TRACE("TMXファイルが開けません\n");
             return;
         }
+
+        if (mode == NetWorkMode::HOST)
+        {
+            // インスタンス情報の送信
+        }
     }
     else if (mode == NetWorkMode::GUEST)
     {
@@ -45,6 +52,16 @@ void GameScene::Init(void)
             return;
         }
     }
+
+
+    //for (auto charData : tileMap_.GetCharChipPos())
+    {
+        auto charData = tileMap_.GetCharChipPos()[0];
+
+        Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
+        player_ = std::make_shared<Player>(pos);
+    }
+
 
     // 最初に一回スクリーンに描画して記録しておく
     DrawOwnScene();

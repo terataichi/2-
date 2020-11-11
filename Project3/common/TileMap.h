@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "Vector2.h"
 
 #include "../TmxLoader.h"
 
@@ -20,6 +21,9 @@ public:
 	void DrawUpdate(void);								// 描画の更新
 	LayerVec GetLayerData(void);
 	MapData GetMapData(void);
+
+	std::vector<Vector2> GetCharChipPos();					// キャラクターの初期配置取得
+
 private:
 	bool DrawMap(LayerData layerData);					// マップの描画
 

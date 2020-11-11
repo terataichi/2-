@@ -167,6 +167,29 @@ MapData TileMap::GetMapData(void)
 	return mapData_;
 }
 
+std::vector<Vector2> TileMap::GetCharChipPos()
+{
+	std::vector<Vector2> chipPos{};
+	for (auto layer : layerData_)
+	{
+		if (layer.name == "Char")
+		{
+			int cnt = 0;
+			Vector2 div{ layer.width ,layer.heigth };
+
+			for (auto data : layer.chipData)
+			{
+				if (data == 4)
+				{
+					chipPos.emplace_back(Vector2{cnt % div.x, cnt / div.y });
+				}
+				cnt++;
+			}
+		}
+	}
+	return chipPos;
+}
+
 bool TileMap::DrawMap(LayerData layerData)
 {
 	// ’·‚¢‚Ì‚Åƒ[ƒJƒ‹•Ï”‚ÉŠi”[
