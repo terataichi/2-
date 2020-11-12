@@ -153,6 +153,36 @@ void NetWork::SendStart(void)
 	SendMes(MesType::GAME_START);
 }
 
+bool NetWork::PickRevData(MesType type, UnionVec& data)
+{
+	int cnt = 0;
+	for (auto list : revDataList_)
+	{
+		if (list.first.type == type)
+		{
+			data = list.second;
+			revDataList_.erase(revDataList_.begin() + cnt);
+			return true;
+		}
+		cnt++;
+	}
+	TRACE("データが見つかりませんでした\n");
+	return false;
+}
+
+bool NetWork::CheckMes(MesType type)
+{
+	for (auto list : revDataList_)
+	{
+		if (list.first.type == type)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void NetWork::RunUpDate(void)
 {
 	update = std::thread(&NetWork::Update, this);
@@ -369,23 +399,25 @@ void NetWork::InitFunc(void)
 
 	auto  tmx_Data = [&](MesH& data, UnionVec& packet)
 	{
-		//if (data.length > 0)
-		//{
-		//	if (GetNetWorkDataLength(state_->GetNetHandle()) <= static_cast<int>(data.length))
-		//	{
-		//		TRACE("データがLengthより小さいです\n");
-		//	}
-		//	NetWorkRecv(state_->GetNetHandle(), &revBox_[0], data.length * sizeof(UnionData));
-		//}
 		revBox_ = packet;
 		return true;
 	};
+
+	auto instance = [&](MesH& data, UnionVec& packet)
+	{
+		revDataList_.emplace_back(data, packet);
+
+		return true;
+	};
+
 
 	hostRevMap_.try_emplace(MesType::GAME_START, hostStanby );
 
 	guestRevMap_.try_emplace(MesType::STANBY, guestStanby);
 	guestRevMap_.try_emplace(MesType::TMX_DATA, tmx_Data);
 	guestRevMap_.try_emplace(MesType::TMX_SIZE, tmx_Size);
+	guestRevMap_.try_emplace(MesType::INSTANCE, instance);
+	guestRevMap_.try_emplace(MesType::POS, instance);
 
 }
 

@@ -20,6 +20,7 @@ enum class MesType:unsigned char
 	GAME_START,						// ゲーム開始
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
+	INSTANCE,						// インスタンスデータ
 	POS
 };
 
@@ -51,6 +52,8 @@ using UnionVec = std::vector<UnionData>;
 
 using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data, UnionVec& packet)>>;
 
+using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
+
 class NetWork
 {
 public:
@@ -76,6 +79,10 @@ public:
 	void SendStanby(void);
 	void SendStart(void);
 
+	bool PickRevData(MesType type ,UnionVec& data);							// リストからデータの取り出し
+
+	bool CheckMes(MesType type);
+
 	void RunUpDate(void);													// マルチスレッド
 private:
 
@@ -98,6 +105,10 @@ private:
 
 	int tmxSize_;															// Tmxファイルサイズ保存用変数 
 	UnionVec revBox_;
+
+
+	RevDataListP revDataList_;
+
 
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態

@@ -17,8 +17,8 @@ public:
     void Init(void)override;
 private:
 
-    TileMap tileMap_;                                   // タイルマップ情報格納
+    TileMap tileMap_;                                       // タイルマップ情報格納
 
-    std::shared_ptr<Player> player_;                    // プレイヤー
+    std::vector<std::shared_ptr<Player>> player_;           // プレイヤー
 };
 

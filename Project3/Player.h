@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <functional>
 #include "common/Vector2.h"
 #include "common/TileMap.h"
 #include "DIR.h"
@@ -7,7 +8,7 @@ class Player
 {
 public:
 	Player();
-	Player(Vector2& pos);
+	Player(int id, Vector2& pos);
 
 	~Player();
 
@@ -16,6 +17,8 @@ public:
 	
 	bool CheckWall(LayerVec& layer);
 
+	bool HostData(void);
+	bool GuestData(void);
 private:
 	DIR dir_;
 
@@ -23,9 +26,12 @@ private:
 	float rad_;
 	Vector2 vel_;
 
-	std::map<DIR, Vector2> dirMap_;			// キーが向きで移動量が入る
+	std::map<DIR, Vector2> dirMap_;							// キーが向きで移動量が入る
+
+
+	std::map<int, std::function<bool(void)>>netFunc_;
 
 	int animCnt_;
-	int id_;
+	const int id_;
 };
 
