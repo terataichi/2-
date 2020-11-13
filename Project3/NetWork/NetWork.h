@@ -20,7 +20,6 @@ enum class MesType:unsigned char
 	GAME_START,						// ゲーム開始
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
-	INSTANCE,						// インスタンスデータ
 	POS
 };
 
@@ -80,8 +79,12 @@ public:
 	void SendStart(void);
 
 	bool PickRevData(MesType type ,UnionVec& data);							// リストからデータの取り出し
+	bool PickRevData(MesType type ,int id , UnionVec& data);				// リストからデータの取り出し
+
 
 	bool CheckMes(MesType type);
+	bool CheckMes(MesType type, int id);
+
 
 	void RunUpDate(void);													// マルチスレッド
 private:
@@ -127,5 +130,6 @@ private:
 
 	//std::thread update_;
 	std::mutex lock_;
+	std::mutex revData_;
 };
 

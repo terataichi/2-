@@ -116,7 +116,7 @@ bool NetWork::Update(void)
 					guestRevMap_[revHeader.type](revHeader, tmpPacket);
 				}
 			}
-			TRACE("type : %d\n", revHeader.type);
+			//TRACE("type : %d\n", revHeader.type);
 		}
 	}
 
@@ -155,6 +155,7 @@ void NetWork::SendStart(void)
 
 bool NetWork::PickRevData(MesType type, UnionVec& data)
 {
+	std::lock_guard<std::mutex> lock(revData_);
 	int cnt = 0;
 	for (auto list : revDataList_)
 	{
@@ -166,12 +167,34 @@ bool NetWork::PickRevData(MesType type, UnionVec& data)
 		}
 		cnt++;
 	}
-	TRACE("データが見つかりませんでした\n");
+	//TRACE("データが見つかりませんでした\n");
+	return false;
+}
+
+bool NetWork::PickRevData(MesType type, int id, UnionVec& data)
+{
+	std::lock_guard<std::mutex> lock(revData_);
+	int cnt = 0;
+	for (auto list : revDataList_)
+	{
+		if (list.first.type == type)
+		{
+			if (list.second[0].iData == id)
+			{
+				data = list.second;
+				revDataList_.erase(revDataList_.begin() + cnt);
+				return true;
+			}
+		}
+		cnt++;
+	}
+	//TRACE("データが見つかりませんでした\n");
 	return false;
 }
 
 bool NetWork::CheckMes(MesType type)
 {
+	std::lock_guard<std::mutex> lock(revData_);
 	for (auto list : revDataList_)
 	{
 		if (list.first.type == type)
@@ -179,7 +202,22 @@ bool NetWork::CheckMes(MesType type)
 			return true;
 		}
 	}
+	return false;
+}
 
+bool NetWork::CheckMes(MesType type, int id)
+{
+	std::lock_guard<std::mutex> lock(revData_);
+	for (auto list : revDataList_)
+	{
+		if (list.first.type == type)
+		{
+			if (list.second[0].iData == id)
+			{
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
@@ -218,13 +256,13 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 		// 分割しないといけないかどうか
 		if (packet.size() == sendCount)
 		{
-			TRACE("分割しません\n");
+			//TRACE("分割しません\n");
 			header.mesH.next = 0;
 		}
 		else
 		{
-			TRACE("分割します\n");
-			TRACE("%d回目\n", header.mesH.sendID);
+			//TRACE("分割します\n");
+			//TRACE("%d回目\n", header.mesH.sendID);
 			header.mesH.next = 1;
 		}
 
@@ -399,12 +437,14 @@ void NetWork::InitFunc(void)
 
 	auto  tmx_Data = [&](MesH& data, UnionVec& packet)
 	{
+
 		revBox_ = packet;
 		return true;
 	};
 
-	auto instance = [&](MesH& data, UnionVec& packet)
+	auto addList = [&](MesH& data, UnionVec& packet)
 	{
+		std::lock_guard<std::mutex> lock(revData_);
 		revDataList_.emplace_back(data, packet);
 
 		return true;
@@ -412,12 +452,12 @@ void NetWork::InitFunc(void)
 
 
 	hostRevMap_.try_emplace(MesType::GAME_START, hostStanby );
+	hostRevMap_.try_emplace(MesType::POS, addList);
 
 	guestRevMap_.try_emplace(MesType::STANBY, guestStanby);
 	guestRevMap_.try_emplace(MesType::TMX_DATA, tmx_Data);
 	guestRevMap_.try_emplace(MesType::TMX_SIZE, tmx_Size);
-	guestRevMap_.try_emplace(MesType::INSTANCE, instance);
-	guestRevMap_.try_emplace(MesType::POS, instance);
+	guestRevMap_.try_emplace(MesType::POS, addList);
 
 }
 

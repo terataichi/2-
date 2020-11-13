@@ -47,34 +47,6 @@ void GameScene::Init(void)
             TRACE("TMXファイルが開けません\n");
             return;
         }
-
-        if (mode == NetWorkMode::HOST)
-        {
-            // インスタンス情報の送信
-            int id = 0;
-            for (auto charData : tileMap_.GetCharChipPos())
-            {
-                Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-
-                // ゲストに情報を送信
-                UnionVec unionVec;
-                UnionData data;
-
-               data.iData = id;
-               unionVec.emplace_back(data);
-               data.iData = pos.x;
-               unionVec.emplace_back(data);
-               data.iData = pos.y;
-               unionVec.emplace_back(data);
-
-
-                lpNetWork.SendMes(MesType::INSTANCE, unionVec);
-
-                player_.emplace_back(std::make_shared<Player>(id,pos));
-                id++;
-            }
-
-        }
     }
     else if (mode == NetWorkMode::GUEST)
     {
@@ -83,19 +55,14 @@ void GameScene::Init(void)
             TRACE("TMXファイルが開けません\n");
             return;
         }
+    }
 
-        // プレイヤー初期化情報受け取り待ち
-        while (!lpNetWork.CheckMes(MesType::INSTANCE))
-        {
-
-        }
-
-        UnionVec vec;
-        while (lpNetWork.PickRevData(MesType::INSTANCE, vec))
-        {
-            Vector2 pos{ vec[1].iData,vec[2].iData };
-           player_.emplace_back(std::make_shared<Player>(vec[0].iData, pos));
-        }
+    int id = 0;
+    for (auto charData : tileMap_.GetCharChipPos())
+    {
+        Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
+        player_.emplace_back(std::make_shared<Player>(id,pos));
+        id++;
     }
 
     // 最初に一回スクリーンに描画して記録しておく

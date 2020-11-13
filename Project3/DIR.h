@@ -6,6 +6,7 @@ enum class DIR
 	LEFT,
 	UP,
 	RIGHT,
+//	Deth,
 	MAX
 };
 

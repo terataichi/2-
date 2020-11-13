@@ -25,8 +25,17 @@ Player::Player(int id,Vector2& pos):id_(id),pos_(pos)
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
 	dirMap_.try_emplace(DIR::UP, Vector2{ 0,-1 });
 
-	//netFunc_.try_emplace(0,std::bind(&HostSend));
-	//netFunc_.try_emplace(1);
+	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST;
+
+	
+	if (id % 2 == modeID)
+	{
+		netFunc_ = std::bind(&Player::HostData, this, std::placeholders::_1);
+	}
+	else
+	{
+		netFunc_ = std::bind(&Player::GuestData, this, std::placeholders::_1);
+	}
 
 }
 
@@ -36,22 +45,9 @@ Player::~Player()
 
 bool Player::Update(LayerVec&& vecLayer)
 {
+	// IDï èàóù
+	netFunc_(vecLayer);
 
-	//if (id_ % 2 == 0)
-	//{
-	CheckWall(vecLayer);
-	//}
-	pos_ += (dirMap_[dir_] * vel_);
-
-	UnionVec vecData;
-	UnionData dirData;
-	dirData.iData = pos_.x;
-	vecData.emplace_back(dirData);
-
-	dirData.iData = pos_.y;
-	vecData.emplace_back(dirData);
-
-	lpNetWork.SendMes(MesType::POS, vecData);
 
 	return true;
 }
@@ -80,24 +76,14 @@ bool Player::CheckWall(LayerVec& vecLayer)
 					size += dirMap_[dir_];
 					int num = ((size.x) + (size.y) * layer.width);
 
-					if (layer.chipData[num] == 7)
+					if (layer.chipData[num] != 7)
 					{
-						++dir_;
-						if (dir_ == end(dir_))
-						{
-							dir_ = begin(dir_);
-						}
-					}
-					else
-					{
-						//UnionData dirData;
-						//dirData.iData = static_cast<int>(dir_);
-
-						//UnionVec vecData;
-						//vecData.emplace_back(dirData);
-
-						//lpNetWork.SendMes(MesType::POS, vecData);
 						return true;
+					}
+					++dir_;
+					if (dir_ == end(dir_))
+					{
+						dir_ = begin(dir_);
 					}
 				}
 			}
@@ -109,12 +95,32 @@ bool Player::CheckWall(LayerVec& vecLayer)
 	return true;
 }
 
-bool Player::HostData(void)
+bool Player::HostData(LayerVec& layer)
 {
-	return false;
+	CheckWall(layer);
+
+	pos_ += (dirMap_[dir_] * vel_);
+
+	UnionData data[3];
+	data[0].iData = id_;
+	data[1].iData = pos_.x;
+	data[2].iData = pos_.y;
+
+	lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] });
+
+	return true;
 }
 
-bool Player::GuestData(void)
+bool Player::GuestData(LayerVec& layer)
 {
-	return false;
+
+	while (lpNetWork.CheckMes(MesType::POS,id_))
+	{
+		UnionVec data;
+		lpNetWork.PickRevData(MesType::POS, id_, data);
+
+		pos_.x = data[1].iData;
+		pos_.y = data[2].iData;
+	}
+	return true;
 }

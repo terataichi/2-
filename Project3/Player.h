@@ -17,8 +17,8 @@ public:
 	
 	bool CheckWall(LayerVec& layer);
 
-	bool HostData(void);
-	bool GuestData(void);
+	bool HostData(LayerVec& layer);
+	bool GuestData(LayerVec& layer);
 private:
 	DIR dir_;
 
@@ -29,7 +29,7 @@ private:
 	std::map<DIR, Vector2> dirMap_;							// ƒL[‚ªŒü‚«‚ÅˆÚ“®—Ê‚ª“ü‚é
 
 
-	std::map<int, std::function<bool(void)>>netFunc_;
+	std::function<bool(LayerVec&)>netFunc_;
 
 	int animCnt_;
 	const int id_;
