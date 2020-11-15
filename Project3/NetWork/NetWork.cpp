@@ -153,78 +153,10 @@ void NetWork::SendStart(void)
 	SendMes(MesType::GAME_START);
 }
 
-bool NetWork::PickRevData(MesType type, UnionVec& data)
-{
-	std::lock_guard<std::mutex> lock(revData_);
-	int cnt = 0;
-	for (auto list : revDataList_)
-	{
-		if (list.first.type == type)
-		{
-			data = list.second;
-			revDataList_.erase(revDataList_.begin() + cnt);
-			return true;
-		}
-		cnt++;
-	}
-	//TRACE("データが見つかりませんでした\n");
-	return false;
-}
-
-bool NetWork::PickRevData(MesType type, int id, UnionVec& data)
-{
-	std::lock_guard<std::mutex> lock(revData_);
-	int cnt = 0;
-	for (auto list : revDataList_)
-	{
-		if (list.first.type == type)
-		{
-			if (list.second[0].iData == id)
-			{
-				data = list.second;
-				revDataList_.erase(revDataList_.begin() + cnt);
-				return true;
-			}
-		}
-		cnt++;
-	}
-	//TRACE("データが見つかりませんでした\n");
-	return false;
-}
-
-bool NetWork::CheckMes(MesType type)
-{
-	std::lock_guard<std::mutex> lock(revData_);
-	for (auto list : revDataList_)
-	{
-		if (list.first.type == type)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-bool NetWork::CheckMes(MesType type, int id)
-{
-	std::lock_guard<std::mutex> lock(revData_);
-	for (auto list : revDataList_)
-	{
-		if (list.first.type == type)
-		{
-			if (list.second[0].iData == id)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-bool NetWork::AddRevList(int id,UnionVec& data)
+bool NetWork::AddRevList(RevDataListP& data)
 {
 	// 追加
-	objRevList_.emplace_back(data);
+	revDataList_.emplace_back(data);
 	return false;
 }
 
@@ -434,7 +366,7 @@ void NetWork::InitFunc(void)
 
 	auto tmx_Size = [&](MesH& data, UnionVec& packet)
 	{
-		tmxSize_ = packet[0].iData;
+		tmxSize_ = packet[0].cData[0] * packet[0].cData[1] * packet[0].cData[2];
 		revBox_.resize(tmxSize_);
 
 		TRACE("TMXデータサイズは：%d\n", tmxSize_);
@@ -453,19 +385,14 @@ void NetWork::InitFunc(void)
 	{
 		std::lock_guard<std::mutex> lock(revData_);
 
-		if (data.type == MesType::POS)
+		// ０要素目がID
+		for (auto& packetData : packet)
 		{
 			if (packet.size())
 			{
-				for (auto data : packet)
-				{
-					objRevList_[packet[0].iData].emplace_back(data);
-				}
-				return true;
+				revDataList_[packet[0].iData].emplace_back(data, packet);
 			}
 		}
-
-		revDataList_.emplace_back(data, packet);
 
 		return true;
 	};

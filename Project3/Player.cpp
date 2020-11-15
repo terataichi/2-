@@ -26,7 +26,7 @@ Player::Player(int& id,Vector2& pos)
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
 	dirMap_.try_emplace(DIR::UP, Vector2{ 0,-1 });
 
-	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST;
+	int modeID = lpNetWork.GetNetWorkMode() != NetWorkMode::HOST;
 
 	
 	if (id % 2 == modeID)
@@ -102,24 +102,22 @@ bool Player::HostData(LayerVec& layer)
 
 	pos_ += (dirMap_[dir_] * vel_);
 
-	UnionData data[3];
+	UnionData data[4];
 	data[0].iData = id_;
 	data[1].iData = pos_.x;
 	data[2].iData = pos_.y;
+	data[3].iData = static_cast<int>(dir_);
 
-	lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] });
+	lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
 
 	return true;
 }
 
 bool Player::GuestData(LayerVec& layer)
 {
-
-	while (lpNetWork.CheckMes(MesType::POS,id_))
+	UnionVec data = PickData(MesType::POS);
+	if (data.size())
 	{
-		UnionVec data;
-		lpNetWork.PickRevData(MesType::POS, id_, data);
-
 		pos_.x = data[1].iData;
 		pos_.y = data[2].iData;
 	}

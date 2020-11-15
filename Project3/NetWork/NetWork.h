@@ -78,16 +78,8 @@ public:
 	void SendStanby(void);
 	void SendStart(void);
 
-	bool PickRevData(MesType type ,UnionVec& data);							// リストからデータの取り出し
-	bool PickRevData(MesType type ,int id , UnionVec& data);				// リストからデータの取り出し
-
-
-	bool CheckMes(MesType type);
-	bool CheckMes(MesType type, int id);
-
-
 	//
-	bool AddRevList(int id,UnionVec& data);
+	bool AddRevList(RevDataListP& data);
 	
 	//
 
@@ -114,10 +106,7 @@ private:
 	int tmxSize_;															// Tmxファイルサイズ保存用変数 
 	UnionVec revBox_;
 
-
-	RevDataListP revDataList_;												// IDに対する受け取ったデータ
-
-	std::vector<UnionVec> objRevList_;
+	std::vector<RevDataListP> revDataList_;												// IDに対する受け取ったデータ
 
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
