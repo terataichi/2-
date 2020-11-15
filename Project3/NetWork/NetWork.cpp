@@ -221,6 +221,13 @@ bool NetWork::CheckMes(MesType type, int id)
 	return false;
 }
 
+bool NetWork::AddRevList(int id,UnionVec& data)
+{
+	// ’Ç‰Á
+	objRevList_.emplace_back(data);
+	return false;
+}
+
 void NetWork::RunUpDate(void)
 {
 	update = std::thread(&NetWork::Update, this);
@@ -445,6 +452,19 @@ void NetWork::InitFunc(void)
 	auto addList = [&](MesH& data, UnionVec& packet)
 	{
 		std::lock_guard<std::mutex> lock(revData_);
+
+		if (data.type == MesType::POS)
+		{
+			if (packet.size())
+			{
+				for (auto data : packet)
+				{
+					objRevList_[packet[0].iData].emplace_back(data);
+				}
+				return true;
+			}
+		}
+
 		revDataList_.emplace_back(data, packet);
 
 		return true;

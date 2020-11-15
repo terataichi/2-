@@ -51,7 +51,7 @@ using UnionVec = std::vector<UnionData>;
 
 using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data, UnionVec& packet)>>;
 
-using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
+using RevDataListP = std::vector<std::pair<MesH, UnionVec&>>;
 
 class NetWork
 {
@@ -86,6 +86,11 @@ public:
 	bool CheckMes(MesType type, int id);
 
 
+	//
+	bool AddRevList(int id,UnionVec& data);
+	
+	//
+
 	void RunUpDate(void);													// マルチスレッド
 private:
 
@@ -110,8 +115,9 @@ private:
 	UnionVec revBox_;
 
 
-	RevDataListP revDataList_;
+	RevDataListP revDataList_;												// IDに対する受け取ったデータ
 
+	std::vector<UnionVec> objRevList_;
 
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態

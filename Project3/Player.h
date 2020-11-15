@@ -4,11 +4,14 @@
 #include "common/Vector2.h"
 #include "common/TileMap.h"
 #include "DIR.h"
-class Player
+#include "Object.h"
+
+class Player:
+	Object
 {
 public:
 	Player();
-	Player(int id, Vector2& pos);
+	Player(int& id, Vector2& pos);
 
 	~Player();
 
@@ -22,9 +25,6 @@ public:
 private:
 	DIR dir_;
 
-	Vector2 pos_;
-	float rad_;
-	Vector2 vel_;
 
 	std::map<DIR, Vector2> dirMap_;							// ƒL[‚ªŒü‚«‚ÅˆÚ“®—Ê‚ª“ü‚é
 
@@ -32,6 +32,5 @@ private:
 	std::function<bool(LayerVec&)>netFunc_;
 
 	int animCnt_;
-	const int id_;
 };
 

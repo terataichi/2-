@@ -4,7 +4,7 @@
 #include "NetWork/NetWork.h"
 #include <DxLib.h>
 
-Player::Player():id_(0)
+Player::Player()
 {
 	pos_ = {0,0};
 	vel_ = { 4,4 };
@@ -13,8 +13,9 @@ Player::Player():id_(0)
 	animCnt_ = 0;
 }
 
-Player::Player(int id,Vector2& pos):id_(id),pos_(pos)
+Player::Player(int& id,Vector2& pos)
 {
+	pos_ = pos;
 	vel_ = { 4,4 };
 	rad_ = 0;
 	dir_ = DIR::DOWN;
