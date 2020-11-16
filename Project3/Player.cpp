@@ -26,16 +26,16 @@ Player::Player(int& id,Vector2& pos)
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
 	dirMap_.try_emplace(DIR::UP, Vector2{ 0,-1 });
 
-	int modeID = lpNetWork.GetNetWorkMode() != NetWorkMode::HOST;
+	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST ? 1 : 0;
 
 	
-	if (id % 2 == modeID)
+	if (id % 2 != modeID)
 	{
-		netFunc_ = std::bind(&Player::HostData, this, std::placeholders::_1);
+		netFunc_ = std::bind(&Player::SendUpdate, this, std::placeholders::_1);
 	}
 	else
 	{
-		netFunc_ = std::bind(&Player::GuestData, this, std::placeholders::_1);
+		netFunc_ = std::bind(&Player::RevUpdate, this, std::placeholders::_1);
 	}
 
 }
@@ -47,16 +47,12 @@ Player::~Player()
 bool Player::Update(LayerVec&& vecLayer)
 {
 	// ID別処理
-	netFunc_(vecLayer);
-
-
-	return true;
+	return 	netFunc_(vecLayer);
 }
 
 void Player::Draw()
 {
 	auto handle = lpImageMng.GetHandle("Image/bomberman.png", { 5,4 }, { 32,51 });
-
 
 	auto tmpCnt = (animCnt_ / 10);
 	DrawGraph(pos_.x, pos_.y - 30, handle[((tmpCnt % 4) * 5) + static_cast<int>(dir_)], true);
@@ -96,7 +92,7 @@ bool Player::CheckWall(LayerVec& vecLayer)
 	return true;
 }
 
-bool Player::HostData(LayerVec& layer)
+bool Player::SendUpdate(LayerVec& layer)
 {
 	CheckWall(layer);
 
@@ -113,13 +109,25 @@ bool Player::HostData(LayerVec& layer)
 	return true;
 }
 
-bool Player::GuestData(LayerVec& layer)
+bool Player::RevUpdate(LayerVec& layer)
 {
 	UnionVec data = PickData(MesType::POS);
-	if (data.size())
+
+	if (!data.size())
+	{
+		TRACE("ポスデータなし\n");
+		return false;
+	}
+
+	while (data.size())
 	{
 		pos_.x = data[1].iData;
 		pos_.y = data[2].iData;
+		dir_ = static_cast<DIR>(data[3].iData);
+		data = PickData(MesType::POS);
+
+		return true;
 	}
+	TRACE("ポスデータなし\n");
 	return true;
 }

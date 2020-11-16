@@ -20,8 +20,8 @@ public:
 	
 	bool CheckWall(LayerVec& layer);
 
-	bool HostData(LayerVec& layer);
-	bool GuestData(LayerVec& layer);
+	bool SendUpdate(LayerVec& layer);
+	bool RevUpdate(LayerVec& layer);
 private:
 	DIR dir_;
 

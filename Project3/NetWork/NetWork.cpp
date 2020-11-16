@@ -78,7 +78,7 @@ bool NetWork::Update(void)
 			// ¦ƒwƒbƒ_[•”‚ğóM‚·‚é‘Oî•ñ
 			if (!revHeader.next)
 			{
-				tmpPacket.clear();
+				tmpPacket.resize(0);
 				writePos = 0;
 			}
 
@@ -153,11 +153,11 @@ void NetWork::SendStart(void)
 	SendMes(MesType::GAME_START);
 }
 
-bool NetWork::AddRevList(RevDataListP& data)
+bool NetWork::AddRevList(std::mutex& mtx, RevDataListP& data)
 {
 	// ’Ç‰Á
-	revDataList_.emplace_back(data);
-	return false;
+	revDataList_.emplace_back(std::pair<std::mutex&, RevDataListP&>{ mtx, data });
+	return true;
 }
 
 void NetWork::RunUpDate(void)
@@ -366,6 +366,7 @@ void NetWork::InitFunc(void)
 
 	auto tmx_Size = [&](MesH& data, UnionVec& packet)
 	{
+		// c‚©‚¯‰¡‚©‚¯ƒŒƒCƒ„[”
 		tmxSize_ = packet[0].cData[0] * packet[0].cData[1] * packet[0].cData[2];
 		revBox_.resize(tmxSize_);
 
@@ -376,21 +377,20 @@ void NetWork::InitFunc(void)
 
 	auto  tmx_Data = [&](MesH& data, UnionVec& packet)
 	{
-
 		revBox_ = packet;
 		return true;
 	};
 
 	auto addList = [&](MesH& data, UnionVec& packet)
 	{
-		std::lock_guard<std::mutex> lock(revData_);
-
-		// ‚O—v‘f–Ú‚ªID
-		for (auto& packetData : packet)
+		if (packet.size())
 		{
-			if (packet.size())
+			//std::lock_guard<std::mutex> lock(revData_);
+			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData].first);
+			// ‚O—v‘f–Ú‚ªID
+			for (auto& packetData : packet)
 			{
-				revDataList_[packet[0].iData].emplace_back(data, packet);
+				revDataList_[packet[0].iData].second.emplace_back(data, packet);
 			}
 		}
 

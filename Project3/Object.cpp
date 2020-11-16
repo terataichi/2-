@@ -1,8 +1,11 @@
 #include "Object.h"
+int Object::count = 0;
 
-Object::Object():id_()
+Object::Object():id_(count)
 {
-	lpNetWork.AddRevList(revList_);
+	lpNetWork.AddRevList(revMutex_, revList_);
+	rad_ = 0;
+	count++;
 }
 
 Object::~Object()

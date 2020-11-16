@@ -12,6 +12,7 @@ public:
 
 protected:
 
+	std::mutex revMutex_;
 	RevDataListP revList_;
 
 	UnionVec PickData(MesType type);
@@ -19,6 +20,7 @@ protected:
 	Vector2 pos_;
 	float rad_;
 	Vector2 vel_;
+	static int count;
 	const int id_;
 };
 

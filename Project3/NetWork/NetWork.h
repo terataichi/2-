@@ -78,8 +78,8 @@ public:
 	void SendStanby(void);
 	void SendStart(void);
 
-	//
-	bool AddRevList(RevDataListP& data);
+	// オブジェクトから追加されていく、自分で自分のデータを管理する
+	bool AddRevList(std::mutex& mtx, RevDataListP& data);
 	
 	//
 
@@ -106,7 +106,7 @@ private:
 	int tmxSize_;															// Tmxファイルサイズ保存用変数 
 	UnionVec revBox_;
 
-	std::vector<RevDataListP> revDataList_;												// IDに対する受け取ったデータ
+	std::vector<std::pair<std::mutex&,RevDataListP&>> revDataList_;			// IDに対する受け取ったデータ
 
 	bool recvStanby_;														// 初期化メッセージを受信した証 
 	std::unique_ptr<NetWorkState> state_;									// ネットワークの状態
