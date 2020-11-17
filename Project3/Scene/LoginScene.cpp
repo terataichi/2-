@@ -170,7 +170,7 @@ bool LoginScene::SetNetWorkMode(void)
 		updateMode_ = UpdateMode::SetHostIP;
 			break;
 	default:
-		TRACE("エラー")
+		TRACE("エラー");
 			break;
 	}
 	TRACE("状態 : %dです\n", lpNetWork.GetActive());
@@ -196,7 +196,6 @@ bool LoginScene::SetHostIP(void)
 		}
 		// ファイルの内容を格納
 		getline(ifs, ip);
-		ifs.close();
 		return true;
 	};
 

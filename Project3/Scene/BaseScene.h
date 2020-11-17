@@ -17,6 +17,9 @@ public:
 	virtual void Init() = 0;								// 初期化
 
 protected:
+
+	static int count_;
+
 	int drawScreen_;										// 各シーンの描画用
 };
 

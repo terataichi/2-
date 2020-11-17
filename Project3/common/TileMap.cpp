@@ -32,7 +32,7 @@ bool TileMap::LoadTmx(std::string fileName)
 {
 	if (!loader_.LoadTmx(fileName))
 	{
-		TRACE("é∏îs\n")
+		TRACE("é∏îs\n");
 		return false;
 	}
 
@@ -52,7 +52,7 @@ bool TileMap::SendTmxSizeData(void)
 	// ÉfÅ[É^èÓïÒÇÃí«â¡
 	vecData[0].cData[0] = mapData_.width;
 	vecData[0].cData[1] = mapData_.height;
-	vecData[0].cData[2] = layerData_.size() - 1;
+	vecData[0].cData[2] = static_cast<char>(layerData_.size() - 1);
 
 	//UnionHeader mData{ MesType::TMX_SIZE, 1,0,1 };
 	//lpNetWork.SetHeader(mData, vecData);

@@ -2,6 +2,8 @@
 #include <DxLib.h>
 #include "SceneMng.h"
 
+int BaseScene::count_ = 0;
+
 BaseScene::BaseScene()
 {
 	drawScreen_ = MakeScreen(lpSceneMng.screenSize_.x, lpSceneMng.screenSize_.y, true);

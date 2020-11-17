@@ -12,19 +12,32 @@ Object::~Object()
 {
 }
 
-UnionVec Object::PickData(MesType type)
+void Object::PickData(MesType type,UnionVec& vec)
 {
+	std::lock_guard<std::mutex> lock(revMutex_);
 	int cnt = 0;
 	for (auto& data : revList_)
 	{
 		if (data.first.type == type)
 		{
-			auto vec = data.second;
+			vec = data.second;
 			revList_.erase(revList_.begin() + cnt);
-			return vec;
+			break;
 		}
 		cnt++;
 	}
+}
 
-	return UnionVec{};
+bool Object::CheckData(MesType type)
+{
+	std::lock_guard<std::mutex> lock(revMutex_);
+
+	for (auto& data : revList_)
+	{
+		if (data.first.type == type)
+		{
+			return true;
+		}
+	}
+	return false;
 }

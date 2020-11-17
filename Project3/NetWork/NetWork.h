@@ -49,9 +49,9 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::map<MesType, std::function<bool(MesH& data, UnionVec& packet)>>;
+using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, 6>;
 
-using RevDataListP = std::vector<std::pair<MesH, UnionVec&>>;
+using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 
 class NetWork
 {
@@ -66,7 +66,7 @@ public:
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
 
-	void SetHeader(UnionHeader header, UnionVec& vec);						// ヘッダー部をくっつける
+	void SetHeader(UnionHeader& header, UnionVec& vec);						// ヘッダー部をくっつける
 	bool SendMes(MesType header,UnionVec data);								// 送信
 	bool SendMes(MesType type);												// 
 
@@ -113,8 +113,7 @@ private:
 	int tmp_;
 	ArrayIP ip_;
 
-	MesTypeFunc guestRevMap_;												// メッセージ管理用マップ
-	MesTypeFunc hostRevMap_;												// メッセージ管理用マップ
+	MesTypeFunc revUpdate_;													// メッセージ管理用マップ
 
 	std::chrono::system_clock::time_point  start_;
 	std::chrono::system_clock::time_point  end_;
@@ -122,9 +121,5 @@ private:
 	std::thread update;
 
 	unsigned int sendLength_;												// 送信バイト長(イントで割る)
-
-	//std::thread update_;
-	std::mutex lock_;
-	std::mutex revData_;
 };
 

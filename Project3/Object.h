@@ -15,7 +15,8 @@ protected:
 	std::mutex revMutex_;
 	RevDataListP revList_;
 
-	UnionVec PickData(MesType type);
+	void PickData(MesType type, UnionVec& vec);
+	bool CheckData(MesType type);
 
 	Vector2 pos_;
 	float rad_;

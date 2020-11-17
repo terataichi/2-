@@ -11,7 +11,7 @@ class Player:
 {
 public:
 	Player();
-	Player(int& id, Vector2& pos);
+	Player(Vector2& pos);
 
 	~Player();
 
@@ -22,6 +22,9 @@ public:
 
 	bool SendUpdate(LayerVec& layer);
 	bool RevUpdate(LayerVec& layer);
+
+	static int lostCont_;
+
 private:
 	DIR dir_;
 

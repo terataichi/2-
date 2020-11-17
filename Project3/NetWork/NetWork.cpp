@@ -54,9 +54,9 @@ bool NetWork::Update(void)
 	MesH revHeader{};
 	UnionVec tmpPacket{};
 	int writePos = 0;
+	int handle = -1;
 	while (ProcessMessage() == 0)
 	{
-
 		if (!state_->Update())
 		{
 			// 使ったものをリセットする
@@ -64,12 +64,15 @@ bool NetWork::Update(void)
 			recvStanby_ = false;
 			continue;
 		}
-		auto handle = state_->GetNetHandle();
-		if (handle == -1)
+		handle = state_->GetNetHandle();
+		if (handle != -1)
 		{
-			//TRACE("ハンドルの取得に失敗しました\n");
-			continue;
+			break;
 		}
+	}
+
+	while (ProcessMessage() == 0 && state_->Update())
+	{
 
 		// データの長さチェック
 		if (GetNetWorkDataLength(handle) >= sizeof(MesH))
@@ -101,22 +104,8 @@ bool NetWork::Update(void)
 				continue;
 			}
 
-			// データの大きさ分送られてくる
-			if (state_->GetMode() == NetWorkMode::HOST)
-			{
-				if (hostRevMap_.find(revHeader.type) != hostRevMap_.end())
-				{
-					hostRevMap_[revHeader.type](revHeader, tmpPacket);
-				}
-			}
-			else if (state_->GetMode() == NetWorkMode::GUEST)
-			{
-				if (guestRevMap_.find(revHeader.type) != guestRevMap_.end())
-				{
-					guestRevMap_[revHeader.type](revHeader, tmpPacket);
-				}
-			}
-			//TRACE("type : %d\n", revHeader.type);
+			unsigned int type = static_cast<unsigned int>(revHeader.type) - static_cast<unsigned int>(MesType::NON);
+			revUpdate_[type](revHeader, tmpPacket);
 		}
 	}
 
@@ -166,7 +155,7 @@ void NetWork::RunUpDate(void)
 	update.detach();
 }
 
-void NetWork::SetHeader(UnionHeader header, UnionVec& packet)
+void NetWork::SetHeader(UnionHeader& header, UnionVec& packet)
 {
 	packet.insert(packet.begin(), { header.iData[1] });
 	packet.insert(packet.begin(), { header.iData[0] });
@@ -259,7 +248,7 @@ NetWork::~NetWork()
 void NetWork::InitFunc(void)
 {
 	// ---- ホスト ---
-	auto hostStanby = [&](MesH& data,UnionVec& packet)
+	auto gameStart = [&](MesH& data,UnionVec& packet)
 	{
 		// ゲームスタートを受信時
 		if (state_->GetActive() == ActiveState::Stanby)
@@ -277,7 +266,7 @@ void NetWork::InitFunc(void)
 
 
 	// ---- ゲスト ---
-	auto guestStanby = [&](MesH& data, UnionVec& packet)
+	auto stanby = [&](MesH& data, UnionVec& packet)
 	{
 		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
 
@@ -385,26 +374,25 @@ void NetWork::InitFunc(void)
 	{
 		if (packet.size())
 		{
-			//std::lock_guard<std::mutex> lock(revData_);
 			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData].first);
-			// ０要素目がID
-			for (auto& packetData : packet)
-			{
-				revDataList_[packet[0].iData].second.emplace_back(data, packet);
-			}
+			revDataList_[packet[0].iData].second.emplace_back(data, packet);
 		}
+		return true;
 
+	};
+
+	auto non = [&](MesH& data, UnionVec& packet)
+	{
+		TRACE("Nondayoooooooooooo\n");
 		return true;
 	};
 
-
-	hostRevMap_.try_emplace(MesType::GAME_START, hostStanby );
-	hostRevMap_.try_emplace(MesType::POS, addList);
-
-	guestRevMap_.try_emplace(MesType::STANBY, guestStanby);
-	guestRevMap_.try_emplace(MesType::TMX_DATA, tmx_Data);
-	guestRevMap_.try_emplace(MesType::TMX_SIZE, tmx_Size);
-	guestRevMap_.try_emplace(MesType::POS, addList);
+	revUpdate_[0] = non;
+	revUpdate_[1] = stanby;
+	revUpdate_[2] = gameStart;
+	revUpdate_[3] = tmx_Size;
+	revUpdate_[4] = tmx_Data;
+	revUpdate_[5] = addList;
 
 }
 

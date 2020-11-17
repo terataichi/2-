@@ -4,6 +4,8 @@
 #include "NetWork/NetWork.h"
 #include <DxLib.h>
 
+int Player::lostCont_ = 0;
+
 Player::Player()
 {
 	pos_ = {0,0};
@@ -13,7 +15,7 @@ Player::Player()
 	animCnt_ = 0;
 }
 
-Player::Player(int& id,Vector2& pos)
+Player::Player(Vector2& pos)
 {
 	pos_ = pos;
 	vel_ = { 4,4 };
@@ -28,16 +30,21 @@ Player::Player(int& id,Vector2& pos)
 
 	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST ? 1 : 0;
 
-	
-	if (id % 2 != modeID)
+	if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
 	{
 		netFunc_ = std::bind(&Player::SendUpdate, this, std::placeholders::_1);
 	}
 	else
 	{
-		netFunc_ = std::bind(&Player::RevUpdate, this, std::placeholders::_1);
+		if (id_ % 2 != modeID)
+		{
+			netFunc_ = std::bind(&Player::SendUpdate, this, std::placeholders::_1);
+		}
+		else
+		{
+			netFunc_ = std::bind(&Player::RevUpdate, this, std::placeholders::_1);
+		}
 	}
-
 }
 
 Player::~Player()
@@ -111,23 +118,26 @@ bool Player::SendUpdate(LayerVec& layer)
 
 bool Player::RevUpdate(LayerVec& layer)
 {
-	UnionVec data = PickData(MesType::POS);
-
-	if (!data.size())
+	bool count = false;
+	while (CheckData(MesType::POS))
 	{
-		TRACE("ポスデータなし\n");
-		return false;
+		UnionVec data{};
+		PickData(MesType::POS, data);
+
+		if (data.size())
+		{
+			pos_.x = data[1].iData;
+			pos_.y = data[2].iData;
+			dir_ = static_cast<DIR>(data[3].iData);
+		}
+		count = true;     
+	}
+	
+	if (!count)
+	{
+		lostCont_++;
+		//TRACE("取りこぼしID:%d\n", id_);
 	}
 
-	while (data.size())
-	{
-		pos_.x = data[1].iData;
-		pos_.y = data[2].iData;
-		dir_ = static_cast<DIR>(data[3].iData);
-		data = PickData(MesType::POS);
-
-		return true;
-	}
-	TRACE("ポスデータなし\n");
 	return true;
 }
