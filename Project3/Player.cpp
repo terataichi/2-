@@ -59,7 +59,7 @@ bool Player::Update(LayerVec&& vecLayer)
 
 void Player::Draw()
 {
-	auto handle = lpImageMng.GetHandle("Image/bomberman.png", { 5,4 }, { 32,51 });
+	VecInt handle = lpImageMng.GetHandle("Image/bomberman.png", { 5,4 }, { 32,51 });
 
 	auto tmpCnt = (animCnt_ / 10);
 	DrawGraph(pos_.x, pos_.y - 30, handle[((tmpCnt % 4) * 5) + static_cast<int>(dir_)], true);
@@ -70,7 +70,7 @@ bool Player::CheckWall(LayerVec& vecLayer)
 {
 	if (pos_.x % 32 == 0 && pos_.y % 32 == 0)
 	{
-		for (auto layer : vecLayer)
+		for (auto& layer : vecLayer)
 		{
 			if (layer.name == "Obj")
 			{
@@ -105,7 +105,7 @@ bool Player::SendUpdate(LayerVec& layer)
 
 	pos_ += (dirMap_[dir_] * vel_);
 
-	UnionData data[4];
+	UnionData data[4]{};
 	data[0].iData = id_;
 	data[1].iData = pos_.x;
 	data[2].iData = pos_.y;
@@ -136,7 +136,7 @@ bool Player::RevUpdate(LayerVec& layer)
 	if (!count)
 	{
 		lostCont_++;
-		//TRACE("Žæ‚è‚±‚Ú‚µID:%d\n", id_);
+		TRACE("Žæ‚è‚±‚Ú‚µID:%d\n", id_);
 	}
 
 	return true;
