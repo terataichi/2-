@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include <algorithm>
 #include <DxLib.h>
 #include "../_debug/_DebugConOut.h"
 #include "../NetWork/NetWork.h"
@@ -19,7 +20,10 @@ uniqueBase GameScene::Update(uniqueBase scene)
 {
     DrawOwnScene();
 
-    for (auto& player : player_)
+    std::sort(objList_.begin(), objList_.end(), [](sharedObj& obj1, sharedObj& obj2)
+        {return obj1->CheckData(MesType::POS) > obj2->CheckData(MesType::POS); });
+
+    for (auto& player : objList_)
     {
         player->Update(tileMap_.GetLayerData());
     }
@@ -31,7 +35,7 @@ void GameScene::DrawOwnScene(void)
     SetDrawScreen(drawScreen_);
     tileMap_.DrawUpdate();
 
-    for (auto& player : player_)
+    for (auto& player : objList_)
     {
         player->Draw();
     }
@@ -80,7 +84,7 @@ void GameScene::Init(void)
     for (auto charData : tileMap_.GetCharChipPos())
     {
         Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-        player_.emplace_back(std::make_shared<Player>(pos));
+        objList_.emplace_back(std::make_shared<Player>(pos));
     }
 
     averageCount_ = 0;

@@ -3,8 +3,9 @@
 #include <chrono>
 #include "BaseScene.h"
 #include "../common/TileMap.h"
+#include "../Object.h"
 
-class Player;
+using sharedObj = std::shared_ptr<Object>;
 
 class GameScene :
     public BaseScene
@@ -29,6 +30,6 @@ private:
     int averageCount_;
 
 
-    std::vector<std::shared_ptr<Player>> player_;           // プレイヤー
+    std::vector<sharedObj> objList_;           // プレイヤー
 };
 

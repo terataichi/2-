@@ -8,10 +8,6 @@ Object::Object():id_(count)
 	count++;
 }
 
-Object::~Object()
-{
-}
-
 void Object::PickData(MesType type,UnionVec& vec)
 {
 	std::lock_guard<std::mutex> lock(revMutex_);

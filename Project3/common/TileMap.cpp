@@ -155,7 +155,10 @@ void TileMap::DrawUpdate(void)
 {
 	for (auto data : layerData_)
 	{
-		DrawMap(data);
+		if (data.name != "Char")
+		{
+			DrawMap(data);
+		}
 	}
 }
 

@@ -7,7 +7,7 @@
 #include "Object.h"
 
 class Player:
-	Object
+	public Object
 {
 public:
 	Player();
@@ -15,8 +15,8 @@ public:
 
 	~Player();
 
-	bool Update(LayerVec&& layer);
-	void Draw(void);
+	bool Update(LayerVec&& layer)override;
+	void Draw(void)override;
 	
 	bool CheckWall(LayerVec& layer);
 
