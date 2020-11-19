@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <DxLib.h>
+#include <chrono>
 #include <cassert>
 #include "common/ImageMng.h"
 #include "_debug/_DebugConOut.h"
@@ -29,42 +30,46 @@ Player::Player(Vector2& pos, BaseScene& scene) :scene_(scene)
 
 	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST ? 1 : 0;
 
+	// ボムリストの初期化
+	for (int id = id_ + 1; id < id_ + UNIT_ID_BASE; id++)
+	{
+		bombList_.emplace_back(id);
+	}
 
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
 	{
 		if (id_ == 0)
 		{
 			netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
+			wallFunc_ = std::bind(&Player::WallInput, this, std::placeholders::_1);
+			return;
 		}
-		else
-		{
-			netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
-		}
+		netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
+		wallFunc_ = std::bind(&Player::WallAuto, this, std::placeholders::_1);
 	}
 	else
 	{
-		if ((id_ / UNIT_ID_BASE) % 2 != modeID)
+		if (id_ / UNIT_ID_BASE == modeID)
 		{
-			if (id_ == (UNIT_ID_BASE * modeID))
-			{
-				netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
-			}
-			else
-			{
-				netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
-			}			
+			netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
+			wallFunc_ = std::bind(&Player::WallInput, this, std::placeholders::_1);
 		}
 		else
 		{
-			netFunc_ = std::bind(&Player::UpdateRev, this, std::placeholders::_1);
+			if (id_ != modeID)
+			{
+
+				netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
+				wallFunc_ = std::bind(&Player::WallAuto, this, std::placeholders::_1);
+			}
+			else
+			{
+				netFunc_ = std::bind(&Player::UpdateRev, this, std::placeholders::_1);
+			}
 		}
 	}
 
-	// ボムリストの初期化
-	for (int id = id_ + 1; id < id_ + UNIT_ID_BASE; id++)
-	{
-		bombList_.emplace_back(id);
-	}
+
 }
 
 Player::~Player()
@@ -88,32 +93,21 @@ void Player::Draw()
 
 bool Player::CheckWall(LayerVec& vecLayer)
 {
-	if (pos_.x % 32 == 0 && pos_.y % 32 == 0)
+	if (pos_.x % 32 == 0)
 	{
-		for (auto& layer : vecLayer)
+		if (pos_.y % 32 == 0)
 		{
-			if (layer.name == "Obj")
+			for (auto& layer : vecLayer)
 			{
-				while (true)
+				if (layer.name == "Obj")
 				{
-					Vector2 size{ (pos_.x / 32),(pos_.y / 32) };
-					size += dirMap_[dir_];
-					int num = ((size.x) + (size.y) * layer.width);
-
-					if (layer.chipData[num] != 0)
+					while (!wallFunc_(layer))
 					{
-						++dir_;
-						if (dir_ == end(dir_))
-						{
-							dir_ = begin(dir_);
-						}
-						continue;
 					}
-
-					return true;
+					break;
 				}
-			}
 
+			}
 		}
 	}
 
@@ -149,7 +143,8 @@ bool Player::UpdateDef(LayerVec& layer)
 		{
 			try
 			{
-				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no, pos_, true);
+				chronoTime time = std::chrono::system_clock::now();
+				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no, pos_,time, true);
 			}
 			catch (...)
 			{
@@ -213,7 +208,11 @@ bool Player::UpdateRev(LayerVec& layer)
 			Vector2 pos{ data[2].iData,data[3].iData };
 			try
 			{
-				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, pos, true);
+				TimeData timeData{};
+				timeData.iData[0] = data[4].iData;
+				timeData.iData[1] = data[5].iData;
+
+				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, pos,timeData.time ,false);
 			}
 			catch (...)
 			{
@@ -246,4 +245,27 @@ int Player::CheckBomb()
 		bombList_.erase(bombList_.begin());
 	}
 	return id;
+}
+
+bool Player::WallAuto(LayerData& layer)
+{
+	Vector2 size{ (pos_.x / 32),(pos_.y / 32) };
+	size += dirMap_[dir_];
+	int num = ((size.x) + (size.y) * layer.width);
+
+	if (layer.chipData[num] != 0)
+	{
+		++dir_;
+		if (dir_ == end(dir_))
+		{
+			dir_ = begin(dir_);
+		}
+		return false;
+	}
+	return true;
+}
+
+bool Player::WallInput(LayerData& layer)
+{
+	return true;
 }

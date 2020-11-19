@@ -34,16 +34,21 @@ public:
 	static int lostCont_;
 
 private:
+	bool WallAuto(LayerData& layer);								// オートパイロット用壁判定
+	bool WallInput(LayerData& layer);								// 操作用壁判定
+
 	DIR dir_;
 
-	std::list<int> bombList_;								// 使えるボムリスト
-	std::map<DIR, Vector2> dirMap_;							// キーが向きで移動量が入る
+	std::list<int> bombList_;										// 使えるボムリスト
+	std::map<DIR, Vector2> dirMap_;									// キーが向きで移動量が入る
 
-	std::function<bool(LayerVec&)>netFunc_;
+	std::function<bool(LayerVec&)>netFunc_;							// 自分が送信する側なのかどうかで処理が変わる
+
+	std::function<bool(LayerData&)>wallFunc_;						// 操作するかオートでするか
 
 	std::unique_ptr<InputState> input_;
 
-	BaseScene& scene_;
+	BaseScene& scene_;												// ゲームシーンアクセス用
 
 	int animCnt_;
 };

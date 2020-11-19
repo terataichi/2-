@@ -18,7 +18,7 @@ public:
     uniqueBase Update(uniqueBase scene)override;
     void DrawOwnScene(void)override;
     void Init(void)override;
-    bool SetBomb(int& ownerID, int& myID, Vector2& pos, bool flg);
+    bool SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& time, bool flg);
     Object& GetObject(int id);
 private:
 

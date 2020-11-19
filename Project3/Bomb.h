@@ -7,7 +7,7 @@ class Bomb :
     public Object
 {
 public:
-	Bomb(int& id, Vector2& pos, BaseScene& scene);
+	Bomb(int& id, Vector2& pos,chronoTime& time, BaseScene& scene);
 	~Bomb();
 
 	bool Update(LayerVec&& layer)override;
@@ -20,6 +20,7 @@ public:
 private:
 	BaseScene& scene_;
 
+	chronoTime startTime_;
 
 	int dethCnt_;
 };

@@ -45,6 +45,12 @@ union UnionData
 	char cData[4];
 };
 
+// ƒNƒƒm‚ÌŒ^‚ªlonglongŒ^‚¾‚Á‚½‚Ì‚Å•ª‚¯‚é‚±‚Æ‚É‚µ‚½
+union TimeData
+{
+	std::chrono::system_clock::time_point time;
+	int iData[2];
+};
 
 using ArrayIP = std::array<IPDATA, 5>;
 

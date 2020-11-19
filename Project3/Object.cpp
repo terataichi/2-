@@ -5,7 +5,8 @@ Object::Object():id_(count)
 {
 	lpNetWork.AddRevList(revMutex_, revList_);
 	rad_ = 0;
-	count += 5;
+	alive_ = true;
+	count += UNIT_ID_BASE;
 }
 
 void Object::PickData(MesType type,UnionVec& vec)

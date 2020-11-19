@@ -5,6 +5,8 @@
 
 #define UNIT_ID_BASE 5			// ƒ{ƒ€‚ªo‚¹‚éÅ‘å”
 
+using chronoTime = std::chrono::system_clock::time_point;
+
 class Object
 {
 public:
@@ -12,6 +14,8 @@ public:
 	virtual ~Object() = default;
 
 	const int ID(void) { return id_; };
+	bool Alive(void) { return alive_; };
+
 	bool CheckData(MesType type);
 	virtual bool Update(LayerVec&& layer) = 0;
 	virtual void Draw(void) = 0;

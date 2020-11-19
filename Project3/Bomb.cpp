@@ -4,14 +4,17 @@
 #include "common/ImageMng.h"
 #include "Scene/BaseScene.h"
 #include "Scene/GameScene.h"
+#include "Player.h"
 
-Bomb::Bomb(int& id, Vector2& pos, BaseScene& scene) :scene_(scene)
+Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(scene)
 {
     pos_ = pos;
     id_ = id;
     pos_ = pos;
     vel_ = { 4,4 };
     rad_ = 0;
+    dethCnt_ = 0;
+    startTime_ = time;
 }
 
 Bomb::~Bomb()
@@ -20,20 +23,22 @@ Bomb::~Bomb()
 
 bool Bomb::Update(LayerVec&& layer)
 {
-    if (dethCnt_ > 180)
+    chronoTime now = std::chrono::system_clock::now();
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > 3000)
     {
-        alive_ = false;
-
         try
         {
-            dynamic_cast<GameScene&>(scene_).GetObject(id_ / UNIT_ID_BASE);
+            auto& object = dynamic_cast<GameScene&>(scene_).GetObject((id_ / UNIT_ID_BASE) * UNIT_ID_BASE);
+            dynamic_cast<Player&>(object).AddBombList(id_);
         }
         catch (...)
         {
             assert(!"シーンのキャスト失敗");
         }
+        alive_ = false;
     }
     Draw();
+    dethCnt_++;
     return true;
 }
 

@@ -28,6 +28,9 @@ uniqueBase GameScene::Update(uniqueBase scene)
     {
         obj->Update(tileMap_.GetLayerData());
     }
+
+    objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive(); }),objList_.end());
+
     return scene;
 }
 
@@ -82,7 +85,7 @@ void GameScene::Init(void)
         }
     }
 
-    for (auto charData : tileMap_.GetCharChipPos())
+    for (auto &charData : tileMap_.GetCharChipPos())
     {
         Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
         objList_.emplace_back(std::make_shared<Player>(pos, *this));
@@ -95,21 +98,25 @@ void GameScene::Init(void)
     DrawOwnScene();
 }
 
-bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, bool flg)
+bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chronoTime, bool flg)
 {
     if (flg)
     {
         // インスタンス情報の送信
-        UnionData data[4]{};
+        UnionData data[6]{};
         data[0].iData = ownerID;
         data[1].iData = myID;
         data[2].iData = pos.x;
         data[3].iData = pos.y;
+        TimeData timeData{ chronoTime };
+        data[4].iData = timeData.iData[0];
+        data[5].iData = timeData.iData[1];
 
-        lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3] });
+        lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3],data[4],data[5] });
 
-        objList_.emplace_back(std::make_shared<Bomb>(myID, pos, *this));
     }
+    objList_.emplace_back(std::make_shared<Bomb>(myID, pos, chronoTime, *this));
+
     return true;
 }
 
@@ -122,6 +129,7 @@ Object& GameScene::GetObject(int id)
             return *list;
         }
     }
-    Object obj();
-    return obj;
+
+    sharedObj&& obj = nullptr;
+    return *obj;
 }
