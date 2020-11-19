@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <list>
 #include <chrono>
 #include "BaseScene.h"
 #include "../common/TileMap.h"
@@ -17,6 +18,8 @@ public:
     uniqueBase Update(uniqueBase scene)override;
     void DrawOwnScene(void)override;
     void Init(void)override;
+    bool SetBomb(int& ownerID, int& myID, Vector2& pos, bool flg);
+    Object& GetObject(int id);
 private:
 
     TileMap tileMap_;                                       // タイルマップ情報格納
@@ -30,6 +33,6 @@ private:
     int averageCount_;
 
 
-    std::vector<sharedObj> objList_;           // プレイヤー
+    std::list<sharedObj> objList_;                          // プレイヤー
 };
 

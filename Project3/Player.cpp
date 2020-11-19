@@ -1,22 +1,16 @@
-
 #include "Player.h"
+#include <DxLib.h>
+#include <cassert>
 #include "common/ImageMng.h"
 #include "_debug/_DebugConOut.h"
 #include "NetWork/NetWork.h"
-#include <DxLib.h>
+#include "Scene/GameScene.h"
+#include "Input/PadState.h"
+#include "Input/KeyState.h"
 
 int Player::lostCont_ = 0;
 
-Player::Player()
-{
-	pos_ = {0,0};
-	vel_ = { 4,4 };
-	rad_ = 0;
-	dir_ = DIR::DOWN;
-	animCnt_ = 0;
-}
-
-Player::Player(Vector2& pos)
+Player::Player(Vector2& pos, BaseScene& scene) :scene_(scene)
 {
 	pos_ = pos;
 	vel_ = { 4,4 };
@@ -29,22 +23,47 @@ Player::Player(Vector2& pos)
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
 	dirMap_.try_emplace(DIR::UP, Vector2{ 0,-1 });
 
+	input_ = std::make_unique<KeyState>();
+
+	input_->SetUp(0);
+
 	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST ? 1 : 0;
+
 
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
 	{
-		netFunc_ = std::bind(&Player::SendUpdate, this, std::placeholders::_1);
-	}
-	else
-	{
-		if (id_ % 2 != modeID)
+		if (id_ == 0)
 		{
-			netFunc_ = std::bind(&Player::SendUpdate, this, std::placeholders::_1);
+			netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
 		}
 		else
 		{
-			netFunc_ = std::bind(&Player::RevUpdate, this, std::placeholders::_1);
+			netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
 		}
+	}
+	else
+	{
+		if ((id_ / UNIT_ID_BASE) % 2 != modeID)
+		{
+			if (id_ == (UNIT_ID_BASE * modeID))
+			{
+				netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
+			}
+			else
+			{
+				netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
+			}			
+		}
+		else
+		{
+			netFunc_ = std::bind(&Player::UpdateRev, this, std::placeholders::_1);
+		}
+	}
+
+	// ボムリストの初期化
+	for (int id = id_ + 1; id < id_ + UNIT_ID_BASE; id++)
+	{
+		bombList_.emplace_back(id);
 	}
 }
 
@@ -81,15 +100,17 @@ bool Player::CheckWall(LayerVec& vecLayer)
 					size += dirMap_[dir_];
 					int num = ((size.x) + (size.y) * layer.width);
 
-					if (layer.chipData[num] != 7)
+					if (layer.chipData[num] != 0)
 					{
-						return true;
+						++dir_;
+						if (dir_ == end(dir_))
+						{
+							dir_ = begin(dir_);
+						}
+						continue;
 					}
-					++dir_;
-					if (dir_ == end(dir_))
-					{
-						dir_ = begin(dir_);
-					}
+
+					return true;
 				}
 			}
 
@@ -100,10 +121,58 @@ bool Player::CheckWall(LayerVec& vecLayer)
 	return true;
 }
 
-bool Player::SendUpdate(LayerVec& layer)
+bool Player::UpdateDef(LayerVec& layer)
 {
+	// 入力のアップデート
+	(*input_)();
+
 	CheckWall(layer);
 
+	auto move = [&](INPUT_ID id, Vector2 vel)
+	{
+		if (input_->GetTrgPush(id))
+		{
+			// ここに壁判定追加予定
+			pos_ += vel;
+		}
+	};
+
+	move(INPUT_ID::BUTTON_DOWN, dirMap_[DIR::DOWN] * vel_);
+	move(INPUT_ID::BUTTON_LEFT, dirMap_[DIR::LEFT] * vel_);
+	move(INPUT_ID::BUTTON_RIGHT, dirMap_[DIR::RIGHT] * vel_);
+	move(INPUT_ID::BUTTON_UP, dirMap_[DIR::UP] * vel_);
+
+	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ATTACK))
+	{
+		auto no = CheckBomb();
+		if (no >= 0)
+		{
+			try
+			{
+				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no, pos_, true);
+			}
+			catch (...)
+			{
+				assert(!"シーンのキャスト失敗");
+			}
+		}
+	}
+
+
+	UnionData data[4]{};
+	data[0].iData = id_;
+	data[1].iData = pos_.x;
+	data[2].iData = pos_.y;
+	data[3].iData = static_cast<int>(dir_);
+
+	lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
+
+	return true;
+}
+
+bool Player::UpdateAuto(LayerVec& layer)
+{
+	CheckWall(layer);
 	pos_ += (dirMap_[dir_] * vel_);
 
 	UnionData data[4]{};
@@ -117,7 +186,7 @@ bool Player::SendUpdate(LayerVec& layer)
 	return true;
 }
 
-bool Player::RevUpdate(LayerVec& layer)
+bool Player::UpdateRev(LayerVec& layer)
 {
 	bool count = false;
 	while (CheckData(MesType::POS))
@@ -134,6 +203,26 @@ bool Player::RevUpdate(LayerVec& layer)
 		count = true;     
 	}
 	
+	while (CheckData(MesType::SET_BOMB))
+	{
+		UnionVec data{};
+		PickData(MesType::SET_BOMB, data);
+
+		if (data.size())
+		{
+			Vector2 pos{ data[2].iData,data[3].iData };
+			try
+			{
+				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, pos, true);
+			}
+			catch (...)
+			{
+				int a = 0;
+			}
+		}
+		count = true;
+	}
+
 	if (!count)
 	{
 		lostCont_++;
@@ -141,4 +230,20 @@ bool Player::RevUpdate(LayerVec& layer)
 	}
 
 	return true;
+}
+
+void Player::AddBombList(int no)
+{
+	bombList_.emplace_back(no);
+}
+
+int Player::CheckBomb()
+{
+	int id = -1;
+	if (bombList_.size())
+	{
+		id = bombList_.front();
+		bombList_.erase(bombList_.begin());
+	}
+	return id;
 }

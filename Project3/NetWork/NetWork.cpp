@@ -374,8 +374,8 @@ void NetWork::InitFunc(void)
 	{
 		if (packet.size())
 		{
-			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData].first);
-			revDataList_[packet[0].iData].second.emplace_back(data, packet);
+			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
+			revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
 		}
 		return true;
 
@@ -393,7 +393,7 @@ void NetWork::InitFunc(void)
 	revUpdate_[3] = tmx_Size;
 	revUpdate_[4] = tmx_Data;
 	revUpdate_[5] = addList;
-
+	revUpdate_[6] = addList;
 }
 
 void NetWork::Init(void)

@@ -20,7 +20,8 @@ enum class MesType:unsigned char
 	GAME_START,						// ゲーム開始
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
-	POS
+	POS,
+	SET_BOMB
 };
 
 struct MesH
@@ -49,7 +50,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, 6>;
+using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, 7>;
 
 using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 

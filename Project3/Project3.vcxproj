@@ -144,8 +144,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
     <ClCompile Include="DIR.cpp" />
+    <ClCompile Include="Input\KeyState.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene\CrossOverScene.cpp" />
@@ -168,10 +170,12 @@
     <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bomb.h" />
     <ClInclude Include="common\details\Vector2.h" />
     <ClInclude Include="common\ImageMng.h" />
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="DIR.h" />
+    <ClInclude Include="Input\KeyState.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scene\CrossOverScene.h" />

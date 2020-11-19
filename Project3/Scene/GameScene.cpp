@@ -4,6 +4,7 @@
 #include "../_debug/_DebugConOut.h"
 #include "../NetWork/NetWork.h"
 #include "../Player.h"
+#include "../Bomb.h"
 
 GameScene::GameScene()
 {
@@ -20,12 +21,12 @@ uniqueBase GameScene::Update(uniqueBase scene)
 {
     DrawOwnScene();
 
-    std::sort(objList_.begin(), objList_.end(), [](sharedObj& obj1, sharedObj& obj2)
+    objList_.sort([](sharedObj& obj1, sharedObj& obj2)
         {return obj1->CheckData(MesType::POS) > obj2->CheckData(MesType::POS); });
-
-    for (auto& player : objList_)
+    
+    for (auto& obj : objList_)
     {
-        player->Update(tileMap_.GetLayerData());
+        obj->Update(tileMap_.GetLayerData());
     }
     return scene;
 }
@@ -35,9 +36,9 @@ void GameScene::DrawOwnScene(void)
     SetDrawScreen(drawScreen_);
     tileMap_.DrawUpdate();
 
-    for (auto& player : objList_)
+    for (auto& obj : objList_)
     {
-        player->Draw();
+        obj->Draw();
     }
 
     end_ = std::chrono::system_clock::now();
@@ -84,7 +85,7 @@ void GameScene::Init(void)
     for (auto charData : tileMap_.GetCharChipPos())
     {
         Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-        objList_.emplace_back(std::make_shared<Player>(pos));
+        objList_.emplace_back(std::make_shared<Player>(pos, *this));
     }
 
     averageCount_ = 0;
@@ -92,4 +93,35 @@ void GameScene::Init(void)
     fps_ = 0;
     // 最初に一回スクリーンに描画して記録しておく
     DrawOwnScene();
+}
+
+bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, bool flg)
+{
+    if (flg)
+    {
+        // インスタンス情報の送信
+        UnionData data[4]{};
+        data[0].iData = ownerID;
+        data[1].iData = myID;
+        data[2].iData = pos.x;
+        data[3].iData = pos.y;
+
+        lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3] });
+
+        objList_.emplace_back(std::make_shared<Bomb>(myID, pos, *this));
+    }
+    return true;
+}
+
+Object& GameScene::GetObject(int id)
+{
+    for (auto& list : objList_)
+    {
+        if (list->ID() == id)
+        {
+            return *list;
+        }
+    }
+    Object obj();
+    return obj;
 }

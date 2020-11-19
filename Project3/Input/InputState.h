@@ -29,8 +29,11 @@ struct InputState
 	}
 
 	const TrgData& GetTrgData(void);			// データのゲット関数
-	const bool GetTrgPull(INPUT_ID);			// 個別データの離されたかどうかを取得(!now && old)
-	const bool GetTrgPush(INPUT_ID);			// 個別データの離されたかどうかを取得(!now && old)
+	const bool GetTrgOnePull(INPUT_ID);			// 離されたか瞬間かどうかを取得(!now && old)
+	const bool GetTrgOnePush(INPUT_ID);			// 押された瞬間かどうかを取得(now && !old)
+	const bool GetTrgPull(INPUT_ID);			// 押された瞬間かどうかを取得(now && !old)
+	const bool GetTrgPush(INPUT_ID);			// 押された瞬間かどうかを取得(now && !old)
+
 	virtual CntType GetCntType(void) = 0;		// 自分がいま何を使っているのかを返す
 	virtual bool SetUp(int no) = 0;
 
