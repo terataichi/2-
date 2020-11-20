@@ -10,12 +10,12 @@ public:
 	Bomb(int& id, Vector2& pos,chronoTime& time, BaseScene& scene);
 	~Bomb();
 
-	bool Update(LayerVec&& layer)override;
+	bool Update()override;
 	void Draw(void)override;
 
-	bool UpdateDef(LayerVec& layer)override;						// 入力処理管理
-	bool UpdateAuto(LayerVec& layer)override;						// オートパイロット
-	bool UpdateRev(LayerVec& layer)override;						// 受信
+	bool UpdateDef()override;						// 入力処理管理
+	bool UpdateAuto()override;						// オートパイロット
+	bool UpdateRev()override;						// 受信
 
 private:
 	BaseScene& scene_;

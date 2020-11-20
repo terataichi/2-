@@ -21,7 +21,7 @@ Bomb::~Bomb()
 {
 }
 
-bool Bomb::Update(LayerVec&& layer)
+bool Bomb::Update()
 {
     chronoTime now = std::chrono::system_clock::now();
     if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > 3000)
@@ -49,17 +49,17 @@ void Bomb::Draw(void)
     DrawGraph(pos_.x, pos_.y, handle[0], true);
 }
 
-bool Bomb::UpdateDef(LayerVec& layer)
+bool Bomb::UpdateDef()
 {
     return false;
 }
 
-bool Bomb::UpdateAuto(LayerVec& layer)
+bool Bomb::UpdateAuto()
 {
     return false;
 }
 
-bool Bomb::UpdateRev(LayerVec& layer)
+bool Bomb::UpdateRev()
 {
     return false;
 }

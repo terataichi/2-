@@ -17,12 +17,12 @@ public:
 	bool Alive(void) { return alive_; };
 
 	bool CheckData(MesType type);
-	virtual bool Update(LayerVec&& layer) = 0;
+	virtual bool Update() = 0;
 	virtual void Draw(void) = 0;
 
-	virtual bool UpdateDef(LayerVec& layer) = 0;					// 入力処理管理
-	virtual bool UpdateAuto(LayerVec& layer) = 0;					// オートパイロット
-	virtual bool UpdateRev(LayerVec& layer)= 0;						// 受信
+	virtual bool UpdateDef() = 0;					// 入力処理管理
+	virtual bool UpdateAuto() = 0;					// オートパイロット
+	virtual bool UpdateRev()= 0;						// 受信
 
 protected:
 

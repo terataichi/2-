@@ -2,10 +2,10 @@
 
 enum class DIR
 {
-	DOWN,
 	LEFT,
 	UP,
 	RIGHT,
+	DOWN,
 //	Deth,
 	MAX
 };

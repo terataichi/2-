@@ -26,7 +26,7 @@ uniqueBase GameScene::Update(uniqueBase scene)
     
     for (auto& obj : objList_)
     {
-        obj->Update(tileMap_.GetLayerData());
+        obj->Update();
     }
 
     objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive(); }),objList_.end());
@@ -88,7 +88,7 @@ void GameScene::Init(void)
     for (auto &charData : tileMap_.GetCharChipPos())
     {
         Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-        objList_.emplace_back(std::make_shared<Player>(pos, *this));
+        objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerData()));
     }
 
     averageCount_ = 0;

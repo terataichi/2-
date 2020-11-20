@@ -4,6 +4,7 @@
 #include <cassert>
 #include "common/ImageMng.h"
 #include "_debug/_DebugConOut.h"
+#include "_debug/_DebugDispOut.h"
 #include "NetWork/NetWork.h"
 #include "Scene/GameScene.h"
 #include "Input/PadState.h"
@@ -11,7 +12,7 @@
 
 int Player::lostCont_ = 0;
 
-Player::Player(Vector2& pos, BaseScene& scene) :scene_(scene)
+Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),layerData_(layer)
 {
 	pos_ = pos;
 	vel_ = { 4,4 };
@@ -40,35 +41,32 @@ Player::Player(Vector2& pos, BaseScene& scene) :scene_(scene)
 	{
 		if (id_ == 0)
 		{
-			netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
-			wallFunc_ = std::bind(&Player::WallInput, this, std::placeholders::_1);
+			netFunc_ = std::bind(&Player::UpdateDef, this);
+			InitFunc();
+
 			return;
 		}
-		netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
-		wallFunc_ = std::bind(&Player::WallAuto, this, std::placeholders::_1);
+		netFunc_ = std::bind(&Player::UpdateAuto, this);
 	}
 	else
 	{
 		if (id_ / UNIT_ID_BASE == modeID)
 		{
-			netFunc_ = std::bind(&Player::UpdateDef, this, std::placeholders::_1);
-			wallFunc_ = std::bind(&Player::WallInput, this, std::placeholders::_1);
+			netFunc_ = std::bind(&Player::UpdateDef,this);
 		}
 		else
 		{
 			if (id_ != modeID)
 			{
 
-				netFunc_ = std::bind(&Player::UpdateAuto, this, std::placeholders::_1);
-				wallFunc_ = std::bind(&Player::WallAuto, this, std::placeholders::_1);
+				netFunc_ = std::bind(&Player::UpdateAuto, this);
 			}
 			else
 			{
-				netFunc_ = std::bind(&Player::UpdateRev, this, std::placeholders::_1);
+				netFunc_ = std::bind(&Player::UpdateRev, this);
 			}
 		}
 	}
-
 
 }
 
@@ -76,10 +74,10 @@ Player::~Player()
 {
 }
 
-bool Player::Update(LayerVec&& vecLayer)
+bool Player::Update()
 {
 	// ID別処理
-	return 	netFunc_(vecLayer);
+	return 	netFunc_();
 }
 
 void Player::Draw()
@@ -88,23 +86,39 @@ void Player::Draw()
 
 	auto tmpCnt = (animCnt_ / 10);
 	DrawGraph(pos_.x, pos_.y - 30, handle[((tmpCnt % 4) * 5) + static_cast<int>(dir_)], true);
+
+	DrawBox(pos_.x, pos_.y, pos_.x + 32, pos_.y + 32, 0xffff, false);
 	animCnt_++;
 }
 
-bool Player::CheckWall(LayerVec& vecLayer)
+bool Player::CheckWallAuto()
 {
 	if (pos_.x % 32 == 0)
 	{
 		if (pos_.y % 32 == 0)
 		{
-			for (auto& layer : vecLayer)
+			for (auto& layer : layerData_)
 			{
 				if (layer.name == "Obj")
 				{
-					while (!wallFunc_(layer))
+					while (true)
 					{
+						Vector2 size{ (pos_.x / 32),(pos_.y / 32) };
+						size += dirMap_[dir_];
+						int num = ((size.x) + (size.y) * layer.width);
+
+						if (layer.chipData[num] != 0)
+						{
+							++dir_;
+							if (dir_ == end(dir_))
+							{
+								dir_ = begin(dir_);
+							}
+							continue;
+						}
+
+						return true;
 					}
-					break;
 				}
 
 			}
@@ -115,26 +129,45 @@ bool Player::CheckWall(LayerVec& vecLayer)
 	return true;
 }
 
-bool Player::UpdateDef(LayerVec& layer)
+bool Player::CheckWallInput()
+{
+	for (auto layer : layerData_)
+	{
+		if (layer.name == "Obj")
+		{
+			for (auto chip : layer.chipData)
+			{
+				Vector2 size{ pos_.x / 32,pos_.y / 32 };
+
+				// チップの番号に変換
+				int num = size.x + size.y * layer.width;
+
+				if (layer.chipData[num] != 0)
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool Player::UpdateDef()
 {
 	// 入力のアップデート
 	(*input_)();
 
-	CheckWall(layer);
-
-	auto move = [&](INPUT_ID id, Vector2 vel)
+	auto input = input_->GetTrgData();
+	for (auto list = inputMoveList_.begin(); list != inputMoveList_.end(); list++)
 	{
-		if (input_->GetTrgPush(id))
+		if ((*list)(input, true))
 		{
-			// ここに壁判定追加予定
-			pos_ += vel;
+			inputMoveList_.splice(inputMoveList_.begin(), inputMoveList_, list);
+			inputMoveList_.sort([&](MoveFunc& a, MoveFunc& b) {return a(input, false) < b(input, false); });
+			break;
 		}
-	};
-
-	move(INPUT_ID::BUTTON_DOWN, dirMap_[DIR::DOWN] * vel_);
-	move(INPUT_ID::BUTTON_LEFT, dirMap_[DIR::LEFT] * vel_);
-	move(INPUT_ID::BUTTON_RIGHT, dirMap_[DIR::RIGHT] * vel_);
-	move(INPUT_ID::BUTTON_UP, dirMap_[DIR::UP] * vel_);
+	}
 
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ATTACK))
 	{
@@ -165,9 +198,9 @@ bool Player::UpdateDef(LayerVec& layer)
 	return true;
 }
 
-bool Player::UpdateAuto(LayerVec& layer)
+bool Player::UpdateAuto()
 {
-	CheckWall(layer);
+	CheckWallAuto();
 	pos_ += (dirMap_[dir_] * vel_);
 
 	UnionData data[4]{};
@@ -181,7 +214,7 @@ bool Player::UpdateAuto(LayerVec& layer)
 	return true;
 }
 
-bool Player::UpdateRev(LayerVec& layer)
+bool Player::UpdateRev()
 {
 	bool count = false;
 	while (CheckData(MesType::POS))
@@ -247,25 +280,79 @@ int Player::CheckBomb()
 	return id;
 }
 
-bool Player::WallAuto(LayerData& layer)
+void Player::InitFunc(void)
 {
-	Vector2 size{ (pos_.x / 32),(pos_.y / 32) };
-	size += dirMap_[dir_];
-	int num = ((size.x) + (size.y) * layer.width);
-
-	if (layer.chipData[num] != 0)
+	auto left= [&](TrgData trgData, bool flg)
 	{
-		++dir_;
-		if (dir_ == end(dir_))
+		if (trgData[INPUT_ID::BUTTON_LEFT][static_cast<int>(Trg::Now)])
 		{
-			dir_ = begin(dir_);
+			dir_ = DIR::LEFT;
+			if (flg)
+			{
+				if (CheckWallInput())
+				{
+					pos_.x -= vel_.x;
+				}
+			}
+			return true;
 		}
 		return false;
-	}
-	return true;
-}
+	};
 
-bool Player::WallInput(LayerData& layer)
-{
-	return true;
+	auto right= [&](TrgData trgData, bool flg)
+	{
+		if (trgData[INPUT_ID::BUTTON_RIGHT][static_cast<int>(Trg::Now)])
+		{
+			dir_ = DIR::RIGHT;
+			if (flg)
+			{
+				//if (CheckWallInput())
+				{
+					pos_.x += vel_.x;
+				}
+				(CheckWallInput());
+			}
+			return true;
+		}
+		return false;	
+	};
+
+	auto up= [&](TrgData trgData, bool flg)
+	{
+		if (trgData[INPUT_ID::BUTTON_UP][static_cast<int>(Trg::Now)])
+		{
+			dir_ = DIR::UP;
+			if (flg)
+			{
+				if (CheckWallInput())
+				{
+					pos_.y -= vel_.y;
+				}
+			}
+			return true;
+		}
+		return false;
+	};
+
+	auto down= [&](TrgData trgData, bool flg)
+	{
+		if (trgData[INPUT_ID::BUTTON_DOWN][static_cast<int>(Trg::Now)])
+		{
+			dir_ = DIR::DOWN;
+			if (flg)
+			{
+				if (CheckWallInput())
+				{
+					pos_.y += vel_.y;
+				}
+			}
+			return true;
+		}
+		return false;
+	};
+
+	inputMoveList_.emplace_back(left);
+	inputMoveList_.emplace_back(right);
+	inputMoveList_.emplace_back(up);	
+	inputMoveList_.emplace_back(down);
 }

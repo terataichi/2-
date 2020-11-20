@@ -162,12 +162,12 @@ void TileMap::DrawUpdate(void)
 	}
 }
 
-LayerVec TileMap::GetLayerData(void)
+LayerVec& TileMap::GetLayerData(void)
 {
 	return layerData_;
 }
 
-MapData TileMap::GetMapData(void)
+MapData& TileMap::GetMapData(void)
 {
 	return mapData_;
 }
