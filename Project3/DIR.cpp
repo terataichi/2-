@@ -4,7 +4,7 @@
 
 DIR begin(DIR)
 {
-	return DIR::LEFT;
+	return DIR::DOWN;
 }
 DIR end(DIR)
 {

@@ -7,6 +7,9 @@ Object::Object():id_(count)
 	rad_ = 0;
 	alive_ = true;
 	count += UNIT_ID_BASE;
+	dir_ = DIR::DOWN;
+	state_ = STATE::Non;
+	animCnt_ = 0;
 }
 
 void Object::PickData(MesType type,UnionVec& vec)
@@ -23,6 +26,10 @@ void Object::PickData(MesType type,UnionVec& vec)
 		}
 		cnt++;
 	}
+}
+
+void Object::AnimStateInit(void)
+{
 }
 
 bool Object::CheckData(MesType type)

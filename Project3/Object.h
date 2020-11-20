@@ -2,10 +2,18 @@
 #include"common/Vector2.h"
 #include "NetWork/NetWork.h"
 #include "common/TileMap.h"
+#include "DIR.h"
 
 #define UNIT_ID_BASE 5			// ボムが出せる最大数
 
 using chronoTime = std::chrono::system_clock::time_point;
+
+enum class STATE
+{
+	Non,
+	Run,
+	Deth,
+};
 
 class Object
 {
@@ -30,6 +38,7 @@ protected:
 	RevDataListP revList_;
 
 	void PickData(MesType type, UnionVec& vec);
+	virtual void AnimStateInit(void);
 
 	Vector2 pos_;
 	float rad_;
@@ -37,5 +46,12 @@ protected:
 	static int count;
 	int id_;
 	bool alive_;
+
+	STATE state_;
+	DIR dir_;
+
+	std::map<STATE, std::vector<int>>animState_;				// アニメーション別ベクター
+
+	int animCnt_;
 };
 

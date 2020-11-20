@@ -19,6 +19,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 	rad_ = 0;
 	dir_ = DIR::DOWN;
 	animCnt_ = 0;
+	dirCnt_ = 0;
 
 	dirMap_.try_emplace(DIR::DOWN, Vector2{ 0,1 });
 	dirMap_.try_emplace(DIR::LEFT, Vector2{ -1,0 });
@@ -28,6 +29,12 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 	input_ = std::make_unique<KeyState>();
 
 	input_->SetUp(0);
+
+	nextDir_[0] = DIR::DOWN;
+	nextDir_[1] = DIR::LEFT;
+	nextDir_[2] = DIR::UP;
+	nextDir_[3] = DIR::RIGHT;
+	nextDir_[4] = DIR::MAX;
 
 	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST ? 1 : 0;
 
@@ -47,6 +54,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 			return;
 		}
 		netFunc_ = std::bind(&Player::UpdateAuto, this);
+		state_ = STATE::Run;
 	}
 	else
 	{
@@ -60,6 +68,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 			{
 
 				netFunc_ = std::bind(&Player::UpdateAuto, this);
+				state_ = STATE::Run;
 			}
 			else
 			{
@@ -85,7 +94,14 @@ void Player::Draw()
 	VecInt handle = lpImageMng.GetHandle("Image/bomberman.png", { 5,4 }, { 32,51 });
 
 	auto tmpCnt = (animCnt_ / 10);
-	DrawGraph(pos_.x, pos_.y - 30, handle[((tmpCnt % 4) * 5) + static_cast<int>(dir_)], true);
+
+	int animNun = 0;
+	if (state_ == STATE::Run)
+	{
+		animNun = 2;
+	}
+
+	DrawGraph(pos_.x, pos_.y - 30, handle[((animNun +(tmpCnt % 2)) * 5) + static_cast<int>(dir_)], true);
 
 	DrawBox(pos_.x, pos_.y, pos_.x + 32, pos_.y + 32, 0xffff, false);
 	animCnt_++;
@@ -109,11 +125,12 @@ bool Player::CheckWallAuto()
 
 						if (layer.chipData[num] != 0)
 						{
-							++dir_;
-							if (dir_ == end(dir_))
+							dirCnt_++;
+							if (nextDir_[dirCnt_] == DIR::MAX)
 							{
-								dir_ = begin(dir_);
+								dirCnt_ = 0;
 							}
+							dir_ = nextDir_[dirCnt_];
 							continue;
 						}
 
@@ -129,23 +146,40 @@ bool Player::CheckWallAuto()
 	return true;
 }
 
-bool Player::CheckWallInput()
+bool Player::CheckWallInput(DIR dir)
 {
-	for (auto layer : layerData_)
+	for (auto& layer : layerData_)
 	{
 		if (layer.name == "Obj")
 		{
-			for (auto chip : layer.chipData)
+			Vector2 size{};
+
+			switch (dir)
 			{
-				Vector2 size{ pos_.x / 32,pos_.y / 32 };
+			case DIR::LEFT:
+				size = { pos_.x - vel_.x, pos_.y + 16 };
+				break;
+			case DIR::UP:
+				size = { pos_.x + 16, pos_.y - vel_.y};
+				break;
+			case DIR::RIGHT:
+				size = { pos_.x + 32,pos_.y + 16 };
+				break;
+			case DIR::DOWN:
+				size = { pos_.x + 16,pos_.y + 32 };
+				break;
+			default:
+				assert(!"エラー：PLAYERDIR");
+				break;
+			}
+			size /= 32;
 
-				// チップの番号に変換
-				int num = size.x + size.y * layer.width;
+			// チップの番号に変換
+			int num = size.x + size.y * layer.width;
 
-				if (layer.chipData[num] != 0)
-				{
-					return false;
-				}
+			if (layer.chipData[num] != 0)
+			{
+				return false;
 			}
 		}
 	}
@@ -159,14 +193,23 @@ bool Player::UpdateDef()
 	(*input_)();
 
 	auto input = input_->GetTrgData();
+	bool animFlg = false;
 	for (auto list = inputMoveList_.begin(); list != inputMoveList_.end(); list++)
 	{
 		if ((*list)(input, true))
 		{
 			inputMoveList_.splice(inputMoveList_.begin(), inputMoveList_, list);
 			inputMoveList_.sort([&](MoveFunc& a, MoveFunc& b) {return a(input, false) < b(input, false); });
+			state_ = STATE::Run;
+			animFlg = true;
 			break;
 		}
+	}
+
+	// 何も入力されなかった
+	if (!animFlg)
+	{
+		state_ = STATE::Non;
 	}
 
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ATTACK))
@@ -282,6 +325,20 @@ int Player::CheckBomb()
 
 void Player::InitFunc(void)
 {
+	// 補正
+	auto correction = [&](int remainder, int& pos)
+	{
+		if (remainder >= 16)
+		{
+			pos += 32 - remainder;
+		}
+		else
+		{
+			pos -= remainder;
+		}
+	};
+
+	// 左方向処理
 	auto left= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_LEFT][static_cast<int>(Trg::Now)])
@@ -289,16 +346,20 @@ void Player::InitFunc(void)
 			dir_ = DIR::LEFT;
 			if (flg)
 			{
-				if (CheckWallInput())
+				if (CheckWallInput(dir_))
 				{
+					correction((pos_.y) % 32, pos_.y);
 					pos_.x -= vel_.x;
+					return true;
 				}
+				return false;
 			}
 			return true;
 		}
 		return false;
 	};
 
+	// 右方向処理
 	auto right= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_RIGHT][static_cast<int>(Trg::Now)])
@@ -306,17 +367,20 @@ void Player::InitFunc(void)
 			dir_ = DIR::RIGHT;
 			if (flg)
 			{
-				//if (CheckWallInput())
+				if (CheckWallInput(dir_))
 				{
+					correction((pos_.y) % 32, pos_.y);
 					pos_.x += vel_.x;
+					return true;
 				}
-				(CheckWallInput());
+				return false;
 			}
 			return true;
 		}
 		return false;	
 	};
 
+	// 上方向処理
 	auto up= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_UP][static_cast<int>(Trg::Now)])
@@ -324,16 +388,20 @@ void Player::InitFunc(void)
 			dir_ = DIR::UP;
 			if (flg)
 			{
-				if (CheckWallInput())
+				if (CheckWallInput(dir_))
 				{
+					correction((pos_.x) % 32, pos_.x);
 					pos_.y -= vel_.y;
+					return true;
 				}
+				return false;
 			}
 			return true;
 		}
 		return false;
 	};
 
+	// 下方向処理
 	auto down= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_DOWN][static_cast<int>(Trg::Now)])
@@ -341,10 +409,13 @@ void Player::InitFunc(void)
 			dir_ = DIR::DOWN;
 			if (flg)
 			{
-				if (CheckWallInput())
+				if (CheckWallInput(dir_))
 				{
+					correction((pos_.x) % 32, pos_.x);
 					pos_.y += vel_.y;
+					return true;
 				}
+				return false;
 			}
 			return true;
 		}

@@ -3,6 +3,8 @@
 
 class BaseScene;
 
+#define DETH_CNT_MAX 3000
+
 class Bomb :
     public Object
 {
@@ -18,6 +20,9 @@ public:
 	bool UpdateRev()override;						// óM
 
 private:
+
+	void AnimStateInit()override;
+
 	BaseScene& scene_;
 
 	chronoTime startTime_;

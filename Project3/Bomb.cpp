@@ -15,6 +15,8 @@ Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(sc
     rad_ = 0;
     dethCnt_ = 0;
     startTime_ = time;
+
+    AnimStateInit();
 }
 
 Bomb::~Bomb()
@@ -24,7 +26,7 @@ Bomb::~Bomb()
 bool Bomb::Update()
 {
     chronoTime now = std::chrono::system_clock::now();
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > 3000)
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > DETH_CNT_MAX)
     {
         try
         {
@@ -35,10 +37,16 @@ bool Bomb::Update()
         {
             assert(!"シーンのキャスト失敗");
         }
-        alive_ = false;
+        state_ = STATE::Deth;
     }
     Draw();
     dethCnt_++;
+
+    if (state_ == STATE::Deth)
+    {
+        
+    }
+
     return true;
 }
 
@@ -46,7 +54,10 @@ void Bomb::Draw(void)
 {
     VecInt handle = lpImageMng.GetHandle("Image/bomb.png", { 2,7 }, { 32,32 });
 
-    DrawGraph(pos_.x, pos_.y, handle[0], true);
+
+    auto tmpCount = animCnt_ / (DETH_CNT_MAX / 10);
+    DrawGraph(pos_.x, pos_.y, handle[(tmpCount % 2) * 2], true);
+    animCnt_++;
 }
 
 bool Bomb::UpdateDef()
@@ -62,4 +73,12 @@ bool Bomb::UpdateAuto()
 bool Bomb::UpdateRev()
 {
     return false;
+}
+
+void Bomb::AnimStateInit()
+{
+    VecInt handle = lpImageMng.GetHandle("Image/bomb.png", { 2,7 }, { 32,32 });
+
+    animState_.try_emplace(STATE::Run, 0, 1);
+
 }

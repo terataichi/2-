@@ -25,7 +25,7 @@ public:
 	void Draw(void)override;
 	
 	bool CheckWallAuto(void);
-	bool CheckWallInput(void);
+	bool CheckWallInput(DIR dir);
 
 
 	bool UpdateDef()override;										// 入力処理管理
@@ -41,10 +41,11 @@ private:
 
 	void InitFunc(void);											// ファンクションの初期化
 
-	DIR dir_;
-
 	std::list<int> bombList_;										// 使えるボムリスト
-	std::map<DIR, Vector2> dirMap_;									// キーが向きで移動量が入る
+	std::map<DIR, Vector2> dirMap_;									// キーが向き
+
+	std::array<DIR, 5> nextDir_;									// 次のDIRを格納
+	int dirCnt_;
 
 	std::function<bool(void)>netFunc_;								// 自分が送信する側なのかどうかで処理が変わる
 
@@ -56,6 +57,5 @@ private:
 
 	LayerVec& layerData_;
 
-	int animCnt_;
 };
 

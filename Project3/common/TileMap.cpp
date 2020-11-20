@@ -16,7 +16,7 @@
 TileMap::TileMap()
 {
 	mapData_ = MapData{};
-	layerData_ = LayerVec{};
+	layerVec_ = LayerVec{};
 }
 
 TileMap::TileMap(std::string fileName)
@@ -36,7 +36,7 @@ bool TileMap::LoadTmx(std::string fileName)
 		return false;
 	}
 
-	layerData_ = loader_.GetLayerData();
+	layerVec_ = loader_.GetLayerData();
 	mapData_ = loader_.GetMapData();
 	ImageName_ = loader_.GetImageName();
 	return true;
@@ -52,7 +52,7 @@ bool TileMap::SendTmxSizeData(void)
 	// ÉfÅ[É^èÓïÒÇÃí«â¡
 	vecData[0].cData[0] = mapData_.width;
 	vecData[0].cData[1] = mapData_.height;
-	vecData[0].cData[2] = static_cast<char>(layerData_.size() - 1);
+	vecData[0].cData[2] = static_cast<char>(layerVec_.size() - 1);
 
 	//UnionHeader mData{ MesType::TMX_SIZE, 1,0,1 };
 	//lpNetWork.SetHeader(mData, vecData);
@@ -153,7 +153,7 @@ bool TileMap::SendTmxData(void)
 
 void TileMap::DrawUpdate(void)
 {
-	for (auto data : layerData_)
+	for (auto &data : layerVec_)
 	{
 		if (data.name != "Char")
 		{
@@ -162,9 +162,22 @@ void TileMap::DrawUpdate(void)
 	}
 }
 
-LayerVec& TileMap::GetLayerData(void)
+LayerVec& TileMap::GetLayerVec(void)
 {
-	return layerData_;
+	return layerVec_;
+}
+
+LayerData& TileMap::GetLayerData(std::string name)
+{
+	for (auto& data : layerVec_)
+	{
+		if (data.name != name)
+		{
+			return data;
+		}
+	}
+	LayerData tmp{};
+	return tmp;
 }
 
 MapData& TileMap::GetMapData(void)
@@ -175,7 +188,7 @@ MapData& TileMap::GetMapData(void)
 std::vector<Vector2> TileMap::GetCharChipPos()
 {
 	std::vector<Vector2> chipPos{};
-	for (auto layer : layerData_)
+	for (auto &layer : layerVec_)
 	{
 		if (layer.name == "Char")
 		{

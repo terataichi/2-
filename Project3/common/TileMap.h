@@ -19,7 +19,8 @@ public:
 	bool SendTmxSizeData(void);							// TMXファイルのサイズを取得して送信
 	bool SendTmxData(void);								// TMXファイルのデータ送信
 	void DrawUpdate(void);								// 描画の更新
-	LayerVec& GetLayerData(void);
+	LayerVec& GetLayerVec(void);
+	LayerData& GetLayerData(std::string name);			// レイヤーの情報取得
 	MapData& GetMapData(void);
 
 	std::vector<Vector2> GetCharChipPos();					// キャラクターの初期配置取得
@@ -27,10 +28,9 @@ public:
 private:
 	bool DrawMap(LayerData layerData);					// マップの描画
 
-
 	// 読み込んだTMXファイルの情報保存用
 	TmxLoader loader_;
-	LayerVec layerData_;
+	LayerVec layerVec_;
 	MapData mapData_;
 	std::string ImageName_;
 };

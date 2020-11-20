@@ -88,7 +88,7 @@ void GameScene::Init(void)
     for (auto &charData : tileMap_.GetCharChipPos())
     {
         Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-        objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerData()));
+        objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec()));
     }
 
     averageCount_ = 0;
