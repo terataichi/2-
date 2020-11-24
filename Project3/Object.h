@@ -30,7 +30,7 @@ public:
 
 	virtual bool UpdateDef() = 0;					// 入力処理管理
 	virtual bool UpdateAuto() = 0;					// オートパイロット
-	virtual bool UpdateRev()= 0;						// 受信
+	virtual bool UpdateRev()= 0;					// 受信
 
 protected:
 

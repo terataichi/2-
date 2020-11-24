@@ -6,6 +6,7 @@
 #include "ImageMng.h"
 #include "../Scene/SceneMng.h"
 #include "../NetWork/NetWork.h"
+#include "../FlameGenerator.h"
 
 // rappidXml
 #include "../TileMap/rapidxml.hpp"
@@ -38,7 +39,9 @@ bool TileMap::LoadTmx(std::string fileName)
 
 	layerVec_ = loader_.GetLayerData();
 	mapData_ = loader_.GetMapData();
-	ImageName_ = loader_.GetImageName();
+	chipImageName_ = loader_.GetImageName();
+
+	flameMap_.resize(mapData_.height * mapData_.width);
 	return true;
 }
 
@@ -151,7 +154,7 @@ bool TileMap::SendTmxData(void)
 	return true;
 }
 
-void TileMap::DrawUpdate(void)
+void TileMap::Update(void)
 {
 	for (auto &data : layerVec_)
 	{
@@ -160,11 +163,21 @@ void TileMap::DrawUpdate(void)
 			DrawMap(data);
 		}
 	}
+
+	// ”š”­I‚í‚Á‚½‚çfalse ‚Å‹A‚Á‚Ä‚­‚é
+	flameList_.erase(std::remove_if(flameList_.begin(), flameList_.end(),
+		[](sharedFlame& flame) {return !flame->Update(); }), flameList_.end());
+
 }
 
 LayerVec& TileMap::GetLayerVec(void)
 {
 	return layerVec_;
+}
+
+void TileMap::AddFlameGenerate(int& length, Vector2& pos)
+{
+	flameList_.emplace_back(std::make_shared<FlameGenerator>(length, pos));
 }
 
 LayerData& TileMap::GetLayerData(std::string name)
@@ -221,10 +234,24 @@ bool TileMap::DrawMap(LayerData layerData)
 		Vector2 chipPos{ size.x * (i % div.x),size.y * (i / div.x)};
 		if (chip != 0)
 		{
-			auto image = lpImageMng.GetHandle(ImageName_.c_str(), { 4,3 }, size)[chip - 1];
+			auto image = lpImageMng.GetHandle(chipImageName_.c_str(), { 4,3 }, size)[chip - 1];
 			DrawGraph(chipPos.x, chipPos.y, image, true);
 		}
 		i++;
+	}
+
+
+	int j = 0;
+	for (auto chip : flameMap_)
+	{
+		Vector2 chipPos{ size.x * (j % div.x),size.y * (j / div.x) };
+		if (chip != 0)
+		{
+			auto image = lpImageMng.GetHandle("fire.png", { 4,4 }, size)[0];
+			DrawRotaGraph(chipPos.x, chipPos.y, 1, 0, image, true);
+		}
+
+		j++;
 	}
     return true;
 }

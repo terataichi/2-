@@ -37,7 +37,7 @@ uniqueBase GameScene::Update(uniqueBase scene)
 void GameScene::DrawOwnScene(void)
 {
     SetDrawScreen(drawScreen_);
-    tileMap_.DrawUpdate();
+    tileMap_.Update();
 
     for (auto& obj : objList_)
     {
@@ -132,4 +132,9 @@ Object& GameScene::GetObject(int id)
 
     sharedObj&& obj = nullptr;
     return *obj;
+}
+
+void GameScene::FlameGenerate(int& length, Vector2& pos)
+{
+    return tileMap_.AddFlameGenerate(length, pos);
 }

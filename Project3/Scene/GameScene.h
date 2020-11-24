@@ -20,6 +20,7 @@ public:
     void Init(void)override;
     bool SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& time, bool flg);
     Object& GetObject(int id);
+    void FlameGenerate(int& length, Vector2& pos);
 private:
 
     TileMap tileMap_;                                       // タイルマップ情報格納

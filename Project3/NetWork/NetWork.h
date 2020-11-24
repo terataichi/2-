@@ -21,7 +21,9 @@ enum class MesType:unsigned char
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
 	POS,
-	SET_BOMB
+	SET_BOMB,
+	DETH,							// 死亡
+	MAX
 };
 
 struct MesH

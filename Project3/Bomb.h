@@ -1,7 +1,10 @@
 #pragma once
+#include <memory>
 #include "Object.h"
+#include "common/TileMap.h"
 
 class BaseScene;
+class FlameGenerator;
 
 #define DETH_CNT_MAX 3000
 

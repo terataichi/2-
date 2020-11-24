@@ -5,6 +5,7 @@
 #include "Scene/BaseScene.h"
 #include "Scene/GameScene.h"
 #include "Player.h"
+#include "FlameGenerator.h"
 
 Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(scene)
 {
@@ -37,15 +38,16 @@ bool Bomb::Update()
         {
             assert(!"シーンのキャスト失敗");
         }
-        state_ = STATE::Deth;
+        if (state_ == STATE::Non)
+        {
+            state_ = STATE::Deth;
+            alive_ = false;
+            int tmplength = 3;
+            dynamic_cast<GameScene&>(scene_).FlameGenerate(tmplength, pos_);
+        }
     }
     Draw();
     dethCnt_++;
-
-    if (state_ == STATE::Deth)
-    {
-        
-    }
 
     return true;
 }
@@ -53,7 +55,6 @@ bool Bomb::Update()
 void Bomb::Draw(void)
 {
     VecInt handle = lpImageMng.GetHandle("Image/bomb.png", { 2,7 }, { 32,32 });
-
 
     auto tmpCount = animCnt_ / (DETH_CNT_MAX / 10);
     DrawGraph(pos_.x, pos_.y, handle[(tmpCount % 2) * 2], true);
