@@ -6,8 +6,7 @@
 #include "ImageMng.h"
 #include "../Scene/SceneMng.h"
 #include "../NetWork/NetWork.h"
-#include "../FlameGenerator.h"
-
+#include "../DIR.h"
 // rappidXml
 #include "../TileMap/rapidxml.hpp"
 #include "../TileMap/rapidxml_utils.hpp"
@@ -177,14 +176,14 @@ LayerVec& TileMap::GetLayerVec(void)
 
 void TileMap::AddFlameGenerate(int& length, Vector2& pos)
 {
-	flameList_.emplace_back(std::make_shared<FlameGenerator>(length, pos));
+	flameList_.emplace_back(std::make_shared<FlameGenerator>(length, pos,*this));
 }
 
 LayerData& TileMap::GetLayerData(std::string name)
 {
 	for (auto& data : layerVec_)
 	{
-		if (data.name != name)
+		if (data.name == name)
 		{
 			return data;
 		}
@@ -221,6 +220,16 @@ std::vector<Vector2> TileMap::GetCharChipPos()
 	return chipPos;
 }
 
+bool TileMap::SetFlameMap_(Vector2 size,int count)
+{
+	if (GetLayerData("Obj").chipData[size.y * 21 + size.x] == 0)
+	{
+		flameMap_[size.y * 21 + size.x] = count;
+		return true;
+	}
+	return false;
+}
+
 bool TileMap::DrawMap(LayerData layerData)
 {
 	// 長いのでローカル変数に格納
@@ -247,11 +256,124 @@ bool TileMap::DrawMap(LayerData layerData)
 		Vector2 chipPos{ size.x * (j % div.x),size.y * (j / div.x) };
 		if (chip != 0)
 		{
-			auto image = lpImageMng.GetHandle("fire.png", { 4,4 }, size)[0];
+			auto image = lpImageMng.GetHandle("Image/fire.png", { 3,4 }, size)[0];
 			DrawRotaGraph(chipPos.x, chipPos.y, 1, 0, image, true);
 		}
 
 		j++;
 	}
     return true;
+}
+
+FlameGenerator::FlameGenerator(int length, Vector2& pos, TileMap& map) :tileMap_(map)
+{
+	TRACE("flameGenerator生成\n");
+	length_ = length;
+	chipPos_ = { pos.x / 32,pos.y / 32 };
+	count_ = 60;
+
+	// 初回書き込み
+	tileMap_.SetFlameMap_(chipPos_, count_);
+}
+
+FlameGenerator::~FlameGenerator()
+{
+	TRACE("flameGenerator破棄\n");
+}
+
+bool FlameGenerator::Update(void)
+{
+	// カウント0以下で終わるようにしたい
+	if (count_ < 0)
+	{
+		return false;
+	}
+
+	// 次のマスを見る
+	CheckNextMap();
+	count_--;
+	return true;
+}
+
+bool FlameGenerator::CheckNextMap(void)
+{
+	auto checkNext = [&](DIR dir, int cnt)
+	{
+		auto& chip = tileMap_.GetLayerData("Obj").chipData;
+
+		if (dir == DIR::DOWN)
+		{
+			int chipPos = (chipPos_.y + cnt) * 21 + chipPos_.x;
+			Vector2 tmp{ chipPos_.x,chipPos_.y + cnt };
+			if (chip[chipPos] == 0)
+			{
+				// まだいけるのでtrueを返す
+				tileMap_.SetFlameMap_(tmp, count_);
+				return true;
+			}
+			else if (chip[chipPos] == 8)
+			{
+				// 壊せるブロックなのでここで止める
+				tileMap_.SetFlameMap_(tmp, count_);
+				return false;
+			}
+		}
+		else if (dir == DIR::UP)
+		{
+			int chipPos = (chipPos_.y - cnt) * 21 + chipPos_.x;
+			Vector2 setPos{ chipPos_.x,chipPos_.y - cnt };
+			if (chip[chipPos] == 0)
+			{
+				tileMap_.SetFlameMap_(setPos, count_);
+				return true;
+			}
+			else if (chip[chipPos] == 8)
+			{
+				tileMap_.SetFlameMap_(setPos, count_);
+				return false;
+			}
+		}
+		else if (dir == DIR::LEFT)
+		{
+			int chipPos = (chipPos_.y  * 21) + chipPos_.x + cnt;
+			Vector2 setPos{ chipPos_.x - cnt,chipPos_.y};
+			if (chip[chipPos] == 0)
+			{
+				tileMap_.SetFlameMap_(setPos, count_);
+				return true;
+			}
+			else if (chip[chipPos] == 8)
+			{
+				tileMap_.SetFlameMap_(setPos, count_);
+				return false;
+			}
+		}
+		else if (dir == DIR::RIGHT)
+		{
+			int chipPos = (chipPos_.y * 21)  + chipPos_.x + cnt;
+			Vector2 setPos{ chipPos_.x + cnt,chipPos_.y};
+			if (chip[chipPos] == 0)
+			{
+				tileMap_.SetFlameMap_(setPos, count_);
+				return true;
+			}
+			else if (chip[chipPos] == 8)
+			{
+				tileMap_.SetFlameMap_(setPos, count_);
+				return false;
+			}
+		}
+		return false;
+	};
+
+	for (auto dir : DIR())
+	{
+		int count = 0;
+		while (checkNext(dir, count))
+		{
+			count++;
+		}
+	}
+
+	return false;
 }

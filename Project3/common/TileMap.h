@@ -9,7 +9,24 @@
 
 #define TMX_VERSION "1.4"
 
-class FlameGenerator;
+class TileMap;
+
+/// <summary>
+/// 炎の爆風生成用
+/// </summary>
+struct FlameGenerator
+{
+public:
+	FlameGenerator(int length, Vector2& pos, TileMap& map);
+	~FlameGenerator();
+	bool Update(void);
+private:
+	bool CheckNextMap(void);
+	int length_;
+	Vector2 chipPos_;
+	int count_;
+	TileMap& tileMap_;
+};
 
 using sharedFlame = std::shared_ptr<FlameGenerator>;
 
@@ -23,14 +40,16 @@ public:
 	bool LoadTmx(std::string fileName);					// TMXファイル読み込み
 	bool SendTmxSizeData(void);							// TMXファイルのサイズを取得して送信
 	bool SendTmxData(void);								// TMXファイルのデータ送信
-	void Update(void);								// 描画の更新
+	void Update(void);									// 描画の更新
 	LayerVec& GetLayerVec(void);
 	LayerData& GetLayerData(std::string name);			// レイヤーの情報取得
 	MapData& GetMapData(void);
 
 	std::vector<Vector2> GetCharChipPos();				// キャラクターの初期配置取得
 
-	void AddFlameGenerate(int& length, Vector2& pos);		// 爆風生成
+	bool SetFlameMap_(Vector2 size,int count);				// 爆発情報書き込み用
+
+	void AddFlameGenerate(int& length, Vector2& pos);	// 爆風生成
 private:
 	bool DrawMap(LayerData layerData);					// マップの描画
 

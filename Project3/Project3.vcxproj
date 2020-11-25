@@ -147,7 +147,6 @@
     <ClCompile Include="Bomb.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
     <ClCompile Include="DIR.cpp" />
-    <ClCompile Include="FlameGenerator.cpp" />
     <ClCompile Include="Input\KeyState.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -176,7 +175,6 @@
     <ClInclude Include="common\ImageMng.h" />
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="DIR.h" />
-    <ClInclude Include="FlameGenerator.h" />
     <ClInclude Include="Input\KeyState.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
