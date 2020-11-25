@@ -36,11 +36,11 @@ void SceneMng::SetEnd(void)
 
 void SceneMng::Draw(void)
 {
-	_dbgAddDraw();
 
 	SetDrawScreen(DX_SCREEN_BACK);
 	ClsDrawScreen();
 	(*activeScene_).Draw();
+	_dbgAddDraw();
 	ScreenFlip();
 }
 
@@ -55,7 +55,7 @@ bool SceneMng::SysInit(void)
 		return false;
 	}
 	SetAlwaysRunFlag(true);
-	_dbgSetup(255,255,255);
+	_dbgSetup(screenSize_.x,screenSize_.y,255);
 	_dbgSetAlpha(255);
 	return true;
 }

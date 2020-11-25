@@ -212,6 +212,7 @@ bool Player::UpdateDef()
 		state_ = STATE::Non;
 	}
 
+	// ”š’eÝ’u
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ATTACK))
 	{
 		auto no = CheckBomb();
@@ -220,7 +221,9 @@ bool Player::UpdateDef()
 			try
 			{
 				chronoTime time = std::chrono::system_clock::now();
-				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no, pos_,time, true);
+				Vector2 pos{ (pos_.x + 16) / 32 ,(pos_.y + 16) / 32 };
+				pos = { pos.x * 32,pos.y * 32 };
+				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no,pos ,time, true);
 			}
 			catch (...)
 			{
@@ -228,7 +231,6 @@ bool Player::UpdateDef()
 			}
 		}
 	}
-
 
 	UnionData data[4]{};
 	data[0].iData = id_;

@@ -12,6 +12,7 @@
 #include "../TileMap/rapidxml_utils.hpp"
 
 #include "../_debug/_DebugConOut.h"
+#include "../_debug/_DebugDispOut.h"
 
 TileMap::TileMap()
 {
@@ -251,15 +252,17 @@ bool TileMap::DrawMap(LayerData layerData)
 
 
 	int j = 0;
-	for (auto chip : flameMap_)
+	for (auto& chip : flameMap_)
 	{
-		Vector2 chipPos{ size.x * (j % div.x),size.y * (j / div.x) };
+		Vector2 chipPos{ size.x * (j % 21),size.y * (j / 21) };
 		if (chip != 0)
 		{
 			auto image = lpImageMng.GetHandle("Image/fire.png", { 3,4 }, size)[0];
-			DrawRotaGraph(chipPos.x, chipPos.y, 1, 0, image, true);
+			DrawRotaGraph(chipPos.x + mapData_.tileWidth / 2, chipPos.y + mapData_.tileHeight / 2, 1, 0, image, true);
+			chip--;
 		}
-
+		std::string str = std::to_string(chip);
+		_dbgDrawString(chipPos.x, chipPos.y, str.c_str(), 0xffffff);
 		j++;
 	}
     return true;
@@ -271,9 +274,10 @@ FlameGenerator::FlameGenerator(int length, Vector2& pos, TileMap& map) :tileMap_
 	length_ = length;
 	chipPos_ = { pos.x / 32,pos.y / 32 };
 	count_ = 60;
-
-	// èââÒèëÇ´çûÇ›
-	tileMap_.SetFlameMap_(chipPos_, count_);
+	for (auto dir : DIR())
+	{
+		dirCount_[static_cast<int>(dir)] = 0;
+	}
 }
 
 FlameGenerator::~FlameGenerator()
@@ -315,6 +319,7 @@ bool FlameGenerator::CheckNextMap(void)
 			{
 				// âÛÇπÇÈÉuÉçÉbÉNÇ»ÇÃÇ≈Ç±Ç±Ç≈é~ÇﬂÇÈ
 				tileMap_.SetFlameMap_(tmp, count_);
+				dirCount_[static_cast<int>(dir)] = length_;
 				return false;
 			}
 		}
@@ -330,12 +335,13 @@ bool FlameGenerator::CheckNextMap(void)
 			else if (chip[chipPos] == 8)
 			{
 				tileMap_.SetFlameMap_(setPos, count_);
+				dirCount_[static_cast<int>(dir)] = length_;
 				return false;
 			}
 		}
 		else if (dir == DIR::LEFT)
 		{
-			int chipPos = (chipPos_.y  * 21) + chipPos_.x + cnt;
+			int chipPos = (chipPos_.y  * 21) + chipPos_.x - cnt;
 			Vector2 setPos{ chipPos_.x - cnt,chipPos_.y};
 			if (chip[chipPos] == 0)
 			{
@@ -345,6 +351,7 @@ bool FlameGenerator::CheckNextMap(void)
 			else if (chip[chipPos] == 8)
 			{
 				tileMap_.SetFlameMap_(setPos, count_);
+				dirCount_[static_cast<int>(dir)] = length_;
 				return false;
 			}
 		}
@@ -360,18 +367,23 @@ bool FlameGenerator::CheckNextMap(void)
 			else if (chip[chipPos] == 8)
 			{
 				tileMap_.SetFlameMap_(setPos, count_);
+				dirCount_[static_cast<int>(dir)] = length_;
 				return false;
 			}
 		}
+		dirCount_[static_cast<int>(dir)] = length_;
 		return false;
 	};
 
 	for (auto dir : DIR())
 	{
-		int count = 0;
-		while (checkNext(dir, count))
+		if (count_ % 6 == 0)
 		{
-			count++;
+			if (dirCount_[static_cast<int>(dir)] < length_)
+			{
+				checkNext(dir, dirCount_[static_cast<int>(dir)]);
+			}
+			dirCount_[static_cast<int>(dir)]++;
 		}
 	}
 

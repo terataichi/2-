@@ -25,6 +25,7 @@ private:
 	int length_;
 	Vector2 chipPos_;
 	int count_;
+	int dirCount_[4];
 	TileMap& tileMap_;
 };
 

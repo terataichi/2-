@@ -118,10 +118,10 @@ int _DebugDispOut::DrawBox(int x1, int y1, int x2, int y2, unsigned int Color, i
 	return rtnFlag;
 }
 
-int _DebugDispOut::DrawString(int x, int y, char* String, unsigned int Color)
+int _DebugDispOut::DrawString(int x, int y, std::string String, unsigned int Color)
 {
 	SetScreen();
-	int rtnFlag = DxLib::DrawString(x, y, String, Color);
+	int rtnFlag = DxLib::DrawString(x, y, String.c_str(), Color);
 	RevScreen();
 	return rtnFlag;
 }
