@@ -196,6 +196,11 @@ MapData& TileMap::GetMapData(void)
 	return mapData_;
 }
 
+const FlameMapVec& TileMap::GetFlameMap(void) const
+{
+	return flameMap_;
+}
+
 std::vector<Vector2> TileMap::GetCharChipPos()
 {
 	std::vector<Vector2> chipPos{};
@@ -221,8 +226,13 @@ std::vector<Vector2> TileMap::GetCharChipPos()
 
 bool TileMap::SetFlameMap(dirBit dir,Vector2 size,bool next,chronoTime time)
 {
-	if (GetLayerData("Obj").chipData[size.y * 21 + size.x] == 0)
+	auto& data = GetLayerData("Obj");
+	if (data.chipData[size.y * 21 + size.x] == 0 ||data.chipData[size.y * 21 + size.x] == 8)
 	{
+		if (data.chipData[size.y * 21 + size.x] == 8)
+		{
+			data.chipData[size.y * 21 + size.x] = 0;
+		}
 		flameMap_[size.y * 21 + size.x].startTime = time;
 		flameMap_[size.y * 21 + size.x].next = next;
 		flameMap_[size.y * 21 + size.x].dir.down |= dir.down;
@@ -261,7 +271,8 @@ bool TileMap::DrawMap(LayerData layerData)
 		Vector2 chipPos{ size.x * (j % 21),size.y * (j / 21) };
 		auto now = lpSceneMng.GetTime();
 		auto difference = std::chrono::duration_cast<std::chrono::milliseconds>(now - chip.startTime).count();
-		if (difference < 1000)
+		//DrawFormatString(chipPos.x, chipPos.y, 0xffffff, "%d", chip.startTime.time_since_epoch().count());
+		if (difference < 1200)
 		{
 			int offset = 1 + static_cast<int>(!chip.next);
 			double angle = 0;
@@ -270,17 +281,29 @@ bool TileMap::DrawMap(LayerData layerData)
 				offset = 0;
 			}
 
-			if (chip.dir.down || chip.dir.up)
+			if (chip.dir.down || chip.dir.up || chip.dir.left)
 			{
-				angle = DX_PI_F / 2;
+				angle = -DX_PI_F / 2;
+				if (chip.dir.down)
+				{
+					angle = DX_PI_F / 2;
+				}
+				if (chip.dir.left)
+				{
+					angle = DX_PI_F;
+				}
 			}
 
-			auto image = lpImageMng.GetHandle("Image/fire.png", { 3,4 }, size)[((((difference / 2) / 60) % 4) * 3) + offset];
+			int tmp = (static_cast<int>(difference) / 3 / 60);
+			int num = abs(tmp % 4 - tmp / 4 % 2 * 2);
+			auto image = lpImageMng.GetHandle("Image/fire.png", { 3,4 }, size)[num * 3 + offset];
 			DrawRotaGraph(chipPos.x + mapData_.tileWidth / 2, chipPos.y + mapData_.tileHeight / 2, 1, angle, image, true);
-
+			DrawFormatString(chipPos.x, chipPos.y, 0xffffff, "%d", num * 3 + offset);
 		}
 		else
 		{
+			chronoTime time{};
+			chip.startTime = time;
 			dirBit dir{false};
 			chip.dir = dir;
 			chip.next = false;
@@ -334,9 +357,8 @@ bool FlameGenerator::CheckNextMap(void)
 			dirBit bit{ 0,0,0,1 };
 			if (chip[chipPos] == 0)
 			{
+				tileMap_.SetFlameMap(bit, tmp, (cnt + 1 < length_), lpSceneMng.GetTime());
 				// ‚Ü‚¾‚¢‚¯‚é‚Ì‚Åtrue‚ð•Ô‚·
-
-				tileMap_.SetFlameMap(bit, tmp, true, lpSceneMng.GetTime());
 				return true;
 			}
 			else if (chip[chipPos] == 8)
@@ -354,7 +376,7 @@ bool FlameGenerator::CheckNextMap(void)
 			dirBit bit{ 0,0,1,0 };
 			if (chip[chipPos] == 0)
 			{
-				tileMap_.SetFlameMap(bit,setPos, true,lpSceneMng.GetTime());
+				tileMap_.SetFlameMap(bit,setPos, (cnt + 1 < length_),lpSceneMng.GetTime());
 				return true;
 			}
 			else if (chip[chipPos] == 8)
@@ -371,7 +393,7 @@ bool FlameGenerator::CheckNextMap(void)
 			dirBit bit{ 1,0,0,0 };
 			if (chip[chipPos] == 0)
 			{
-				tileMap_.SetFlameMap(bit,setPos, true,lpSceneMng.GetTime());
+				tileMap_.SetFlameMap(bit,setPos, (cnt + 1 < length_),lpSceneMng.GetTime());
 				return true;
 			}
 			else if (chip[chipPos] == 8)
@@ -388,7 +410,7 @@ bool FlameGenerator::CheckNextMap(void)
 			dirBit bit{ 0,1,0,0 };
 			if (chip[chipPos] == 0)
 			{
-				tileMap_.SetFlameMap(bit,setPos, true,lpSceneMng.GetTime());
+				tileMap_.SetFlameMap(bit,setPos, (cnt + 1 < length_),lpSceneMng.GetTime());
 				return true;
 			}
 			else if (chip[chipPos] == 8)

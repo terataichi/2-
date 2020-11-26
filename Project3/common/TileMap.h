@@ -43,11 +43,13 @@ struct dirBit
 struct FlameMapData
 {
 	chronoTime startTime;
-	dirBit dir;
-	bool next;
+	dirBit dir{};
+	bool next{};
 };
 
 using sharedFlame = std::shared_ptr<FlameGenerator>;
+
+using FlameMapVec = std::vector<FlameMapData>;
 
 class TileMap
 {
@@ -63,7 +65,7 @@ public:
 	LayerVec& GetLayerVec(void);
 	LayerData& GetLayerData(std::string name);			// レイヤーの情報取得
 	MapData& GetMapData(void);
-
+	const FlameMapVec& GetFlameMap(void)const;				// 当たり判定に使う
 	std::vector<Vector2> GetCharChipPos();				// キャラクターの初期配置取得
 
 	bool SetFlameMap(dirBit dir,Vector2 size,bool next, chronoTime time);	// 爆発情報書き込み用

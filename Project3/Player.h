@@ -57,5 +57,6 @@ private:
 
 	LayerVec& layerData_;
 
+	int length_;													// ƒ{ƒ€‚Éî•ñ‚ğ‘—‚é‚Ì‚É•K—v
 };
 

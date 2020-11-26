@@ -27,7 +27,9 @@ Bomb::~Bomb()
 bool Bomb::Update()
 {
     chronoTime now = std::chrono::system_clock::now();
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > DETH_CNT_MAX)
+    int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > DETH_CNT_MAX ||
+        dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
     {
         try
         {

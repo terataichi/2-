@@ -20,7 +20,8 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 	dir_ = DIR::DOWN;
 	animCnt_ = 0;
 	dirCnt_ = 0;
-
+	state_ = STATE::Non;
+	length_ = 3;
 	dirMap_.try_emplace(DIR::DOWN, Vector2{ 0,1 });
 	dirMap_.try_emplace(DIR::LEFT, Vector2{ -1,0 });
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
@@ -36,14 +37,13 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 	nextDir_[3] = DIR::RIGHT;
 	nextDir_[4] = DIR::MAX;
 
-	int modeID = lpNetWork.GetNetWorkMode() == NetWorkMode::HOST ? 1 : 0;
+	int modeID = lpNetWork.GetNetWorkMode() != NetWorkMode::HOST ? 1 : 0;
 
 	// É{ÉÄÉäÉXÉgÇÃèâä˙âª
 	for (int id = id_ + 1; id < id_ + UNIT_ID_BASE; id++)
 	{
 		bombList_.emplace_back(id);
 	}
-
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
 	{
 		if (id_ == 0)
@@ -61,10 +61,11 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 		if (id_ / UNIT_ID_BASE == modeID)
 		{
 			netFunc_ = std::bind(&Player::UpdateDef,this);
+			InitFunc();
 		}
 		else
 		{
-			if (id_ != modeID)
+			if (id_ == modeID)
 			{
 
 				netFunc_ = std::bind(&Player::UpdateAuto, this);
@@ -223,7 +224,7 @@ bool Player::UpdateDef()
 				chronoTime time = std::chrono::system_clock::now();
 				Vector2 pos{ (pos_.x + 16) / 32 ,(pos_.y + 16) / 32 };
 				pos = { pos.x * 32,pos.y * 32 };
-				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no,pos ,time, true);
+				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no,pos ,time, length_,true);
 			}
 			catch (...)
 			{
@@ -287,10 +288,10 @@ bool Player::UpdateRev()
 			try
 			{
 				TimeData timeData{};
-				timeData.iData[0] = data[4].iData;
-				timeData.iData[1] = data[5].iData;
+				timeData.iData[0] = data[5].iData;
+				timeData.iData[1] = data[6].iData;
 
-				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, pos,timeData.time ,false);
+				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, pos,timeData.time, data[4].iData,false);
 			}
 			catch (...)
 			{

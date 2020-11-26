@@ -98,21 +98,22 @@ void GameScene::Init(void)
     DrawOwnScene();
 }
 
-bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chronoTime, bool flg)
+bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chronoTime, int length, bool flg)
 {
     if (flg)
     {
         // インスタンス情報の送信
-        UnionData data[6]{};
+        UnionData data[7]{};
         data[0].iData = ownerID;
         data[1].iData = myID;
         data[2].iData = pos.x;
         data[3].iData = pos.y;
+        data[4].iData = length;
         TimeData timeData{ chronoTime };
-        data[4].iData = timeData.iData[0];
-        data[5].iData = timeData.iData[1];
+        data[5].iData = timeData.iData[0];
+        data[6].iData = timeData.iData[1];
 
-        lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3],data[4],data[5] });
+        lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3],data[4],data[5], data[6] });
 
     }
     objList_.emplace_back(std::make_shared<Bomb>(myID, pos, chronoTime, *this));
@@ -137,4 +138,14 @@ Object& GameScene::GetObject(int id)
 void GameScene::FlameGenerate(int& length, Vector2& pos)
 {
     return tileMap_.AddFlameGenerate(length, pos);
+}
+
+bool GameScene::CheckHitFlame(int chipPos)
+{
+    auto check = tileMap_.GetFlameMap()[chipPos].startTime.time_since_epoch().count();
+    if (check != 0)
+    {
+        return true;
+    }
+    return false;
 }

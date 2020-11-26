@@ -18,12 +18,13 @@ public:
     uniqueBase Update(uniqueBase scene)override;
     void DrawOwnScene(void)override;
     void Init(void)override;
-    bool SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& time, bool flg);
+    bool SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& time,int length, bool flg);
     Object& GetObject(int id);
-    void FlameGenerate(int& length, Vector2& pos);
+    void FlameGenerate(int& length, Vector2& pos);                                            // フレーム生成
+    bool CheckHitFlame(int chipPos);                                                     // 爆風との当たり判定用
 private:
 
-    TileMap tileMap_;                                       // タイルマップ情報格納
+    TileMap tileMap_;                                                                         // タイルマップ情報格納
 
     std::chrono::system_clock::time_point  now_;
     std::chrono::system_clock::time_point  end_;
@@ -33,7 +34,6 @@ private:
 
     int averageCount_;
 
-
-    std::list<sharedObj> objList_;                          // プレイヤー
+    std::list<sharedObj> objList_;                                                            // ｵﾌﾞｼﾞｪｸﾄリスト
 };
 
