@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <chrono>
 #include "../common/Vector2.h"
 #include "../Scene/LoginScene.h"
 
@@ -18,6 +19,8 @@ enum class DrawQue
 
 //						ImageID, 座標,		倍率	角度,	奥行
 using drawQueT = std::tuple<int, int, int, double, float, int>;
+
+using chronoTime = std::chrono::system_clock::time_point;
 
 class SceneMng
 {
@@ -45,8 +48,8 @@ public:
 
 	void Run(void);
 	bool AddDrawQue(drawQueT que);
-	void SetEnd(void);
 
+	const chronoTime& GetTime();
 	const Vector2 screenSize_;								// スクリーンサイズ
 private:
 	bool SysInit(void);
@@ -58,6 +61,8 @@ private:
 	static SceneMng* sInstance_;
 
 	std::vector<drawQueT>drawList_;							// 描画リスト
+
+	chronoTime time_;
 
 	bool end_;												// 実行条件 true : 続行  false : 実行終了
 

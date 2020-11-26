@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include "Vector2.h"
+#include "../DIR.h"
+#include "../Scene/SceneMng.h"
 
 #include "../TmxLoader.h"
 
@@ -24,9 +26,25 @@ private:
 	bool CheckNextMap(void);
 	int length_;
 	Vector2 chipPos_;
+	chronoTime time_;
 	int count_;
 	int dirCount_[4];
 	TileMap& tileMap_;
+};
+
+struct dirBit
+{
+	int left : 8;
+	int right : 8;
+	int up : 8;
+	int down : 8;
+};
+
+struct FlameMapData
+{
+	chronoTime startTime;
+	dirBit dir;
+	bool next;
 };
 
 using sharedFlame = std::shared_ptr<FlameGenerator>;
@@ -48,7 +66,7 @@ public:
 
 	std::vector<Vector2> GetCharChipPos();				// キャラクターの初期配置取得
 
-	bool SetFlameMap_(Vector2 size,int count);				// 爆発情報書き込み用
+	bool SetFlameMap(dirBit dir,Vector2 size,bool next, chronoTime time);	// 爆発情報書き込み用
 
 	void AddFlameGenerate(int& length, Vector2& pos);	// 爆風生成
 private:
@@ -60,8 +78,8 @@ private:
 	MapData mapData_;
 	std::string chipImageName_;
 
-	std::vector<int> flameMap_;							// 炎書き込み用マップ
-
+	std::vector<FlameMapData> flameMap_;				// 炎書き込み用マップ
+	chronoTime oldTime_;
 	std::list<sharedFlame> flameList_;					// 爆風リスト
 };
 

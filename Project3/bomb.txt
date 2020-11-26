@@ -26,8 +26,10 @@
 　・壊せるブロックも
 
 
+bom def1 max4
 
+length def3 max6
 
-
+speed def2 ,4,8
 
 

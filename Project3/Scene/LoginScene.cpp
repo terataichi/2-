@@ -9,6 +9,7 @@
 #include "../Scene/SceneMng.h"
 #include "../Input/PadState.h"
 #include "../Input/INPUT_ID.h"
+#include "../common/TileMap.h"
 #include "GameScene.h"
 #include "CrossOverScene.h"
 
@@ -34,7 +35,8 @@ LoginScene::LoginScene()
 	func_[UpdateMode::Play] = std::bind(&LoginScene::PlayUpdate, this);
 	func_[UpdateMode::StartInit] = std::bind(&LoginScene::StartInit, this);;
 
-	if (!tileMap_.LoadTmx("TileMap/Stage01.tmx"))
+	tileMap_ = std::make_shared<TileMap>();
+	if (!tileMap_->LoadTmx("TileMap/Stage01.tmx"))
 	{
 		TRACE("ファイルの読み込みに失敗\n");
 		return;
@@ -252,7 +254,7 @@ bool LoginScene::StartInit(void)
 		{
 			// 初期化情報の送信をして待機
 			TRACE("初期化情報の送信\n");
-			tileMap_.SendTmxData();
+			tileMap_->SendTmxData();
 			lpNetWork.SendStanby();
 		}
 		if (lpNetWork.GetActive() == ActiveState::Play)

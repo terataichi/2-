@@ -2,11 +2,11 @@
 #include"common/Vector2.h"
 #include "NetWork/NetWork.h"
 #include "common/TileMap.h"
+#include "Scene/SceneMng.h"
 #include "DIR.h"
 
 #define UNIT_ID_BASE 5			// ƒ{ƒ€‚ªo‚¹‚éÅ‘å”
 
-using chronoTime = std::chrono::system_clock::time_point;
 
 enum class STATE
 {

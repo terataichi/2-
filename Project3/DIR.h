@@ -2,7 +2,7 @@
 
 enum class DIR
 {
-	DOWN,
+	DOWN = 0,
 	LEFT,
 	RIGHT,
 	UP,

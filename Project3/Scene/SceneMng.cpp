@@ -15,7 +15,7 @@ void SceneMng::Run(void)
 	while (!ProcessMessage() && !CheckHitKey(KEY_INPUT_ESCAPE) && end_)
 	{
 		_dbgStartDraw();
-
+		time_ = std::chrono::system_clock::now();
 		activeScene_ = (*activeScene_).Update(std::move(activeScene_));			// 現在のシーンアップデート
 
 		Draw();																	// すべて描画
@@ -29,9 +29,9 @@ bool SceneMng::AddDrawQue(drawQueT que)
 	return true;
 }
 
-void SceneMng::SetEnd(void)
+const chronoTime& SceneMng::GetTime()
 {
-	end_ = false;
+	return time_;
 }
 
 void SceneMng::Draw(void)
