@@ -16,7 +16,7 @@ Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(sc
     rad_ = 0;
     dethCnt_ = 0;
     startTime_ = time;
-
+    dynamic_cast<GameScene&>(scene_).SetBombMap((pos_.y / 32) * 21 + (pos_.x / 32), true);
     AnimStateInit();
 }
 
@@ -31,21 +31,20 @@ bool Bomb::Update()
     if (std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime_).count() > DETH_CNT_MAX ||
         dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
     {
-        try
+        auto object = dynamic_cast<GameScene&>(scene_).GetObjectList((id_ / UNIT_ID_BASE) * UNIT_ID_BASE);
+
+        if (object != nullptr)
         {
-            auto& object = dynamic_cast<GameScene&>(scene_).GetObject((id_ / UNIT_ID_BASE) * UNIT_ID_BASE);
-            dynamic_cast<Player&>(object).AddBombList(id_);
+            dynamic_cast<Player&>(*object).AddBombList(id_);
         }
-        catch (...)
-        {
-            assert(!"シーンのキャスト失敗");
-        }
+ 
         if (state_ == STATE::Non)
         {
             state_ = STATE::Deth;
             alive_ = false;
             int tmplength = 3;
             dynamic_cast<GameScene&>(scene_).FlameGenerate(tmplength, pos_);
+            dynamic_cast<GameScene&>(scene_).SetBombMap(chipPos, false);
         }
     }
     Draw();
@@ -58,7 +57,7 @@ void Bomb::Draw(void)
 {
     VecInt handle = lpImageMng.GetHandle("Image/bomb.png", { 2,7 }, { 32,32 });
 
-    auto tmpCount = animCnt_ / (DETH_CNT_MAX / 10);
+    auto tmpCount = animCnt_ / 60;
     DrawGraph(pos_.x, pos_.y, handle[(tmpCount % 2) * 2], true);
     animCnt_++;
 }

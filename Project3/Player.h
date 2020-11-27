@@ -10,7 +10,9 @@
 #include "Object.h"
 #include "Scene/BaseScene.h"
 
-using MoveFunc = std::function<bool(TrgData, bool)>;
+using MoveFuncInput = std::function<bool(TrgData, bool)>;
+
+using MoveFuncAuto = std::function<bool(DIR, bool)>;
 
 //ホストdef
 class Player:
@@ -26,11 +28,12 @@ public:
 	
 	bool CheckWallAuto(void);
 	bool CheckWallInput(DIR dir);
-
+	bool CheckMoveBombAuto(void);
+	bool CheckMoveBomb(DIR dir);									// ボムすり抜け防止
 
 	bool UpdateDef()override;										// 入力処理管理
 	bool UpdateAuto()override;										// オートパイロット
-	bool UpdateRev()override;						// 受信
+	bool UpdateRev()override;										// 受信
 
 	void AddBombList(int no);
 	int CheckBomb();
@@ -53,7 +56,9 @@ private:
 
 	BaseScene& scene_;												// ゲームシーンアクセス用
 
-	std::list<MoveFunc>inputMoveList_;
+	std::list<MoveFuncInput>inputMoveList_;
+
+	std::list<MoveFuncAuto>autoMoveList_;
 
 	LayerVec& layerData_;
 

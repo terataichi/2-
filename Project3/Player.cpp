@@ -65,7 +65,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 		}
 		else
 		{
-			if (id_ == modeID)
+			if ((id_ / UNIT_ID_BASE) % 2 == modeID)
 			{
 
 				netFunc_ = std::bind(&Player::UpdateAuto, this);
@@ -110,6 +110,7 @@ void Player::Draw()
 
 bool Player::CheckWallAuto()
 {
+	auto bombMap = dynamic_cast<GameScene&>(scene_).GetBombMap();
 	if (pos_.x % 32 == 0)
 	{
 		if (pos_.y % 32 == 0)
@@ -118,13 +119,14 @@ bool Player::CheckWallAuto()
 			{
 				if (layer.name == "Obj")
 				{
-					while (true)
+					int count = 0;
+					while (count < 4)
 					{
 						Vector2 size{ (pos_.x / 32),(pos_.y / 32) };
 						size += dirMap_[dir_];
 						int num = ((size.x) + (size.y) * layer.width);
 
-						if (layer.chipData[num] != 0)
+						if (layer.chipData[num] != 0 || bombMap[num])
 						{
 							dirCnt_++;
 							if (nextDir_[dirCnt_] == DIR::MAX)
@@ -132,11 +134,12 @@ bool Player::CheckWallAuto()
 								dirCnt_ = 0;
 							}
 							dir_ = nextDir_[dirCnt_];
+							count++;
 							continue;
 						}
-
 						return true;
 					}
+					return false;
 				}
 
 			}
@@ -188,8 +191,55 @@ bool Player::CheckWallInput(DIR dir)
 	return true;
 }
 
+bool Player::CheckMoveBombAuto(void)
+{
+	auto bombMap = dynamic_cast<GameScene&>(scene_).GetBombMap();
+
+	return false;
+}
+
+bool Player::CheckMoveBomb(DIR dir)
+{
+	auto bombMap = dynamic_cast<GameScene&>(scene_).GetBombMap();
+
+	Vector2 size{};
+	switch (dir)
+	{
+	case DIR::LEFT:
+		size = { pos_.x - vel_.x, pos_.y + 16 };
+		break;
+	case DIR::UP:
+		size = { pos_.x + 16, pos_.y - vel_.y };
+		break;
+	case DIR::RIGHT:
+		size = { pos_.x + 32,pos_.y + 16 };
+		break;
+	case DIR::DOWN:
+		size = { pos_.x + 16,pos_.y + 32 };
+		break;
+	default:
+		assert(!"エラー：PLAYERDIR");
+		break;
+	}
+	size /= 32;
+
+	// チップの番号に変換
+	int num = size.x + size.y * 21;
+
+	if (bombMap[num])
+	{
+		return false;
+	}
+	return true;
+}
+
 bool Player::UpdateDef()
 {
+	if (!alive_)
+	{
+		return false;
+	}
+
 	// 入力のアップデート
 	(*input_)();
 
@@ -200,7 +250,7 @@ bool Player::UpdateDef()
 		if ((*list)(input, true))
 		{
 			inputMoveList_.splice(inputMoveList_.begin(), inputMoveList_, list);
-			inputMoveList_.sort([&](MoveFunc& a, MoveFunc& b) {return a(input, false) < b(input, false); });
+			inputMoveList_.sort([&](MoveFuncInput& a, MoveFuncInput& b) {return a(input, false) < b(input, false); });
 			state_ = STATE::Run;
 			animFlg = true;
 			break;
@@ -233,36 +283,72 @@ bool Player::UpdateDef()
 		}
 	}
 
-	UnionData data[4]{};
-	data[0].iData = id_;
-	data[1].iData = pos_.x;
-	data[2].iData = pos_.y;
-	data[3].iData = static_cast<int>(dir_);
+	int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
 
-	lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
+	if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
+	{
+
+		UnionData data[1]{};
+		data[0].iData = id_;
+
+		lpNetWork.SendMes(MesType::DETH, UnionVec{ data[0]});
+		alive_ = false;
+	}
+	else
+	{
+
+		UnionData data[4]{};
+		data[0].iData = id_;
+		data[1].iData = pos_.x;
+		data[2].iData = pos_.y;
+		data[3].iData = static_cast<int>(dir_);
+
+		lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
+	}
 
 	return true;
 }
 
 bool Player::UpdateAuto()
 {
-	CheckWallAuto();
-	pos_ += (dirMap_[dir_] * vel_);
+	//CheckMoveBombAuto();
+	if (CheckWallAuto())
+	{
+		state_ = STATE::Run;
+		pos_ += (dirMap_[dir_] * vel_);
+	}
+	else
+	{
+		state_ = STATE::Non;
+	}
 
-	UnionData data[4]{};
-	data[0].iData = id_;
-	data[1].iData = pos_.x;
-	data[2].iData = pos_.y;
-	data[3].iData = static_cast<int>(dir_);
+	int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+	if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
+	{
 
-	lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
+		UnionData data[1]{};
+		data[0].iData = id_;
+
+		lpNetWork.SendMes(MesType::DETH, UnionVec{ data[0] });
+		alive_ = false;
+	}
+	else
+	{
+		UnionData data[4]{};
+		data[0].iData = id_;
+		data[1].iData = pos_.x;
+		data[2].iData = pos_.y;
+		data[3].iData = static_cast<int>(dir_);
+
+		lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
+	}
 
 	return true;
 }
 
 bool Player::UpdateRev()
 {
-	bool count = false;
+	bool lost = false;
 	while (CheckData(MesType::POS))
 	{
 		UnionVec data{};
@@ -274,7 +360,7 @@ bool Player::UpdateRev()
 			pos_.y = data[2].iData;
 			dir_ = static_cast<DIR>(data[3].iData);
 		}
-		count = true;     
+		lost = true;     
 	}
 	
 	while (CheckData(MesType::SET_BOMB))
@@ -298,10 +384,19 @@ bool Player::UpdateRev()
 				int a = 0;
 			}
 		}
-		count = true;
+		lost = true;
 	}
 
-	if (!count)
+	while (CheckData(MesType::DETH))
+	{
+		UnionVec data{};
+		PickData(MesType::DETH, data);
+
+		alive_ = false;
+		lost = true;
+	}
+
+	if (!lost)
 	{
 		lostCont_++;
 		TRACE("取りこぼしID:%d\n", id_);
@@ -312,7 +407,10 @@ bool Player::UpdateRev()
 
 void Player::AddBombList(int no)
 {
-	bombList_.emplace_back(no);
+	if (alive_)
+	{
+		bombList_.emplace_back(no);
+	}
 }
 
 int Player::CheckBomb()
@@ -341,15 +439,17 @@ void Player::InitFunc(void)
 		}
 	};
 
+	// ------------ Input ----------------------------------------------
+
 	// 左方向処理
-	auto left= [&](TrgData trgData, bool flg)
+	auto inputLeft= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_LEFT][static_cast<int>(Trg::Now)])
 		{
 			dir_ = DIR::LEFT;
 			if (flg)
 			{
-				if (CheckWallInput(dir_))
+				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
 					correction((pos_.y) % 32, pos_.y);
 					pos_.x -= vel_.x;
@@ -363,14 +463,14 @@ void Player::InitFunc(void)
 	};
 
 	// 右方向処理
-	auto right= [&](TrgData trgData, bool flg)
+	auto inputRight= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_RIGHT][static_cast<int>(Trg::Now)])
 		{
 			dir_ = DIR::RIGHT;
 			if (flg)
 			{
-				if (CheckWallInput(dir_))
+				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
 					correction((pos_.y) % 32, pos_.y);
 					pos_.x += vel_.x;
@@ -384,14 +484,14 @@ void Player::InitFunc(void)
 	};
 
 	// 上方向処理
-	auto up= [&](TrgData trgData, bool flg)
+	auto inputUp= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_UP][static_cast<int>(Trg::Now)])
 		{
 			dir_ = DIR::UP;
 			if (flg)
 			{
-				if (CheckWallInput(dir_))
+				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
 					correction((pos_.x) % 32, pos_.x);
 					pos_.y -= vel_.y;
@@ -405,14 +505,14 @@ void Player::InitFunc(void)
 	};
 
 	// 下方向処理
-	auto down= [&](TrgData trgData, bool flg)
+	auto inputDown= [&](TrgData trgData, bool flg)
 	{
 		if (trgData[INPUT_ID::BUTTON_DOWN][static_cast<int>(Trg::Now)])
 		{
 			dir_ = DIR::DOWN;
 			if (flg)
 			{
-				if (CheckWallInput(dir_))
+				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
 					correction((pos_.x) % 32, pos_.x);
 					pos_.y += vel_.y;
@@ -425,8 +525,12 @@ void Player::InitFunc(void)
 		return false;
 	};
 
-	inputMoveList_.emplace_back(left);
-	inputMoveList_.emplace_back(right);
-	inputMoveList_.emplace_back(up);	
-	inputMoveList_.emplace_back(down);
+	inputMoveList_.emplace_back(inputLeft);
+	inputMoveList_.emplace_back(inputRight);
+	inputMoveList_.emplace_back(inputUp);	
+	inputMoveList_.emplace_back(inputDown);
+
+
+	// ------------ Auto ----------------------------------------------
+
 }

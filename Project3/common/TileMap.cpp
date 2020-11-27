@@ -40,6 +40,7 @@ bool TileMap::LoadTmx(std::string fileName)
 	chipImageName_ = loader_.GetImageName();
 
 	flameMap_.resize(mapData_.height * mapData_.width);
+	bombMap_.resize(mapData_.height * mapData_.width);
 	return true;
 }
 
@@ -173,6 +174,11 @@ LayerVec& TileMap::GetLayerVec(void)
 	return layerVec_;
 }
 
+const std::vector<bool> TileMap::GetBombMap(void) const
+{
+	return bombMap_;
+}
+
 void TileMap::AddFlameGenerate(int& length, Vector2& pos)
 {
 	flameList_.emplace_back(std::make_shared<FlameGenerator>(length, pos,*this));
@@ -243,6 +249,11 @@ bool TileMap::SetFlameMap(dirBit dir,Vector2 size,bool next,chronoTime time)
 		return true;
 	}
 	return false;
+}
+
+void TileMap::SetBombMap(int chipPos, bool flg)
+{
+	bombMap_[chipPos] = flg;
 }
 
 bool TileMap::DrawMap(LayerData layerData)

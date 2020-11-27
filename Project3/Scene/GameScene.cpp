@@ -121,18 +121,21 @@ bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chron
     return true;
 }
 
-Object& GameScene::GetObject(int id)
+sharedObj GameScene::GetObjectList(int id)
 {
     for (auto& list : objList_)
     {
-        if (list->ID() == id)
+        if (list != nullptr)
         {
-            return *list;
+            if (list->ID() == id)
+            {
+                return list;
+            }
         }
     }
 
-    sharedObj&& obj = nullptr;
-    return *obj;
+    sharedObj obj = nullptr;
+    return obj;
 }
 
 void GameScene::FlameGenerate(int& length, Vector2& pos)
@@ -148,4 +151,14 @@ bool GameScene::CheckHitFlame(int chipPos)
         return true;
     }
     return false;
+}
+
+void GameScene::SetBombMap(int chipPos, bool flg)
+{
+    tileMap_.SetBombMap(chipPos, flg);
+}
+
+const std::vector<bool> GameScene::GetBombMap(void)
+{
+    return tileMap_.GetBombMap();
 }

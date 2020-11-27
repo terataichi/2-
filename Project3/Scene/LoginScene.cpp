@@ -236,7 +236,7 @@ bool LoginScene::SetHostIP(void)
 		// ファイルへの書き込み
 		// なかったら新しくファイルを作ってくれる
 		// std::ios::trunc：今回はファイルを上書きしてかまわないので毎回新しくファイルを作り直す
-		std::ofstream ofs("hostIp.txt",std::ios::trunc);
+		std::ofstream ofs("init/hostIp.txt",std::ios::trunc);
 		ofs << ip;
 		ofs.close();
 

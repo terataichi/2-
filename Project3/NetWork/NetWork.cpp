@@ -394,6 +394,7 @@ void NetWork::InitFunc(void)
 	revUpdate_[4] = tmx_Data;
 	revUpdate_[5] = addList;
 	revUpdate_[6] = addList;
+	revUpdate_[7] = addList;
 }
 
 void NetWork::Init(void)

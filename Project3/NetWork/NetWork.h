@@ -23,7 +23,6 @@ enum class MesType:unsigned char
 	POS,
 	SET_BOMB,
 	DETH,							// Ž€–S
-	MAX
 };
 
 struct MesH
@@ -58,7 +57,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, 7>;
+using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, 8>;
 
 using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 

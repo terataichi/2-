@@ -65,10 +65,13 @@ public:
 	LayerVec& GetLayerVec(void);
 	LayerData& GetLayerData(std::string name);			// レイヤーの情報取得
 	MapData& GetMapData(void);
-	const FlameMapVec& GetFlameMap(void)const;				// 当たり判定に使う
+	const FlameMapVec& GetFlameMap(void)const;			// 当たり判定に使う
 	std::vector<Vector2> GetCharChipPos();				// キャラクターの初期配置取得
 
 	bool SetFlameMap(dirBit dir,Vector2 size,bool next, chronoTime time);	// 爆発情報書き込み用
+
+	void SetBombMap(int chipPos, bool flg);
+	const std::vector<bool>GetBombMap(void)const;
 
 	void AddFlameGenerate(int& length, Vector2& pos);	// 爆風生成
 private:
@@ -83,5 +86,6 @@ private:
 	std::vector<FlameMapData> flameMap_;				// 炎書き込み用マップ
 	chronoTime oldTime_;
 	std::list<sharedFlame> flameList_;					// 爆風リスト
+	std::vector<bool>bombMap_;								// ボム用ﾏｯﾌﾟ							
 };
 

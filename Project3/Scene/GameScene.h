@@ -19,12 +19,15 @@ public:
     void DrawOwnScene(void)override;
     void Init(void)override;
     bool SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& time,int length, bool flg);
-    Object& GetObject(int id);
-    void FlameGenerate(int& length, Vector2& pos);                                            // フレーム生成
-    bool CheckHitFlame(int chipPos);                                                     // 爆風との当たり判定用
+    sharedObj GetObjectList(int id);                                                             // オブジェリストから要素の取り出し
+    void FlameGenerate(int& length, Vector2& pos);                                               // フレーム生成
+    bool CheckHitFlame(int chipPos);                                                             // 爆風との当たり判定用
+
+    void SetBombMap(int chipPos, bool flg);
+    const std::vector<bool> GetBombMap(void);
 private:
 
-    TileMap tileMap_;                                                                         // タイルマップ情報格納
+    TileMap tileMap_;                                                                            // タイルマップ情報格納
 
     std::chrono::system_clock::time_point  now_;
     std::chrono::system_clock::time_point  end_;
