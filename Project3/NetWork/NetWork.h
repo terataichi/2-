@@ -7,11 +7,14 @@
 #include <array>
 #include <vector>
 #include <Dxlib.h>
+#include <chrono>
 #include "NetWorkState.h"
 
 #define HEADER_COUNT 2
 
 #define lpNetWork NetWork::GetInstance()
+
+#define COUNT_DOWN_MAX 3000
 
 enum class MesType:unsigned char
 {
@@ -19,8 +22,8 @@ enum class MesType:unsigned char
 	COUNT_DOWN,						// 接続受付カウントダウン
 	ID,								// 自分のIDとﾌﾟﾚｲﾔｰ総数
 	STANBY,							// 初期化情報送信
-	START_TIME,						// 全員の初期化完了後のゲーム開始時間
 	GAME_START,						// ゲーム開始
+	//START_TIME,						// 全員の初期化完了後のゲーム開始時間
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
 	POS,							// 座標
@@ -66,6 +69,8 @@ using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>
 
 using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 
+using chronoTime = std::chrono::system_clock::time_point;
+
 class NetWork
 {
 public:
@@ -90,6 +95,11 @@ public:
 	bool CloseNetWork(void);
 	void SendStanby(void);
 	void SendStart(void);
+
+	chronoTime GetStartTime(void);											// 接続待ち開始時間取得用
+	bool GetCountDownFlg(void);												//
+	const int GetPlayerMax(void)const;
+	const int GetPlayerID(void)const;
 
 	// オブジェクトから追加されていく、自分で自分のデータを管理する
 	bool AddRevList(std::mutex& mtx, RevDataListP& data);
@@ -135,7 +145,9 @@ private:
 
 	unsigned int sendLength_;												// 送信バイト長(イントで割る)
 
-	int playerID_;				// 自分のプレイヤーID
-	int playerMax_;				// プレイヤーの最大人数
+	int playerID_;															// 自分のプレイヤーID
+	int playerMax_;															// プレイヤーの最大人数
+	chronoTime revTime_;
+	bool countDownFlg_;														// カウントダウンが開始されているか		
 };
 

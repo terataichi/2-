@@ -85,10 +85,27 @@ void GameScene::Init(void)
         }
     }
 
-    for (auto &charData : tileMap_.GetCharChipPos())
+    if (mode != NetWorkMode::OFFLINE)
     {
-        Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-        objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec()));
+        int max = lpNetWork.GetPlayerMax();
+        int playerCnt = 1;
+        for (auto& charData : tileMap_.GetCharChipPos())
+        {
+            if (playerCnt <= max)
+            {
+                Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
+                objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec()));
+                playerCnt++;
+            }
+        }
+    }
+    else
+    {
+        for (auto& charData : tileMap_.GetCharChipPos())
+        {
+            Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
+            objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec()));
+        }
     }
 
     averageCount_ = 0;
@@ -100,6 +117,7 @@ void GameScene::Init(void)
 
 bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chronoTime, int length, bool flg)
 {
+
     if (flg)
     {
         // インスタンス情報の送信
@@ -114,8 +132,8 @@ bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chron
         data[6].iData = timeData.iData[1];
 
         lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3],data[4],data[5], data[6] });
-
     }
+ 
     objList_.emplace_back(std::make_shared<Bomb>(myID, pos, chronoTime, *this));
 
     return true;

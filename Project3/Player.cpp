@@ -371,13 +371,15 @@ bool Player::UpdateRev()
 		if (data.size())
 		{
 			Vector2 pos{ data[2].iData,data[3].iData };
+			Vector2 sendPos{ (pos.x) / 32 ,(pos.y) / 32 };
+			sendPos = { sendPos.x * 32,sendPos.y * 32 };
 			try
 			{
 				TimeData timeData{};
 				timeData.iData[0] = data[5].iData;
 				timeData.iData[1] = data[6].iData;
 
-				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, pos,timeData.time, data[4].iData,false);
+				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, sendPos,timeData.time, data[4].iData,false);
 			}
 			catch (...)
 			{
@@ -387,7 +389,7 @@ bool Player::UpdateRev()
 		lost = true;
 	}
 
-	while (CheckData(MesType::DETH) || CheckData(MesType::LOST))
+	if (CheckData(MesType::DETH) || CheckData(MesType::LOST))
 	{
 		UnionVec data{};
 		PickData(MesType::DETH, data);

@@ -65,8 +65,12 @@ bool NetWork::Update(void)
 			recvStanby_ = false;
 			continue;
 		}
+
 		handlelist = state_->GetNetHandle();
-		handle = handlelist.front().first;
+		if (handlelist.size())
+		{
+			handle = handlelist.front().first;
+		}
 		if (handle != -1)
 		{
 			break;
@@ -77,37 +81,40 @@ bool NetWork::Update(void)
 	{
 
 		// データの長さチェック
-		if (GetNetWorkDataLength(handle) >= sizeof(MesH))
+		for (auto list : handlelist)
 		{
-			// これ以上データがないとき
-			// ※ヘッダー部を受信する前情報
-			if (!revHeader.next)
+			if (GetNetWorkDataLength(list.first) >= sizeof(MesH))
 			{
-				tmpPacket.resize(0);
-				writePos = 0;
+				// これ以上データがないとき
+				// ※ヘッダー部を受信する前情報
+				if (!revHeader.next)
+				{
+					tmpPacket.resize(0);
+					writePos = 0;
+				}
+
+				// ヘッダー部の受信
+				NetWorkRecv(list.first, &revHeader, sizeof(MesH));
+
+				// データがある場合
+				if (revHeader.length)
+				{
+					tmpPacket.resize(tmpPacket.size() + revHeader.length);
+
+					// データの受け取り
+					NetWorkRecv(handle, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+					writePos = tmpPacket.size();
+				}
+
+				// まだデータが残ってる場合
+				if (revHeader.next)
+				{
+					continue;
+				}
+
+				unsigned int type = static_cast<unsigned int>(revHeader.type) - static_cast<unsigned int>(MesType::NON);
+				revUpdate_[type](revHeader, tmpPacket);
 			}
-
-			// ヘッダー部の受信
-			NetWorkRecv(handle, &revHeader, sizeof(MesH));
-
-			// データがある場合
-			if (revHeader.length)
-			{
-				tmpPacket.resize(tmpPacket.size() + revHeader.length);
-
-				// データの受け取り
-				NetWorkRecv(handle, &tmpPacket[writePos], sizeof(int) * revHeader.length);
-				writePos = tmpPacket.size();
-			}
-
-			// まだデータが残ってる場合
-			if (revHeader.next)
-			{
-				continue;
-			}
-
-			unsigned int type = static_cast<unsigned int>(revHeader.type) - static_cast<unsigned int>(MesType::NON);
-			revUpdate_[type](revHeader, tmpPacket);
 		}
 	}
 
@@ -144,6 +151,26 @@ void NetWork::SendStart(void)
 	SendMes(MesType::GAME_START);
 }
 
+chronoTime NetWork::GetStartTime(void)
+{
+	return revTime_;
+}
+
+bool NetWork::GetCountDownFlg(void)
+{
+	return countDownFlg_;
+}
+
+const int NetWork::GetPlayerMax(void) const
+{
+	return playerMax_;
+}
+
+const int NetWork::GetPlayerID(void) const
+{
+	return playerID_;
+}
+
 bool NetWork::AddRevList(std::mutex& mtx, RevDataListP& data)
 {
 	// 追加
@@ -165,9 +192,12 @@ void NetWork::SetHeader(UnionHeader& header, UnionVec& packet)
 
 bool NetWork::SendMes(MesType type,UnionVec packet)
 {
-	if (state_->GetNetHandle().front().first == -1)
+	if (state_->GetNetHandle().size())
 	{
-		return false;
+		if (state_->GetNetHandle().front().first == -1)
+		{
+			return false;
+		}
 	}
 
 	// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
@@ -202,7 +232,10 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 
 
 		// データの送信
-		NetWorkSend(state_->GetNetHandle().front().first, packet.data(), sendCount * sizeof(UnionData));
+		if (state_->GetNetHandle().size())
+		{
+			NetWorkSend(state_->GetNetHandle().front().first, packet.data(), sendCount * sizeof(UnionData));
+		}
 
 		// 送った要素のみ削除
 		packet.erase(packet.begin() + HEADER_COUNT, packet.begin() + sendCount);
@@ -376,28 +409,37 @@ void NetWork::InitFunc(void)
 	{
 		if (packet.size())
 		{
+			if (data.type == MesType::LOST)
+			{
+				TRACE("誰かが切断");
+			}
 			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
 			revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
 		}
 		return true;
-
 	};
 
 	auto non = [&](MesH& data, UnionVec& packet)
 	{
-		TRACE("Nondayoooooooooooo\n");
+		TRACE("Non\n");
 		return true;
 	};
 
 	auto countDown = [&](MesH& data, UnionVec& packet) 
 	{
+		TimeData timeData{};
+		timeData.iData[0] = packet[0].iData;
+		timeData.iData[1] = packet[1].iData;
+
+		countDownFlg_ = true;
+		revTime_ = timeData.time;
 		return true;
 	};
 
 	auto id = [&](MesH& data, UnionVec& packet)
 	{
 		playerID_ = packet[0].iData;
-		playerMax_ = packet[0].iData;
+		playerMax_ = packet[1].iData;
 		state_->SetPlayerID(playerID_);
 		return true;
 	};
@@ -411,14 +453,14 @@ void NetWork::InitFunc(void)
 	revUpdate_[1] = countDown;
 	revUpdate_[2] = id;
 	revUpdate_[3] = stanby;
-	revUpdate_[4] = startTime;
-	revUpdate_[5] = gameStart;
-	revUpdate_[6] = tmx_Size;
-	revUpdate_[7] = tmx_Data;
+	//revUpdate_[5] = startTime;
+	revUpdate_[4] = gameStart;
+	revUpdate_[5] = tmx_Size;
+	revUpdate_[6] = tmx_Data;
+	revUpdate_[7] = addList;
 	revUpdate_[8] = addList;
 	revUpdate_[9] = addList;
 	revUpdate_[10] = addList;
-	revUpdate_[11] = addList;
 }
 
 void NetWork::Init(void)
@@ -428,7 +470,7 @@ void NetWork::Init(void)
 	tmxSize_ = 0;
 	ip_ = ArrayIP{};
 	sendLength_ = 0;
-
+	countDownFlg_ = false;
 
 	// バイト長の読み込み
 	std::ifstream ifs("init/setting.txt");

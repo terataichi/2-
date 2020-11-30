@@ -61,7 +61,7 @@ void LoginScene::Init(void)
 	speed_ = 10;
 	rad_ = 0;
 	wasHost_ = false;
-	//tileMap_.SendTmxData();
+	// tileMap_.SendTmxData();
 	DrawOwnScene();
 }
 
@@ -79,7 +79,23 @@ uniqueBase LoginScene::Update(uniqueBase scene)
 void LoginScene::DrawOwnScene()
 {
 	SetDrawScreen(drawScreen_);
+	ClsDrawScreen();
 	DrawBox(100, 100, 200, 200, 0xfffff, true);
+
+	auto size = lpSceneMng.screenSize_ / 2;
+	if (lpNetWork.GetCountDownFlg())
+	{
+		auto startTime = lpNetWork.GetStartTime();
+
+		chronoTime now = std::chrono::system_clock::now();
+		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+
+		DrawFormatString(size.x, size.y, 0xffffff, "écÇËÅF%dïb", (COUNT_DOWN_MAX - time) / 1000);
+	}
+	else
+	{
+		DrawFormatString(size.x, size.y, 0xffffff, "ë“ã@íÜ");
+	}
 }
 
 bool LoginScene::PlayUpdate(void)
