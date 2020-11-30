@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <functional>
+#include <list>
 #include <DxLib.h>
 #include "../common/Vector2.h"
 
@@ -24,6 +25,9 @@ enum class ActiveState
 	OFFLINE,
 };
 
+// 1:ネットハンドル, 2:ID
+using listIntP = std::list<std::pair<int, unsigned int>>;
+
 class NetWorkState
 {
 public:
@@ -36,13 +40,16 @@ public:
 	bool Update(void);														// 更新
 	bool CheckNetWork(void);												// 接続が切れていないかの確認
 
-	int GetNetHandle(void);													// ネットハンドルの取得
+	bool SetPlayerID(int id);
+
+	listIntP GetNetHandle(void);											// ネットハンドルの取得
 
 	virtual bool CheckConnect(void) { return false; };						// 接続されたかの確認(ホスト用)
 	virtual bool ConnectHost(IPDATA hostIP) { return false; };				// ホストに接続する(ゲスト:ホストは待機する)
 protected:
 	const int portNum_ = 8086;												// ポート番号格納変数(番号は基本的に何でもいい)
 	ActiveState active_;
-	int netHandle_ = -1;														// ０以上：確立した接続を示すネットワークハンドル(int型の識別値)格納用
+
+	listIntP handleList_;
 };
 

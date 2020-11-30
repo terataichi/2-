@@ -30,14 +30,21 @@ bool NetWorkState::CheckNetWork(void)
 	if (GetLostNetWork() != -1)
 	{
 		// 再接続の開始
-		netHandle_ = -1;
+		handleList_.front().first = -1;
 		TRACE("接続が切れました、再接続します\n");
 		return false;
 	}
 	return true;
 }
 
-int NetWorkState::GetNetHandle(void)
+bool NetWorkState::SetPlayerID(int id)
 {
-	return netHandle_;
+	// 自分のIDをセット
+	handleList_.front().second = id;
+	return true;
+}
+
+listIntP NetWorkState::GetNetHandle(void)
+{
+	return handleList_;
 }

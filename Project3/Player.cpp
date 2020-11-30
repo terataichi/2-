@@ -387,7 +387,7 @@ bool Player::UpdateRev()
 		lost = true;
 	}
 
-	while (CheckData(MesType::DETH))
+	while (CheckData(MesType::DETH) || CheckData(MesType::LOST))
 	{
 		UnionVec data{};
 		PickData(MesType::DETH, data);

@@ -16,13 +16,18 @@
 enum class MesType:unsigned char
 {
 	NON = 100,						// 送信が失敗したときに0が来るケースが多いからスタート位置を変える
+	COUNT_DOWN,						// 接続受付カウントダウン
+	ID,								// 自分のIDとﾌﾟﾚｲﾔｰ総数
 	STANBY,							// 初期化情報送信
+	START_TIME,						// 全員の初期化完了後のゲーム開始時間
 	GAME_START,						// ゲーム開始
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
-	POS,
+	POS,							// 座標
 	SET_BOMB,
 	DETH,							// 死亡
+	LOST,							// 切断時に生成
+	MAX
 };
 
 struct MesH
@@ -57,7 +62,7 @@ using ArrayIP = std::array<IPDATA, 5>;
 
 using UnionVec = std::vector<UnionData>;
 
-using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, 8>;
+using MesTypeFunc = std::array<std::function<bool(MesH& data, UnionVec& packet)>, static_cast<int>(MesType::MAX)>;
 
 using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 
@@ -129,5 +134,8 @@ private:
 	std::thread update;
 
 	unsigned int sendLength_;												// 送信バイト長(イントで割る)
+
+	int playerID_;				// 自分のプレイヤーID
+	int playerMax_;				// プレイヤーの最大人数
 };
 

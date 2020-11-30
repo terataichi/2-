@@ -40,7 +40,7 @@ bool HostState::CheckConnect(void)
 		// Ú‘±‚³‚ê‚Ä‚é‚Ì‚Å‚±‚êˆÈãÚ‘±‚³‚ê‚È‚¢‚æ‚¤‚É~‚ß‚é
 		StopListenNetWork();
 		// ‰Šú‰»ó‘Ô‚É“ü‚é
-		netHandle_ = handle;
+		handleList_.emplace_back(handle, -1);
 		active_ = ActiveState::Init;
 
 		TRACE("Ú‘±‚ªŠm”F‚³‚ê‚Ü‚µ‚½\n");

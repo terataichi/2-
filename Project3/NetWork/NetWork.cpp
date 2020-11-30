@@ -54,6 +54,7 @@ bool NetWork::Update(void)
 	MesH revHeader{};
 	UnionVec tmpPacket{};
 	int writePos = 0;
+	listIntP handlelist;
 	int handle = -1;
 	while (ProcessMessage() == 0)
 	{
@@ -64,7 +65,8 @@ bool NetWork::Update(void)
 			recvStanby_ = false;
 			continue;
 		}
-		handle = state_->GetNetHandle();
+		handlelist = state_->GetNetHandle();
+		handle = handlelist.front().first;
 		if (handle != -1)
 		{
 			break;
@@ -120,7 +122,7 @@ bool NetWork::Update(void)
 
 bool NetWork::CloseNetWork(void)
 {
-	DxLib::CloseNetWork(state_->GetNetHandle());
+	DxLib::CloseNetWork(state_->GetNetHandle().front().first);
 	return true;
 }
 
@@ -163,7 +165,7 @@ void NetWork::SetHeader(UnionHeader& header, UnionVec& packet)
 
 bool NetWork::SendMes(MesType type,UnionVec packet)
 {
-	if (state_->GetNetHandle() == -1)
+	if (state_->GetNetHandle().front().first == -1)
 	{
 		return false;
 	}
@@ -200,7 +202,7 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 
 
 		// データの送信
-		NetWorkSend(state_->GetNetHandle(), packet.data(), sendCount * sizeof(UnionData));
+		NetWorkSend(state_->GetNetHandle().front().first, packet.data(), sendCount * sizeof(UnionData));
 
 		// 送った要素のみ削除
 		packet.erase(packet.begin() + HEADER_COUNT, packet.begin() + sendCount);
@@ -387,14 +389,36 @@ void NetWork::InitFunc(void)
 		return true;
 	};
 
+	auto countDown = [&](MesH& data, UnionVec& packet) 
+	{
+		return true;
+	};
+
+	auto id = [&](MesH& data, UnionVec& packet)
+	{
+		playerID_ = packet[0].iData;
+		playerMax_ = packet[0].iData;
+		state_->SetPlayerID(playerID_);
+		return true;
+	};
+
+	auto startTime = [&](MesH& data, UnionVec& packet)
+	{
+		return true;
+	};
+
 	revUpdate_[0] = non;
-	revUpdate_[1] = stanby;
-	revUpdate_[2] = gameStart;
-	revUpdate_[3] = tmx_Size;
-	revUpdate_[4] = tmx_Data;
-	revUpdate_[5] = addList;
-	revUpdate_[6] = addList;
-	revUpdate_[7] = addList;
+	revUpdate_[1] = countDown;
+	revUpdate_[2] = id;
+	revUpdate_[3] = stanby;
+	revUpdate_[4] = startTime;
+	revUpdate_[5] = gameStart;
+	revUpdate_[6] = tmx_Size;
+	revUpdate_[7] = tmx_Data;
+	revUpdate_[8] = addList;
+	revUpdate_[9] = addList;
+	revUpdate_[10] = addList;
+	revUpdate_[11] = addList;
 }
 
 void NetWork::Init(void)
