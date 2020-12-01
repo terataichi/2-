@@ -102,9 +102,11 @@ public:
 	bool CheckNetWork();
 
 	chronoTime GetStartTime(void);											// 接続待ち開始時間取得用
+	void SetStartTime(chronoTime time);
 	bool GetCountDownFlg(void);												//
 	void SetCountDownFlg(bool flg);
 	bool GetStartCntFlg(void);												// スタートのカウントダウン開始していいか
+	void SetPlayerMax(int max);
 	const int GetPlayerMax(void)const;
 	const int GetPlayerID(void)const;
 
@@ -154,7 +156,7 @@ private:
 
 	int playerID_;															// 自分のプレイヤーID
 	int playerMax_;															// プレイヤーの最大人数
-	chronoTime revTime_;
+	chronoTime countDownTime_;
 	bool countDownFlg_;														// カウントダウンが開始されているか
 	bool startCntFlg_;
 	listIntP handlelist_;

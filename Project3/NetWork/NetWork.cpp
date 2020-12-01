@@ -54,7 +54,6 @@ bool NetWork::Update(void)
 	MesH revHeader{};
 	UnionVec tmpPacket{};
 	int writePos = 0;
-	int handle = -1;
 	while (ProcessMessage() == 0)
 	{
 		if (!state_->Update())
@@ -66,12 +65,15 @@ bool NetWork::Update(void)
 		}
 
 		handlelist_ = state_->GetNetHandle();
-		if (handlelist_.size())
+		bool flg = true;
+		for (auto& list : handlelist_)
 		{
-			handle = handlelist_.front().first;
-
+			if (list.first != -1)
+			{
+				flg = false;
+			}
 		}
-		if (handle != -1)
+		if (flg)
 		{
 			break;
 		}
@@ -81,14 +83,19 @@ bool NetWork::Update(void)
 	{
 		auto lostHandle = GetLostNetWork();
 
+		if (handlelist_.size() < state_->GetNetHandle().size())
+		{
+			handlelist_ = state_->GetNetHandle();
+		}
+
 		// データの長さチェック
 		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 		{
-			if (lostHandle == list->first)
-			{
-				handlelist_.erase(list);
-				TRACE("切断されたハンドル削除\n");
-			}
+			//if (lostHandle == list->first)
+			//{
+			//	handlelist_.erase(list);
+			//	TRACE("切断されたハンドル削除\n");
+			//}
 
 			if (GetNetWorkDataLength(list->first) >= sizeof(MesH))
 			{
@@ -165,7 +172,12 @@ bool NetWork::CheckNetWork()
 
 chronoTime NetWork::GetStartTime(void)
 {
-	return revTime_;
+	return countDownTime_;
+}
+
+void NetWork::SetStartTime(chronoTime time)
+{
+	countDownTime_ = time;
 }
 
 bool NetWork::GetCountDownFlg(void)
@@ -181,6 +193,11 @@ void NetWork::SetCountDownFlg(bool flg)
 bool NetWork::GetStartCntFlg(void)
 {
 	return startCntFlg_;
+}
+
+void NetWork::SetPlayerMax(int max)
+{
+	playerMax_ = max;
 }
 
 const int NetWork::GetPlayerMax(void) const
@@ -274,33 +291,38 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 
 bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
 {
-	if (state_->GetNetHandle().size())
-	{
-		if (state_->GetNetHandle().front().first == -1)
-		{
-			return false;
-		}
-	}
-
-	// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
-	UnionHeader header{ type,0,0 };
-	SetHeader(header, packet);
+	//if (state_->GetNetHandle().size())
+	//{
+	//	if (state_->GetNetHandle().front().first == -1)
+	//	{
+	//		return false;
+	//	}
+	//}
 
 	for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 	{
+		if (list->first == -1)
+		{
+			continue;
+		}
+
 		if (list->first != handle)
 		{
+			// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
+			UnionHeader header{ type,0,0 };
+			UnionVec tmpPacket = packet;
+			SetHeader(header, tmpPacket);
 			// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる。
 			do
 			{
 				// 送信データ長を求める
-				int sendCount = (packet.size() < 500 / sizeof(UnionData)) ? packet.size() : 500 / sizeof(UnionData);
+				int sendCount = (tmpPacket.size() < 500 / sizeof(UnionData)) ? tmpPacket.size() : 500 / sizeof(UnionData);
 
 				// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる
 				header.mesH.length = sendCount - HEADER_COUNT;
 
 				// 分割しないといけないかどうか
-				if (packet.size() == sendCount)
+				if (tmpPacket.size() == sendCount)
 				{
 					//TRACE("分割しません\n");
 					header.mesH.next = 0;
@@ -313,25 +335,25 @@ bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
 				}
 
 				// ヘッダー情報の更新
-				packet[0].iData = header.iData[0];
-				packet[1].iData = header.iData[1];
+				tmpPacket[0].iData = header.iData[0];
+				tmpPacket[1].iData = header.iData[1];
 
 
 				// データの送信
 				if (state_->GetNetHandle().size())
 				{
-					NetWorkSend(list->first, packet.data(), sendCount * sizeof(UnionData));
+					NetWorkSend(list->first, tmpPacket.data(), sendCount * sizeof(UnionData));
 				}
 
 				// 送った要素のみ削除
-				packet.erase(packet.begin() + HEADER_COUNT, packet.begin() + sendCount);
+				tmpPacket.erase(tmpPacket.begin() + HEADER_COUNT, tmpPacket.begin() + sendCount);
 
 				// 送る度にカウント++
 				header.mesH.sendID++;
 
 				// 一度は送ってほしいからdo
 				// 分割データが送り終わるまでループ
-			} while (packet.size() > HEADER_COUNT);
+			} while (tmpPacket.size() > HEADER_COUNT);
 		}
 	}
 	return false;
@@ -391,7 +413,6 @@ void NetWork::InitFunc(void)
 		}
 		return false;
 	};
-
 
 	// ---- ゲスト ---
 	auto stanby = [&](MesH& data, UnionVec& packet)
@@ -525,7 +546,7 @@ void NetWork::InitFunc(void)
 		timeData.iData[1] = packet[1].iData;
 
 		countDownFlg_ = true;
-		revTime_ = timeData.time;
+		countDownTime_ = timeData.time;
 		return true;
 	};
 
@@ -544,7 +565,7 @@ void NetWork::InitFunc(void)
 		timeData.iData[1] = packet[1].iData;
 
 		startCntFlg_ = true;
-		revTime_ = timeData.time;
+		countDownTime_ = timeData.time;
 		return true;
 	};
 
