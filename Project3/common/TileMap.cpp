@@ -58,7 +58,7 @@ bool TileMap::SendTmxSizeData(void)
 
 	//UnionHeader mData{ MesType::TMX_SIZE, 1,0,1 };
 	//lpNetWork.SetHeader(mData, vecData);
-	return lpNetWork.SendMes(MesType::TMX_SIZE, vecData);
+	return lpNetWork.SendMesAll(MesType::TMX_SIZE, vecData, 0);
 }
 
 bool TileMap::SendTmxData(void)
@@ -148,7 +148,7 @@ bool TileMap::SendTmxData(void)
 	// ¡ì‚Á‚½DATA‚Ì‘—M
 	//UnionHeader mData{ MesType::TMX_DATA,0,0,vecData.size() };
 	//lpNetWork.SetHeader(mData, vecData);
-	lpNetWork.SendMes(MesType::TMX_DATA, packetData);
+	lpNetWork.SendMesAll(MesType::TMX_DATA, packetData, 0);
 
 	return true;
 }
@@ -166,7 +166,6 @@ void TileMap::Update(void)
 	// ”š”­I‚í‚Á‚½‚çfalse ‚Å‹A‚Á‚Ä‚­‚é
 	flameList_.erase(std::remove_if(flameList_.begin(), flameList_.end(),
 		[](sharedFlame& flame) {return !flame->Update(); }), flameList_.end());
-
 }
 
 LayerVec& TileMap::GetLayerVec(void)

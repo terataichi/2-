@@ -12,7 +12,7 @@
 
 int Player::lostCont_ = 0;
 
-Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),layerData_(layer)
+Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(scene),layerData_(layer)
 {
 	pos_ = pos;
 	vel_ = { 4,4 };
@@ -44,6 +44,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 	{
 		bombList_.emplace_back(id);
 	}
+
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
 	{
 		if (id_ == 0)
@@ -58,23 +59,14 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer):scene_(scene),lay
 	}
 	else
 	{
-		if (id_ / UNIT_ID_BASE == modeID)
+		if (id_ == id)
 		{
 			netFunc_ = std::bind(&Player::UpdateDef,this);
 			InitFunc();
 		}
 		else
 		{
-			if ((id_ / UNIT_ID_BASE) % 2 == modeID)
-			{
-
-				netFunc_ = std::bind(&Player::UpdateAuto, this);
-				state_ = STATE::Run;
-			}
-			else
-			{
-				netFunc_ = std::bind(&Player::UpdateRev, this);
-			}
+			netFunc_ = std::bind(&Player::UpdateRev, this);
 		}
 	}
 

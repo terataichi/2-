@@ -19,7 +19,7 @@ class Player:
 	public Object
 {
 public:
-	Player(Vector2& pos,BaseScene& baseScene,LayerVec& layer);
+	Player(Vector2& pos, BaseScene& baseScene, LayerVec& layer, int id);
 
 	~Player();
 

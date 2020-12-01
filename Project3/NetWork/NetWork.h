@@ -14,20 +14,21 @@
 
 #define lpNetWork NetWork::GetInstance()
 
-#define COUNT_DOWN_MAX 3000
+#define COUNT_DOWN_MAX 15000
+#define COUNT_START_MAX 10000
 
 enum class MesType:unsigned char
 {
 	NON = 100,						// 送信が失敗したときに0が来るケースが多いからスタート位置を変える
-	COUNT_DOWN,						// 接続受付カウントダウン
+	COUNT_DOWN_ROOM,				// 接続受付カウントダウン
 	ID,								// 自分のIDとﾌﾟﾚｲﾔｰ総数
-	STANBY,							// 初期化情報送信
-	GAME_START,						// ゲーム開始
-	//START_TIME,						// 全員の初期化完了後のゲーム開始時間
+	STANBY_HOST,					// 初期化情報送信
+	STANBY_GUEST,					// ゲーム開始
+	COUNT_DOWN_GAME,				// 全員の初期化完了後のゲーム開始時間
 	TMX_SIZE,						// TMXファイルのサイズ
 	TMX_DATA,						// TMXテータ
 	POS,							// 座標
-	SET_BOMB,
+	SET_BOMB,						// インスタンスするボムの情報
 	DETH,							// 死亡
 	LOST,							// 切断時に生成
 	MAX
@@ -54,7 +55,7 @@ union UnionData
 	char cData[4];
 };
 
-// クロノの型がlonglong型だったので分けることにした
+// クロノの型がlonglong型だったので分けることに
 union TimeData
 {
 	std::chrono::system_clock::time_point time;
@@ -86,7 +87,9 @@ public:
 
 	void SetHeader(UnionHeader& header, UnionVec& vec);						// ヘッダー部をくっつける
 	bool SendMes(MesType header,UnionVec data);								// 送信
+	bool SendMesAll(MesType header, UnionVec data, int handle);
 	bool SendMes(MesType type);												// 
+	bool SendMesAll(MesType type);
 
 	bool ConnectHost(IPDATA hostIP);										// ホストに接続
 
@@ -96,8 +99,12 @@ public:
 	void SendStanby(void);
 	void SendStart(void);
 
+	bool CheckNetWork();
+
 	chronoTime GetStartTime(void);											// 接続待ち開始時間取得用
 	bool GetCountDownFlg(void);												//
+	void SetCountDownFlg(bool flg);
+	bool GetStartCntFlg(void);												// スタートのカウントダウン開始していいか
 	const int GetPlayerMax(void)const;
 	const int GetPlayerID(void)const;
 
@@ -148,6 +155,8 @@ private:
 	int playerID_;															// 自分のプレイヤーID
 	int playerMax_;															// プレイヤーの最大人数
 	chronoTime revTime_;
-	bool countDownFlg_;														// カウントダウンが開始されているか		
+	bool countDownFlg_;														// カウントダウンが開始されているか
+	bool startCntFlg_;
+	listIntP handlelist_;
 };
 

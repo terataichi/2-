@@ -122,7 +122,7 @@ bool LoginScene::SetNetWorkMode(void)
 	int mode;												// モード選択用
 
 	// 前回のホストのIPアドレス取得
-	std::ifstream ifs("hostIp.txt");
+	std::ifstream ifs("init/hostIp.txt");
 	std::string str;
 
 	bool fFlg = true;										// ファイルが開けているか						

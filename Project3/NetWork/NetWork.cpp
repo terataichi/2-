@@ -54,7 +54,6 @@ bool NetWork::Update(void)
 	MesH revHeader{};
 	UnionVec tmpPacket{};
 	int writePos = 0;
-	listIntP handlelist;
 	int handle = -1;
 	while (ProcessMessage() == 0)
 	{
@@ -66,10 +65,11 @@ bool NetWork::Update(void)
 			continue;
 		}
 
-		handlelist = state_->GetNetHandle();
-		if (handlelist.size())
+		handlelist_ = state_->GetNetHandle();
+		if (handlelist_.size())
 		{
-			handle = handlelist.front().first;
+			handle = handlelist_.front().first;
+
 		}
 		if (handle != -1)
 		{
@@ -77,13 +77,20 @@ bool NetWork::Update(void)
 		}
 	}
 
-	while (ProcessMessage() == 0 && state_->Update())
+	while (ProcessMessage() == 0 && state_->Update() && handlelist_.size())
 	{
+		auto lostHandle = GetLostNetWork();
 
 		// データの長さチェック
-		for (auto list : handlelist)
+		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 		{
-			if (GetNetWorkDataLength(list.first) >= sizeof(MesH))
+			if (lostHandle == list->first)
+			{
+				handlelist_.erase(list);
+				TRACE("切断されたハンドル削除\n");
+			}
+
+			if (GetNetWorkDataLength(list->first) >= sizeof(MesH))
 			{
 				// これ以上データがないとき
 				// ※ヘッダー部を受信する前情報
@@ -94,7 +101,7 @@ bool NetWork::Update(void)
 				}
 
 				// ヘッダー部の受信
-				NetWorkRecv(list.first, &revHeader, sizeof(MesH));
+				NetWorkRecv(list->first, &revHeader, sizeof(MesH));
 
 				// データがある場合
 				if (revHeader.length)
@@ -102,7 +109,7 @@ bool NetWork::Update(void)
 					tmpPacket.resize(tmpPacket.size() + revHeader.length);
 
 					// データの受け取り
-					NetWorkRecv(handle, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+					NetWorkRecv(list->first, &tmpPacket[writePos], sizeof(int) * revHeader.length);
 					writePos = tmpPacket.size();
 				}
 
@@ -142,13 +149,18 @@ void NetWork::SendStanby(void)
 {
 	// 初期化情報の送信
 	state_->SetActive(ActiveState::Stanby);
-	SendMes(MesType::STANBY);
+	SendMesAll(MesType::STANBY_HOST);
 }
 
 void NetWork::SendStart(void)
 {
 	// 初期化情報の送信
-	SendMes(MesType::GAME_START);
+	SendMes(MesType::STANBY_GUEST);
+}
+
+bool NetWork::CheckNetWork()
+{
+	return state_->CheckNetWork();
 }
 
 chronoTime NetWork::GetStartTime(void)
@@ -159,6 +171,16 @@ chronoTime NetWork::GetStartTime(void)
 bool NetWork::GetCountDownFlg(void)
 {
 	return countDownFlg_;
+}
+
+void NetWork::SetCountDownFlg(bool flg)
+{
+	countDownFlg_ = flg;
+}
+
+bool NetWork::GetStartCntFlg(void)
+{
+	return startCntFlg_;
 }
 
 const int NetWork::GetPlayerMax(void) const
@@ -250,10 +272,81 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 	return true;
 }
 
+bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
+{
+	if (state_->GetNetHandle().size())
+	{
+		if (state_->GetNetHandle().front().first == -1)
+		{
+			return false;
+		}
+	}
+
+	// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
+	UnionHeader header{ type,0,0 };
+	SetHeader(header, packet);
+
+	for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
+	{
+		if (list->first != handle)
+		{
+			// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる。
+			do
+			{
+				// 送信データ長を求める
+				int sendCount = (packet.size() < 500 / sizeof(UnionData)) ? packet.size() : 500 / sizeof(UnionData);
+
+				// 求めた送信データ長からヘッダーサイズを除いた分をヘッダーのlengthに入れる
+				header.mesH.length = sendCount - HEADER_COUNT;
+
+				// 分割しないといけないかどうか
+				if (packet.size() == sendCount)
+				{
+					//TRACE("分割しません\n");
+					header.mesH.next = 0;
+				}
+				else
+				{
+					//TRACE("分割します\n");
+					//TRACE("%d回目\n", header.mesH.sendID);
+					header.mesH.next = 1;
+				}
+
+				// ヘッダー情報の更新
+				packet[0].iData = header.iData[0];
+				packet[1].iData = header.iData[1];
+
+
+				// データの送信
+				if (state_->GetNetHandle().size())
+				{
+					NetWorkSend(list->first, packet.data(), sendCount * sizeof(UnionData));
+				}
+
+				// 送った要素のみ削除
+				packet.erase(packet.begin() + HEADER_COUNT, packet.begin() + sendCount);
+
+				// 送る度にカウント++
+				header.mesH.sendID++;
+
+				// 一度は送ってほしいからdo
+				// 分割データが送り終わるまでループ
+			} while (packet.size() > HEADER_COUNT);
+		}
+	}
+	return false;
+}
+
 bool NetWork::SendMes(MesType type)
 {
 	UnionVec vec{};
 	return SendMes(type, vec);
+}
+
+bool NetWork::SendMesAll(MesType type)
+{
+	UnionVec vec{};
+	return SendMesAll(type, vec, 0);
 }
 
 bool NetWork::ConnectHost(IPDATA hostIP)
@@ -289,7 +382,7 @@ void NetWork::InitFunc(void)
 		if (state_->GetActive() == ActiveState::Stanby)
 		{
 			// ゲームスタートを受信時
-			if (static_cast<MesType>(data.type) == MesType::GAME_START)
+			if (static_cast<MesType>(data.type) == MesType::STANBY_GUEST)
 			{
 				TRACE("ゲストから通知を確認、ゲームを開始します\n");
 				state_->SetActive(ActiveState::Play);
@@ -411,7 +504,7 @@ void NetWork::InitFunc(void)
 		{
 			if (data.type == MesType::LOST)
 			{
-				TRACE("誰かが切断");
+				TRACE("誰かが切断\n");
 			}
 			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
 			revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
@@ -446,6 +539,12 @@ void NetWork::InitFunc(void)
 
 	auto startTime = [&](MesH& data, UnionVec& packet)
 	{
+		TimeData timeData{};
+		timeData.iData[0] = packet[0].iData;
+		timeData.iData[1] = packet[1].iData;
+
+		startCntFlg_ = true;
+		revTime_ = timeData.time;
 		return true;
 	};
 
@@ -453,14 +552,14 @@ void NetWork::InitFunc(void)
 	revUpdate_[1] = countDown;
 	revUpdate_[2] = id;
 	revUpdate_[3] = stanby;
-	//revUpdate_[5] = startTime;
 	revUpdate_[4] = gameStart;
-	revUpdate_[5] = tmx_Size;
-	revUpdate_[6] = tmx_Data;
-	revUpdate_[7] = addList;
+	revUpdate_[5] = startTime;
+	revUpdate_[6] = tmx_Size;
+	revUpdate_[7] = tmx_Data;
 	revUpdate_[8] = addList;
 	revUpdate_[9] = addList;
 	revUpdate_[10] = addList;
+	revUpdate_[11] = addList;
 }
 
 void NetWork::Init(void)
@@ -471,6 +570,7 @@ void NetWork::Init(void)
 	ip_ = ArrayIP{};
 	sendLength_ = 0;
 	countDownFlg_ = false;
+	startCntFlg_ = false;
 
 	// バイト長の読み込み
 	std::ifstream ifs("init/setting.txt");

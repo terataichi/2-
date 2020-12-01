@@ -10,6 +10,7 @@ GameScene::GameScene()
 {
     TRACE("ｹﾞｰﾑｼｰﾝの生成\n");
     Init();
+    InitFunc();
     now_ = std::chrono::system_clock::now();
 }
 
@@ -19,18 +20,7 @@ GameScene::~GameScene()
 
 uniqueBase GameScene::Update(uniqueBase scene)
 {
-    DrawOwnScene();
-
-    objList_.sort([](sharedObj& obj1, sharedObj& obj2)
-        {return obj1->CheckData(MesType::POS) > obj2->CheckData(MesType::POS); });
-    
-    for (auto& obj : objList_)
-    {
-        obj->Update();
-    }
-
-    objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive(); }),objList_.end());
-
+    stateUpdate_[gameState_]();
     return scene;
 }
 
@@ -44,7 +34,7 @@ void GameScene::DrawOwnScene(void)
         obj->Draw();
     }
 
-    end_ = std::chrono::system_clock::now();
+    end_ = lpSceneMng.GetTime();
 
     if (std::chrono::duration_cast<std::chrono::seconds>(end_ - now_).count() < 1)
     {
@@ -94,7 +84,7 @@ void GameScene::Init(void)
             if (playerCnt <= max)
             {
                 Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-                objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec()));
+                objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(),lpNetWork.GetPlayerID()));
                 playerCnt++;
             }
         }
@@ -104,7 +94,7 @@ void GameScene::Init(void)
         for (auto& charData : tileMap_.GetCharChipPos())
         {
             Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-            objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec()));
+            objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(), lpNetWork.GetPlayerID()));
         }
     }
 
@@ -117,7 +107,6 @@ void GameScene::Init(void)
 
 bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chronoTime, int length, bool flg)
 {
-
     if (flg)
     {
         // インスタンス情報の送信
@@ -179,4 +168,45 @@ void GameScene::SetBombMap(int chipPos, bool flg)
 const std::vector<bool> GameScene::GetBombMap(void)
 {
     return tileMap_.GetBombMap();
+}
+
+void GameScene::InitFunc()
+{
+    gameState_ = GameState::Wait;
+
+    auto playUpdate = [&]()
+    {
+        DrawOwnScene();
+
+        objList_.sort([](sharedObj& obj1, sharedObj& obj2)
+            {return obj1->CheckData(MesType::POS) > obj2->CheckData(MesType::POS); });
+
+        for (auto& obj : objList_)
+        {
+            obj->Update();
+        }
+
+        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive(); }), objList_.end());
+    };
+
+    auto waitUpdate = [&]()
+    {
+        DrawOwnScene();
+        auto size = lpSceneMng.screenSize_ / 2;
+        auto startTime = lpNetWork.GetStartTime();
+        if (lpNetWork.GetStartCntFlg())
+        {
+            chronoTime now = std::chrono::system_clock::now();
+            auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+            auto tmp = (COUNT_START_MAX - time) / 1000;
+            if (tmp <= 0)
+            {
+                gameState_ = GameState::Play;
+            }
+            DrawFormatString(size.x, size.y, 0xffffff, "残り：%d秒", (COUNT_START_MAX - time) / 1000);
+        }
+    };
+
+    stateUpdate_.try_emplace(GameState::Wait, waitUpdate);
+    stateUpdate_.try_emplace(GameState::Play, playUpdate);
 }

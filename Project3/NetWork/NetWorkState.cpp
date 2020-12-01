@@ -22,6 +22,7 @@ void NetWorkState::SetActive(ActiveState state)
 bool NetWorkState::Update(void)
 {
 	// 接続が切れていないかチェック
+	CheckConnect();
 	return CheckNetWork();
 }
 

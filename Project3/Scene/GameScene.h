@@ -1,5 +1,7 @@
 #pragma once
 #include <memory>
+#include <map>
+#include <functional>
 #include <list>
 #include <chrono>
 #include "BaseScene.h"
@@ -7,6 +9,13 @@
 #include "../Object.h"
 
 using sharedObj = std::shared_ptr<Object>;
+
+// 状態管理用
+enum class GameState
+{
+    Wait,
+    Play
+};
 
 class GameScene :
     public BaseScene
@@ -26,11 +35,14 @@ public:
     void SetBombMap(int chipPos, bool flg);
     const std::vector<bool> GetBombMap(void);
 private:
-
+    void InitFunc();
     TileMap tileMap_;                                                                            // タイルマップ情報格納
 
     std::chrono::system_clock::time_point  now_;
     std::chrono::system_clock::time_point  end_;
+
+    std::map<GameState, std::function<void(void)>> stateUpdate_;                                // 状態別アップデート
+    GameState gameState_;
 
     int fpsCount_;
     int fps_;

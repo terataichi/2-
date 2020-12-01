@@ -1,5 +1,7 @@
 #pragma once
 #include "NetWorkState.h"
+#include "../Scene/SceneMng.h"
+
 class HostState :
 	public NetWorkState
 {
@@ -13,5 +15,6 @@ public:
 	bool CheckConnect(void) override;
 private:
 
+	chronoTime startTime_;
 };
 
