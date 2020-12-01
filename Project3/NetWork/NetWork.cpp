@@ -64,7 +64,6 @@ bool NetWork::Update(void)
 			continue;
 		}
 
-		handlelist_ = state_->GetNetHandle();
 		bool flg = true;
 		for (auto& list : handlelist_)
 		{
@@ -83,19 +82,14 @@ bool NetWork::Update(void)
 	{
 		auto lostHandle = GetLostNetWork();
 
-		if (handlelist_.size() < state_->GetNetHandle().size())
-		{
-			handlelist_ = state_->GetNetHandle();
-		}
-
 		// データの長さチェック
 		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 		{
-			//if (lostHandle == list->first)
-			//{
-			//	handlelist_.erase(list);
-			//	TRACE("切断されたハンドル削除\n");
-			//}
+			if (lostHandle == list->first)
+			{
+				handlelist_.erase(list);
+				TRACE("切断されたハンドル削除\n");
+			}
 
 			if (GetNetWorkDataLength(list->first) >= sizeof(MesH))
 			{
@@ -126,6 +120,9 @@ bool NetWork::Update(void)
 					continue;
 				}
 
+				// 
+				SendMesAll(revHeader.type, tmpPacket, list->first);
+
 				unsigned int type = static_cast<unsigned int>(revHeader.type) - static_cast<unsigned int>(MesType::NON);
 				revUpdate_[type](revHeader, tmpPacket);
 			}
@@ -143,7 +140,7 @@ bool NetWork::Update(void)
 
 bool NetWork::CloseNetWork(void)
 {
-	DxLib::CloseNetWork(state_->GetNetHandle().front().first);
+	DxLib::CloseNetWork(handlelist_.front().first);
 	return true;
 }
 
@@ -210,6 +207,16 @@ const int NetWork::GetPlayerID(void) const
 	return playerID_;
 }
 
+void NetWork::AddHandleList(intP intp)
+{
+	handlelist_.emplace_front(intp);
+}
+
+listIntP& NetWork::GetHandleList(void)
+{
+	return handlelist_;
+}
+
 bool NetWork::AddRevList(std::mutex& mtx, RevDataListP& data)
 {
 	// 追加
@@ -231,9 +238,9 @@ void NetWork::SetHeader(UnionHeader& header, UnionVec& packet)
 
 bool NetWork::SendMes(MesType type,UnionVec packet)
 {
-	if (state_->GetNetHandle().size())
+	if (handlelist_.size())
 	{
-		if (state_->GetNetHandle().front().first == -1)
+		if (handlelist_.front().first == -1)
 		{
 			return false;
 		}
@@ -271,9 +278,9 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 
 
 		// データの送信
-		if (state_->GetNetHandle().size())
+		if (handlelist_.size())
 		{
-			NetWorkSend(state_->GetNetHandle().front().first, packet.data(), sendCount * sizeof(UnionData));
+			NetWorkSend(handlelist_.front().first, packet.data(), sendCount * sizeof(UnionData));
 		}
 
 		// 送った要素のみ削除
@@ -340,7 +347,7 @@ bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
 
 
 				// データの送信
-				if (state_->GetNetHandle().size())
+				if (handlelist_.size())
 				{
 					NetWorkSend(list->first, tmpPacket.data(), sendCount * sizeof(UnionData));
 				}

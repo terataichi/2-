@@ -42,12 +42,12 @@ bool HostState::CheckConnect(void)
 
 	int handle = GetNewAcceptNetWork();
 
-	if(handle != -1)
+	if (handle != -1)
 	{
 		// 接続されてるのでこれ以上接続されないように止める
 		StopListenNetWork();
 		// 初期化状態に入る
-		handleList_.emplace_front(handle, -1);
+		lpNetWork.AddHandleList({ handle, -1 });
 
 		lpNetWork.SetCountDownFlg(true);
 
@@ -74,6 +74,17 @@ bool HostState::CheckConnect(void)
 			lpNetWork.SetPlayerMax(connectCnt_ + 1);		// 自分の分+1する
 			active_ = ActiveState::Init;
 
+			//　IDの振り分けと送信
+			auto& handlelist = lpNetWork.GetHandleList();
+			int cnt = static_cast<int>(handlelist.size() - 1);
+
+			for (auto list : handlelist)
+			{
+				list.second = cnt * 5;
+			}
+
+
+			// カウントダウンの送信
 			UnionData data[2];
 			TimeData time{ now };
 

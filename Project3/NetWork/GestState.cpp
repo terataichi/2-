@@ -1,4 +1,5 @@
 #include "GestState.h"
+#include "NetWork.h"
 
 GuestState::GuestState()
 {
@@ -17,7 +18,8 @@ bool GuestState::ConnectHost(IPDATA hostIP)
 	// Ú‘±o—ˆ‚½‚çŸ‚És‚­
 	if (0 <= netHandle)
 	{
-		handleList_.emplace_back(netHandle, -1);
+		listIntP& list = lpNetWork.GetHandleList();
+		list.emplace_back(netHandle, -1);
 		active_ = ActiveState::Init;
 		return true;
 	}

@@ -1,4 +1,5 @@
 #include "NetWorkState.h"
+#include "NetWork.h"
 
 NetWorkState::NetWorkState()
 {
@@ -31,7 +32,7 @@ bool NetWorkState::CheckNetWork(void)
 	if (GetLostNetWork() != -1)
 	{
 		// 再接続の開始
-		handleList_.front().first = -1;
+		//handleList_.front().first = -1;
 		TRACE("接続が切れました、再接続します\n");
 		return false;
 	}
@@ -41,11 +42,12 @@ bool NetWorkState::CheckNetWork(void)
 bool NetWorkState::SetPlayerID(int id)
 {
 	// 自分のIDをセット
-	handleList_.front().second = id;
+	listIntP& list = lpNetWork.GetHandleList();
+	list.front().second = id;
 	return true;
 }
 
-listIntP NetWorkState::GetNetHandle(void)
-{
-	return handleList_;
-}
+//listIntP NetWorkState::GetNetHandle(void)
+//{
+//	return handleList_;
+//}

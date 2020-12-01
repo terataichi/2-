@@ -72,6 +72,10 @@ using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 
 using chronoTime = std::chrono::system_clock::time_point;
 
+// 1:ネットハンドル, 2:ID
+using intP = std::pair<int, unsigned int>;
+using listIntP = std::list<intP>;
+
 class NetWork
 {
 public:
@@ -109,6 +113,9 @@ public:
 	void SetPlayerMax(int max);
 	const int GetPlayerMax(void)const;
 	const int GetPlayerID(void)const;
+
+	void AddHandleList(intP intp);
+	listIntP& GetHandleList(void);
 
 	// オブジェクトから追加されていく、自分で自分のデータを管理する
 	bool AddRevList(std::mutex& mtx, RevDataListP& data);
