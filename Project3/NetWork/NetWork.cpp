@@ -467,11 +467,11 @@ void NetWork::InitFunc(void)
 					TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
 					recvStanby_ = true;
 					state_->SetActive(ActiveState::Play);
-					break;
+					return true;
 				}
 			} while (str.find("data encoding") == std::string::npos);
 
-			return true;
+			return false;
 		};
 
 
@@ -647,7 +647,7 @@ void NetWork::Init(void)
 	mesTypeSize_.try_emplace(MesType::LOST, 1);
 	mesTypeSize_.try_emplace(MesType::MAX, 0);
 	mesTypeSize_.try_emplace(MesType::POS, 4);
-	mesTypeSize_.try_emplace(MesType::SET_BOMB, 6);
+	mesTypeSize_.try_emplace(MesType::SET_BOMB, 7);
 	mesTypeSize_.try_emplace(MesType::STANBY_GUEST, 0);
 	mesTypeSize_.try_emplace(MesType::STANBY_HOST, 0);
 	mesTypeSize_.try_emplace(MesType::TMX_SIZE, 1);
