@@ -178,5 +178,7 @@ private:
 	bool countDownFlg_;														// カウントダウンが開始されているか
 	bool startCntFlg_;
 	listIntP handlelist_;
+
+	std::map<MesType, int> mesTypeSize_;
 };
 

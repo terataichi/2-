@@ -9,6 +9,7 @@ public:
 
 	NetWorkMode GetMode(void) override{ return NetWorkMode::GUEST; }		// モードの取得
 	bool ConnectHost(IPDATA hostIP) override;								// ホストに接続
+	bool CheckConnect(void) override;
 private:
 
 };

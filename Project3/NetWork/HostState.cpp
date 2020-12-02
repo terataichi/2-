@@ -44,16 +44,17 @@ bool HostState::CheckConnect(void)
 
 	if (handle != -1)
 	{
-		// 接続されてるのでこれ以上接続されないように止める
-		StopListenNetWork();
+
 		// 初期化状態に入る
 		lpNetWork.AddHandleList({ handle, -1 });
 
-		lpNetWork.SetCountDownFlg(true);
-
-		startTime_ = lpSceneMng.GetTime();
-		lpNetWork.SetStartTime(startTime_);
-		TimeData time{ startTime_ };
+		// カウントダウンの送信
+		if (!lpNetWork.GetCountDownFlg())
+		{
+			lpNetWork.SetStartTime(lpSceneMng.GetTime());
+			lpNetWork.SetCountDownFlg(true);
+		}
+		TimeData time{ lpNetWork.GetStartTime() };
 		UnionData data[2];
 
 		data[0].iData = time.iData[0];
@@ -65,6 +66,7 @@ bool HostState::CheckConnect(void)
 
 	if (lpNetWork.GetCountDownFlg() && !lpNetWork.GetStartCntFlg())
 	{
+	
 		chronoTime now = std::chrono::system_clock::now();
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - lpNetWork.GetStartTime()).count();
 
@@ -75,11 +77,11 @@ bool HostState::CheckConnect(void)
 
 			//　IDの振り分け
 			auto& handlelist = lpNetWork.GetHandleList();
-			int max = static_cast<int>(handlelist.size() - 1);
+			int max = static_cast<int>(handlelist.size());
 			int cnt = max;
 
 			UnionData idData[2];
-			idData[1].iData = max;
+			idData[1].iData = max + 1;
 			for (auto& list : handlelist)
 			{
 				list.id_ = cnt * 5;
@@ -99,6 +101,9 @@ bool HostState::CheckConnect(void)
 			lpNetWork.SetStartTime(time.time);
 			lpNetWork.SetStartCntFlg(true);
 			lpNetWork.SendMesAll(MesType::COUNT_DOWN_GAME, UnionVec{ data[0],data[1] }, 0);
+
+			// 接続されてるのでこれ以上接続されないように止める
+			StopListenNetWork();
 			return true;
 		}
 	}

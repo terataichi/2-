@@ -56,23 +56,14 @@ bool NetWork::Update(void)
 	int writePos = 0;
 	while (ProcessMessage() == 0)
 	{
-		if (!state_->Update())
+		if (!state_->Update() || !handlelist_.size())
 		{
 			// 使ったものをリセットする
 			//state_.reset();
 			recvStanby_ = false;
 			continue;
 		}
-
-		bool flg = false;
-		for (auto& list : handlelist_)
-		{
-			if (list.handle_ != -1)
-			{
-				flg = true;
-			}
-		}
-		if (flg)
+		else
 		{
 			break;
 		}
@@ -89,6 +80,11 @@ bool NetWork::Update(void)
 			{
 				handlelist_.erase(list);
 				TRACE("切断されたハンドル削除\n");
+				if (!handlelist_.size())
+				{
+					break;
+				}
+				continue;
 			}
 
 			if (GetNetWorkDataLength(list->handle_) >= sizeof(MesH))
@@ -121,10 +117,19 @@ bool NetWork::Update(void)
 				}
 
 				// 
-				//SendMesAll(revHeader.type, tmpPacket, list->handle_);
+				SendMesAll(revHeader.type, tmpPacket, list->handle_);
 
-				unsigned int type = static_cast<unsigned int>(revHeader.type) - static_cast<unsigned int>(MesType::NON);
-				revUpdate_[type](revHeader, tmpPacket);
+
+				if (static_cast<int>(revHeader.type) >= static_cast<int>(MesType::NON) && 
+					static_cast<int>(revHeader.type) <= static_cast<int>(MesType::MAX))
+				{
+					unsigned int type = static_cast<int>(revHeader.type) - static_cast<int>(MesType::NON);
+					revUpdate_[type](revHeader, tmpPacket);
+				}
+				else
+				{
+					TRACE("メッセージタイプが変です ID : %d\n", list->id_);
+				}
 			}
 		}
 	}
@@ -132,7 +137,10 @@ bool NetWork::Update(void)
 	// オフライン以外だったら切断するよ
 	if (state_->GetMode() != NetWorkMode::OFFLINE)
 	{
-		CloseNetWork();
+		if (handlelist_.size())
+		{
+			CloseNetWork();
+		}
 	}
 
 	return true;
@@ -243,12 +251,9 @@ void NetWork::SetHeader(UnionHeader& header, UnionVec& packet)
 
 bool NetWork::SendMes(MesType type,UnionVec packet)
 {
-	if (handlelist_.size())
+	if (!handlelist_.size())
 	{
-		if (handlelist_.front().handle_ == -1)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	SendMes(type, packet, handlelist_.front().handle_);
@@ -462,11 +467,11 @@ void NetWork::InitFunc(void)
 					TRACE("初期化情報の確認、ゲームを開始の合図をします\n");
 					recvStanby_ = true;
 					state_->SetActive(ActiveState::Play);
-					return true;
+					break;
 				}
 			} while (str.find("data encoding") == std::string::npos);
 
-			return false;
+			return true;
 		};
 
 
@@ -542,6 +547,13 @@ void NetWork::InitFunc(void)
 			{
 				TRACE("誰かが切断\n");
 			}
+
+			if (mesTypeSize_[data.type] != packet.size())
+			{
+				TRACE("ボマー見つけた\n");
+				return false;
+			}
+
 			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
 			revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
 		}
@@ -625,5 +637,20 @@ void NetWork::Init(void)
 		getline(is, length);
 		sendLength_ = atoi(length.c_str());
 	}
+
+
+	mesTypeSize_.try_emplace(MesType::NON, 0);
+	mesTypeSize_.try_emplace(MesType::COUNT_DOWN_GAME, 2);
+	mesTypeSize_.try_emplace(MesType::COUNT_DOWN_ROOM, 2);
+	mesTypeSize_.try_emplace(MesType::DETH, 1);
+	mesTypeSize_.try_emplace(MesType::ID, 2);
+	mesTypeSize_.try_emplace(MesType::LOST, 1);
+	mesTypeSize_.try_emplace(MesType::MAX, 0);
+	mesTypeSize_.try_emplace(MesType::POS, 4);
+	mesTypeSize_.try_emplace(MesType::SET_BOMB, 6);
+	mesTypeSize_.try_emplace(MesType::STANBY_GUEST, 0);
+	mesTypeSize_.try_emplace(MesType::STANBY_HOST, 0);
+	mesTypeSize_.try_emplace(MesType::TMX_SIZE, 1);
+	mesTypeSize_.try_emplace(MesType::TMX_DATA, 179);
 
 }

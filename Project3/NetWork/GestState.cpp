@@ -1,5 +1,6 @@
 #include "GestState.h"
 #include "NetWork.h"
+#include <DxLib.h>
 
 GuestState::GuestState()
 {
@@ -24,4 +25,9 @@ bool GuestState::ConnectHost(IPDATA hostIP)
 		return true;
 	}
 	return false;
+}
+
+bool GuestState::CheckConnect(void)
+{
+	return true;
 }

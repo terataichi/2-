@@ -14,8 +14,6 @@ public:
 	//ActiveState CheckPreparation(void);
 	bool CheckConnect(void) override;
 private:
-
-	chronoTime startTime_;
 	int connectCnt_;
 };
 

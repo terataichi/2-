@@ -54,7 +54,7 @@ bool TileMap::SendTmxSizeData(void)
 	// ƒf[ƒ^î•ñ‚Ì’Ç‰Á
 	vecData[0].cData[0] = mapData_.width;
 	vecData[0].cData[1] = mapData_.height;
-	vecData[0].cData[2] = static_cast<char>(layerVec_.size() - 1);
+	vecData[0].cData[2] = static_cast<char>(layerVec_.size());
 
 	//UnionHeader mData{ MesType::TMX_SIZE, 1,0,1 };
 	//lpNetWork.SetHeader(mData, vecData);
