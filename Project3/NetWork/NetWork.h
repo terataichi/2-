@@ -73,8 +73,17 @@ using RevDataListP = std::vector<std::pair<MesH, UnionVec>>;
 using chronoTime = std::chrono::system_clock::time_point;
 
 // 1:ネットハンドル, 2:ID
-using intP = std::pair<int, unsigned int>;
-using listIntP = std::list<intP>;
+// 0
+// 準備完了 1
+// -1 切断
+struct PlayerHandle
+{
+	int handle_;
+	int id_;
+	int state_;
+};
+
+using listIntP = std::list<PlayerHandle>;
 
 class NetWork
 {
@@ -91,6 +100,7 @@ public:
 
 	void SetHeader(UnionHeader& header, UnionVec& vec);						// ヘッダー部をくっつける
 	bool SendMes(MesType header,UnionVec data);								// 送信
+	bool SendMes(MesType header, UnionVec data, int handle);				// ハンドル指定版
 	bool SendMesAll(MesType header, UnionVec data, int handle);
 	bool SendMes(MesType type);												// 
 	bool SendMesAll(MesType type);
@@ -109,12 +119,13 @@ public:
 	void SetStartTime(chronoTime time);
 	bool GetCountDownFlg(void);												//
 	void SetCountDownFlg(bool flg);
+	void SetStartCntFlg(bool flg);
 	bool GetStartCntFlg(void);												// スタートのカウントダウン開始していいか
 	void SetPlayerMax(int max);
 	const int GetPlayerMax(void)const;
 	const int GetPlayerID(void)const;
 
-	void AddHandleList(intP intp);
+	void AddHandleList(PlayerHandle intp);
 	listIntP& GetHandleList(void);
 
 	// オブジェクトから追加されていく、自分で自分のデータを管理する

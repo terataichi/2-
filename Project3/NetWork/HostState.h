@@ -16,7 +16,6 @@ public:
 private:
 
 	chronoTime startTime_;
-	bool startFlg_ = false;
 	int connectCnt_;
 };
 

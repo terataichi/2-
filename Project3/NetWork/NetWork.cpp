@@ -64,12 +64,12 @@ bool NetWork::Update(void)
 			continue;
 		}
 
-		bool flg = true;
+		bool flg = false;
 		for (auto& list : handlelist_)
 		{
-			if (list.first != -1)
+			if (list.handle_ != -1)
 			{
-				flg = false;
+				flg = true;
 			}
 		}
 		if (flg)
@@ -85,13 +85,13 @@ bool NetWork::Update(void)
 		// データの長さチェック
 		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 		{
-			if (lostHandle == list->first)
+			if (lostHandle == list->handle_)
 			{
 				handlelist_.erase(list);
 				TRACE("切断されたハンドル削除\n");
 			}
 
-			if (GetNetWorkDataLength(list->first) >= sizeof(MesH))
+			if (GetNetWorkDataLength(list->handle_) >= sizeof(MesH))
 			{
 				// これ以上データがないとき
 				// ※ヘッダー部を受信する前情報
@@ -102,7 +102,7 @@ bool NetWork::Update(void)
 				}
 
 				// ヘッダー部の受信
-				NetWorkRecv(list->first, &revHeader, sizeof(MesH));
+				NetWorkRecv(list->handle_, &revHeader, sizeof(MesH));
 
 				// データがある場合
 				if (revHeader.length)
@@ -110,7 +110,7 @@ bool NetWork::Update(void)
 					tmpPacket.resize(tmpPacket.size() + revHeader.length);
 
 					// データの受け取り
-					NetWorkRecv(list->first, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+					NetWorkRecv(list->handle_, &tmpPacket[writePos], sizeof(int) * revHeader.length);
 					writePos = tmpPacket.size();
 				}
 
@@ -121,7 +121,7 @@ bool NetWork::Update(void)
 				}
 
 				// 
-				SendMesAll(revHeader.type, tmpPacket, list->first);
+				//SendMesAll(revHeader.type, tmpPacket, list->handle_);
 
 				unsigned int type = static_cast<unsigned int>(revHeader.type) - static_cast<unsigned int>(MesType::NON);
 				revUpdate_[type](revHeader, tmpPacket);
@@ -140,7 +140,7 @@ bool NetWork::Update(void)
 
 bool NetWork::CloseNetWork(void)
 {
-	DxLib::CloseNetWork(handlelist_.front().first);
+	DxLib::CloseNetWork(handlelist_.front().handle_);
 	return true;
 }
 
@@ -187,6 +187,11 @@ void NetWork::SetCountDownFlg(bool flg)
 	countDownFlg_ = flg;
 }
 
+void NetWork::SetStartCntFlg(bool flg)
+{
+	startCntFlg_ = flg;
+}
+
 bool NetWork::GetStartCntFlg(void)
 {
 	return startCntFlg_;
@@ -207,7 +212,7 @@ const int NetWork::GetPlayerID(void) const
 	return playerID_;
 }
 
-void NetWork::AddHandleList(intP intp)
+void NetWork::AddHandleList(PlayerHandle intp)
 {
 	handlelist_.emplace_front(intp);
 }
@@ -240,12 +245,19 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 {
 	if (handlelist_.size())
 	{
-		if (handlelist_.front().first == -1)
+		if (handlelist_.front().handle_ == -1)
 		{
 			return false;
 		}
 	}
 
+	SendMes(type, packet, handlelist_.front().handle_);
+
+	return true;
+}
+
+bool NetWork::SendMes(MesType type, UnionVec packet, int handle)
+{
 	// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
 	UnionHeader header{ type,0,0 };
 	SetHeader(header, packet);
@@ -278,10 +290,7 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 
 
 		// データの送信
-		if (handlelist_.size())
-		{
-			NetWorkSend(handlelist_.front().first, packet.data(), sendCount * sizeof(UnionData));
-		}
+		NetWorkSend(handle, packet.data(), sendCount * sizeof(UnionData));
 
 		// 送った要素のみ削除
 		packet.erase(packet.begin() + HEADER_COUNT, packet.begin() + sendCount);
@@ -292,8 +301,7 @@ bool NetWork::SendMes(MesType type,UnionVec packet)
 		// 一度は送ってほしいからdo
 		// 分割データが送り終わるまでループ
 	} while (packet.size() > HEADER_COUNT);
-
-	return true;
+	return false;
 }
 
 bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
@@ -308,12 +316,12 @@ bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
 
 	for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 	{
-		if (list->first == -1)
+		if (list->handle_ == -1)
 		{
 			continue;
 		}
 
-		if (list->first != handle)
+		if (list->handle_ != handle)
 		{
 			// 受け取ったMesTypeでヘッダーを生成して、MesPacketの先頭に挿入する。
 			UnionHeader header{ type,0,0 };
@@ -349,7 +357,7 @@ bool NetWork::SendMesAll(MesType type, UnionVec packet, int handle)
 				// データの送信
 				if (handlelist_.size())
 				{
-					NetWorkSend(list->first, tmpPacket.data(), sendCount * sizeof(UnionData));
+					NetWorkSend(list->handle_, tmpPacket.data(), sendCount * sizeof(UnionData));
 				}
 
 				// 送った要素のみ削除

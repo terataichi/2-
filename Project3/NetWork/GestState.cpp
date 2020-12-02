@@ -19,7 +19,7 @@ bool GuestState::ConnectHost(IPDATA hostIP)
 	if (0 <= netHandle)
 	{
 		listIntP& list = lpNetWork.GetHandleList();
-		list.emplace_back(netHandle, -1);
+		list.emplace_back(PlayerHandle{ netHandle, -1 ,0 });
 		active_ = ActiveState::Init;
 		return true;
 	}

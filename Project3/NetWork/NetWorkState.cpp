@@ -43,7 +43,7 @@ bool NetWorkState::SetPlayerID(int id)
 {
 	// Ž©•ª‚ÌID‚ðƒZƒbƒg
 	listIntP& list = lpNetWork.GetHandleList();
-	list.front().second = id;
+	list.front().id_ = id;
 	return true;
 }
 
