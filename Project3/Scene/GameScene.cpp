@@ -3,8 +3,9 @@
 #include <DxLib.h>
 #include "../_debug/_DebugConOut.h"
 #include "../NetWork/NetWork.h"
-#include "../Player.h"
-#include "../Bomb.h"
+#include "../Object/Player.h"
+#include "../Object/Bomb.h"
+#include "../Object/Item.h"
 
 GameScene::GameScene()
 {
@@ -31,7 +32,10 @@ void GameScene::DrawOwnScene(void)
 
     for (auto& obj : objList_)
     {
-        obj->Draw();
+        if (obj->Alive())
+        {
+            obj->Draw();
+        }
     }
 
     end_ = lpSceneMng.GetTime();
@@ -51,7 +55,7 @@ void GameScene::DrawOwnScene(void)
     DrawBox(0, 0, 80, 30, 0xf, true);
     DrawFormatString(0, 5, 0xff, "1/%d", fps_);
     DrawBox(100, 0, 250, 30, 0xf, true);
-    DrawFormatString(100, 5, 0xff, "LostAverage : %d", Player::lostCont_ / averageCount_);
+    DrawFormatString(100, 5, 0xff, "LostAverage : %d", Player::lostCnt_ / averageCount_);
 }
 
 void GameScene::Init(void)
@@ -97,6 +101,29 @@ void GameScene::Init(void)
             objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(), lpNetWork.GetPlayerID()));
         }
     }
+
+    // ÉAÉCÉeÉÄÇÃê∂ê¨
+
+    //for (auto data : layer.chipData)
+    //{
+    //    if (data == 4)
+    //    {
+    //        chipPos.emplace_back(Vector2{ cnt % div.x, cnt / div.x });
+    //    }
+    //}
+    //auto chipData = tileMap_.GetLayerData("Item").chipData;
+    //Vector2 div{ 32,32 };
+    //int cnt = 0;
+    //for (auto& chip : chipData)
+    //{
+    //    if (chip != 0)
+    //    {
+    //        Vector2 pos{ chip * tileMap_.GetMapData().tileWidth,chip.y * tileMap_.GetMapData().tileHeight };
+    //        objList_.emplace_back(std::make_shared<Item>(chip, ));
+    //    }
+    //    cnt++;
+    //}
+
 
     averageCount_ = 0;
     fpsCount_ = 0;
@@ -172,7 +199,11 @@ const std::vector<bool> GameScene::GetBombMap(void)
 
 void GameScene::InitFunc()
 {
-    gameState_ = GameState::Wait;
+    gameState_ = GameState::Play;
+    if (lpNetWork.GetNetWorkMode() != NetWorkMode::OFFLINE)
+    {
+        gameState_ = GameState::Wait;
+    }
 
     auto playUpdate = [&]()
     {
@@ -183,10 +214,13 @@ void GameScene::InitFunc()
 
         for (auto& obj : objList_)
         {
-            obj->Update();
+            if (obj->Alive())
+            {
+                obj->Update();
+            }
         }
 
-        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive(); }), objList_.end());
+        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive() && (obj->ObjType() != ObjectType::Player); }), objList_.end());
     };
 
     auto waitUpdate = [&]()

@@ -6,7 +6,7 @@
 #include <chrono>
 #include "BaseScene.h"
 #include "../common/TileMap.h"
-#include "../Object.h"
+#include "../Object/Object.h"
 
 using sharedObj = std::shared_ptr<Object>;
 

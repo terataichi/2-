@@ -15,5 +15,6 @@ public:
 	bool CheckConnect(void) override;
 private:
 	int connectCnt_;
+	bool initFlg_;
 };
 

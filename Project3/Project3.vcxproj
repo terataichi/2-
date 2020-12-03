@@ -144,12 +144,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Bomb.cpp" />
+    <ClCompile Include="Object\Item.cpp" />
+    <ClCompile Include="Object\Bomb.cpp" />
     <ClCompile Include="common\ImageMng.cpp" />
     <ClCompile Include="DIR.cpp" />
     <ClCompile Include="Input\KeyState.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Object\Object.cpp" />
+    <ClCompile Include="Object\Player.cpp" />
     <ClCompile Include="Scene\CrossOverScene.cpp" />
     <ClCompile Include="Scene\GameScene.cpp" />
     <ClCompile Include="Input\InputState.cpp" />
@@ -170,14 +171,15 @@
     <ClCompile Include="_debug\_DebugDispOut.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bomb.h" />
+    <ClInclude Include="Object\Item.h" />
+    <ClInclude Include="Object\Bomb.h" />
     <ClInclude Include="common\details\Vector2.h" />
     <ClInclude Include="common\ImageMng.h" />
     <ClInclude Include="common\Vector2.h" />
     <ClInclude Include="DIR.h" />
     <ClInclude Include="Input\KeyState.h" />
-    <ClInclude Include="Object.h" />
-    <ClInclude Include="Player.h" />
+    <ClInclude Include="Object\Object.h" />
+    <ClInclude Include="Object\Player.h" />
     <ClInclude Include="Scene\CrossOverScene.h" />
     <ClInclude Include="Scene\GameScene.h" />
     <ClInclude Include="Input\InputState.h" />

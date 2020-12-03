@@ -179,6 +179,8 @@ private:
 	bool startCntFlg_;
 	listIntP handlelist_;
 
+	int stanbyCnt_;
+
 	std::map<MesType, int> mesTypeSize_;
 };
 

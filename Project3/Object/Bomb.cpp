@@ -1,11 +1,11 @@
 #include "Bomb.h"
 #include <DxLib.h>
 #include <cassert>
-#include "common/ImageMng.h"
-#include "Scene/BaseScene.h"
-#include "Scene/GameScene.h"
+#include "../common/ImageMng.h"
+#include "../Scene/BaseScene.h"
+#include "../Scene/GameScene.h"
 #include "Player.h"
-#include "FlameGenerator.h"
+#include "../FlameGenerator.h"
 
 Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(scene)
 {

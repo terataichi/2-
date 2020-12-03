@@ -266,12 +266,13 @@ bool LoginScene::StartInit(void)
 {
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
 	{
-		if (lpNetWork.CheckConnect() && lpNetWork.GetActive() == ActiveState::Init)
+		if (lpNetWork.GetActive() == ActiveState::Init)
 		{
 			// 初期化情報の送信をして待機
 			TRACE("初期化情報の送信\n");
 			tileMap_->SendTmxData();
 			lpNetWork.SendStanby();
+
 		}
 		if (lpNetWork.GetActive() == ActiveState::Play)
 		{
@@ -284,14 +285,15 @@ bool LoginScene::StartInit(void)
 		{
 			//TRACE("初期化情報の受け取り\n");
 		}
+		if (lpNetWork.GetActive() == ActiveState::Play)
+		{
+			// スタート情報の送信
+			lpNetWork.SendStart();
+			TRACE("ゲームモードに移行します\n");
+			updateMode_ = UpdateMode::Play;
+			return false;
+		}
 	}
-	if (lpNetWork.GetActive() == ActiveState::Play)
-	{
-		// スタート情報の送信
-		lpNetWork.SendStart();
-		TRACE("ゲームモードに移行します\n");
-		updateMode_ = UpdateMode::Play;
-		return false;
-	}
+
 	return true;
 }

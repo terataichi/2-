@@ -2,15 +2,15 @@
 #include <DxLib.h>
 #include <chrono>
 #include <cassert>
-#include "common/ImageMng.h"
-#include "_debug/_DebugConOut.h"
-#include "_debug/_DebugDispOut.h"
-#include "NetWork/NetWork.h"
-#include "Scene/GameScene.h"
-#include "Input/PadState.h"
-#include "Input/KeyState.h"
+#include "../common/ImageMng.h"
+#include "../_debug/_DebugConOut.h"
+#include "../_debug/_DebugDispOut.h"
+#include "../NetWork/NetWork.h"
+#include "../Scene/GameScene.h"
+#include "../Input/PadState.h"
+#include "../Input/KeyState.h"
 
-int Player::lostCont_ = 0;
+int Player::lostCnt_ = 0;
 
 Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(scene),layerData_(layer)
 {
@@ -283,7 +283,7 @@ bool Player::UpdateDef()
 		UnionData data[1]{};
 		data[0].iData = id_;
 
-		lpNetWork.SendMes(MesType::DETH, UnionVec{ data[0]});
+		lpNetWork.SendMesAll(MesType::DETH, UnionVec{ data[0]}, 0);
 		alive_ = false;
 	}
 	else
@@ -295,7 +295,7 @@ bool Player::UpdateDef()
 		data[2].iData = pos_.y;
 		data[3].iData = static_cast<int>(dir_);
 
-		lpNetWork.SendMes(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] });
+		lpNetWork.SendMesAll(MesType::POS, UnionVec{ data[0],data[1],data[2] ,data[3] }, 0);
 	}
 
 	return true;
@@ -392,8 +392,8 @@ bool Player::UpdateRev()
 
 	if (!lost)
 	{
-		lostCont_++;
-		TRACE("Žæ‚è‚±‚Ú‚µID:%d\n", id_);
+		lostCnt_++;
+		// TRACE("Žæ‚è‚±‚Ú‚µID:%d\n", id_);
 	}
 
 	return true;

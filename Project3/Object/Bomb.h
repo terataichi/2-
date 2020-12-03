@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "Object.h"
-#include "common/TileMap.h"
+#include "../common/TileMap.h"
 
 class BaseScene;
 
@@ -20,6 +20,7 @@ public:
 	bool UpdateDef()override;						// 入力処理管理
 	bool UpdateAuto()override;						// オートパイロット
 	bool UpdateRev()override;						// 受信
+	ObjectType ObjType() override { return ObjectType::Bomb; };
 
 private:
 

@@ -1,9 +1,9 @@
 #pragma once
-#include"common/Vector2.h"
-#include "NetWork/NetWork.h"
-#include "common/TileMap.h"
-#include "Scene/SceneMng.h"
-#include "DIR.h"
+#include"../common/Vector2.h"
+#include "../NetWork/NetWork.h"
+#include "../common/TileMap.h"
+#include "../Scene/SceneMng.h"
+#include "../DIR.h"
 
 #define UNIT_ID_BASE 5			// ボムが出せる最大数
 
@@ -13,6 +13,15 @@ enum class STATE
 	Non,
 	Run,
 	Deth,
+};
+
+enum class ObjectType
+{
+	Non,
+	Player,
+	Bomb,
+	Item,
+	Max
 };
 
 class Object
@@ -29,9 +38,10 @@ public:
 	virtual void Draw(void) = 0;
 
 	virtual bool UpdateDef() = 0;					// 入力処理管理
-	virtual bool UpdateAuto() = 0;					// オートパイロット
-	virtual bool UpdateRev()= 0;					// 受信
+	virtual bool UpdateAuto() { return true; };		// オートパイロット
+	virtual bool UpdateRev() { return true; };		// 受信
 
+	virtual ObjectType ObjType() { return ObjectType::Non; };
 protected:
 
 	std::mutex revMutex_;

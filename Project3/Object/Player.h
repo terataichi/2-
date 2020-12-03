@@ -3,12 +3,12 @@
 #include <memory>
 #include <list>
 #include <functional>
-#include "common/Vector2.h"
-#include "common/TileMap.h"
-#include "Input/InputState.h"
-#include "DIR.h"
+#include "../common/Vector2.h"
+#include "../common/TileMap.h"
+#include "../Input/InputState.h"
+#include "../DIR.h"
 #include "Object.h"
-#include "Scene/BaseScene.h"
+#include "../Scene/BaseScene.h"
 
 using MoveFuncInput = std::function<bool(TrgData, bool)>;
 
@@ -38,8 +38,8 @@ public:
 	void AddBombList(int no);
 	int CheckBomb();
 
-	static int lostCont_;
-
+	static int lostCnt_;
+	ObjectType ObjType() override { return ObjectType::Player; };
 private:
 
 	void InitFunc(void);											// ファンクションの初期化

@@ -69,7 +69,7 @@ bool NetWork::Update(void)
 		}
 	}
 
-	while (ProcessMessage() == 0 && state_->Update() && handlelist_.size())
+	while (ProcessMessage() == 0 && handlelist_.size())
 	{
 		auto lostHandle = GetLostNetWork();
 
@@ -78,13 +78,20 @@ bool NetWork::Update(void)
 		{
 			if (lostHandle == list->handle_)
 			{
-				handlelist_.erase(list);
 				TRACE("切断されたハンドル削除\n");
-				if (!handlelist_.size())
+
+				if (revDataList_.size())
 				{
-					break;
+					std::lock_guard<std::mutex> lock(revDataList_[0].first);
+					UnionData data;
+					data.iData = list->id_;
+					UnionVec packet{ data };
+					SendMesAll(MesType::LOST, packet, 0);
+					revDataList_[list->id_ / 5].second.emplace_back(MesH{ MesType::LOST,0,0,0 }, packet);
 				}
-				continue;
+				handlelist_.erase(list);
+				playerMax_--;
+				break;
 			}
 
 			if (GetNetWorkDataLength(list->handle_) >= sizeof(MesH))
@@ -128,7 +135,7 @@ bool NetWork::Update(void)
 				}
 				else
 				{
-					TRACE("メッセージタイプが変です ID : %d\n", list->id_);
+					TRACE("メッセージタイプが変 ID : %d\n", list->id_);
 				}
 			}
 		}
@@ -137,6 +144,7 @@ bool NetWork::Update(void)
 	// オフライン以外だったら切断するよ
 	if (state_->GetMode() != NetWorkMode::OFFLINE)
 	{
+		TRACE("オンラインを終了します\n");
 		if (handlelist_.size())
 		{
 			CloseNetWork();
@@ -426,8 +434,24 @@ void NetWork::InitFunc(void)
 			// ゲームスタートを受信時
 			if (static_cast<MesType>(data.type) == MesType::STANBY_GUEST)
 			{
-				TRACE("ゲストから通知を確認、ゲームを開始します\n");
-				state_->SetActive(ActiveState::Play);
+				TRACE("ゲストから通知を確認\n"); 
+				stanbyCnt_++;
+				// 自分の分を引いておく
+				if (playerMax_ - 1  <= stanbyCnt_)
+				{
+					// カウントダウンの送信
+					UnionData data[2];
+					TimeData time{ lpSceneMng.GetTime() };
+
+					data[0].iData = time.iData[0];
+					data[1].iData = time.iData[1];
+
+					lpNetWork.SetStartTime(time.time);
+					lpNetWork.SetStartCntFlg(true);
+					lpNetWork.SendMesAll(MesType::COUNT_DOWN_GAME, UnionVec{ data[0],data[1] }, 0);
+
+					state_->SetActive(ActiveState::Play);
+				}
 				return true;
 			}
 		}
@@ -554,8 +578,14 @@ void NetWork::InitFunc(void)
 				return false;
 			}
 
-			std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
-			revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
+			if (packet[0].iData / 5 <= static_cast<int>(revDataList_.size()))
+			{
+				// if (packet[0].iData > 0)
+				{
+					std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
+					revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
+				}
+			}
 		}
 		return true;
 	};
@@ -619,6 +649,7 @@ void NetWork::Init(void)
 	sendLength_ = 0;
 	countDownFlg_ = false;
 	startCntFlg_ = false;
+	stanbyCnt_ = 0;
 
 	// バイト長の読み込み
 	std::ifstream ifs("init/setting.txt");

@@ -8,7 +8,7 @@ HostState::HostState()
 	//active_ = !PreparationListenNetWork(portNum_);
 	bool flg;
 	flg = PreparationListenNetWork(portNum_) == 0 ? true : false;
-
+	initFlg_ = false;
 	active_ = ActiveState::Non;
 	connectCnt_ = 0;
 	if (flg)
@@ -64,7 +64,7 @@ bool HostState::CheckConnect(void)
 		TRACE("接続が確認されました\n");
 	}
 
-	if (lpNetWork.GetCountDownFlg() && !lpNetWork.GetStartCntFlg())
+	if (lpNetWork.GetCountDownFlg() && !initFlg_)
 	{
 	
 		chronoTime now = std::chrono::system_clock::now();
@@ -74,7 +74,7 @@ bool HostState::CheckConnect(void)
 		{
 			lpNetWork.SetPlayerMax(connectCnt_ + 1);		// 自分の分+1する
 			active_ = ActiveState::Init;
-
+			initFlg_ = true;
 			//　IDの振り分け
 			auto& handlelist = lpNetWork.GetHandleList();
 			int max = static_cast<int>(handlelist.size());
@@ -89,19 +89,6 @@ bool HostState::CheckConnect(void)
 				cnt--;
 				lpNetWork.SendMes(MesType::ID, UnionVec{ idData[0] ,idData[1] }, list.handle_);
 			}
-
-
-			// カウントダウンの送信
-			UnionData data[2];
-			TimeData time{ now };
-
-			data[0].iData = time.iData[0];
-			data[1].iData = time.iData[1];
-
-			lpNetWork.SetStartTime(time.time);
-			lpNetWork.SetStartCntFlg(true);
-			lpNetWork.SendMesAll(MesType::COUNT_DOWN_GAME, UnionVec{ data[0],data[1] }, 0);
-
 			// 接続されてるのでこれ以上接続されないように止める
 			StopListenNetWork();
 			return true;
