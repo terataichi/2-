@@ -464,6 +464,7 @@ void NetWork::InitFunc(void)
 					lpNetWork.SendMesAll(MesType::COUNT_DOWN_GAME, UnionVec{ data[0],data[1] }, 0);
 
 					state_->SetActive(ActiveState::Play);
+					playerID_ = 0;
 				}
 				return true;
 			}
@@ -630,7 +631,7 @@ void NetWork::InitFunc(void)
 		// ˆê‰ñ‚¾‚¯İ’è
 		if (packet[0].iData % 5 == 0)
 		{
-			if (playerID_ == -1)
+			if (playerID_ == -1 && packet[0].iData / 5 <= packet[1].iData)
 			{
 				playerID_ = packet[0].iData;
 				playerMax_ = packet[1].iData;

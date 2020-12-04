@@ -24,6 +24,8 @@ enum class ObjectType
 	Max
 };
 
+#define MAX_FIRE_LENGTH 6
+
 class Object
 {
 public:

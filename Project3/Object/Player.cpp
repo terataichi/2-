@@ -384,6 +384,11 @@ bool Player::UpdateRev()
 					break;
 				}
 
+				if (data[4].iData > MAX_FIRE_LENGTH)
+				{
+					TRACE("ÉGÉâÅ[:length : %d\n", data[1].iData / 5);
+					break;
+				}
 
 				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, sendPos,timeData.time, data[4].iData,false);
 			}
