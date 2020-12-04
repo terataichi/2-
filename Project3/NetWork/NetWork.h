@@ -121,7 +121,7 @@ public:
 	void SetCountDownFlg(bool flg);
 	void SetStartCntFlg(bool flg);
 	bool GetStartCntFlg(void);												// スタートのカウントダウン開始していいか
-	void SetPlayerMax(int max);
+	void AddPlayerMax();
 	const int GetPlayerMax(void)const;
 	const int GetPlayerID(void)const;
 

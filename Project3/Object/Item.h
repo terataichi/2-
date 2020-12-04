@@ -22,6 +22,7 @@ public:
     bool Update(void)override;
     void Draw(void)override;
 
+    bool UpdateDef();
     ObjectType ObjType() { return ObjectType::Item; };
 private:
     void InitFunc(void);

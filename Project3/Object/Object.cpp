@@ -3,7 +3,6 @@ int Object::count = 0;
 
 Object::Object():id_(count)
 {
-	lpNetWork.AddRevList(revMutex_, revList_);
 	rad_ = 0;
 	alive_ = true;
 	count += UNIT_ID_BASE;

@@ -67,6 +67,7 @@ public:
 	MapData& GetMapData(void);
 	const FlameMapVec& GetFlameMap(void)const;			// 当たり判定に使う
 	std::vector<Vector2> GetCharChipPos();				// キャラクターの初期配置取得
+	std::vector<Vector2> GetItemChipPos();				// キャラクターの初期配置取得
 
 	bool SetFlameMap(dirBit dir,Vector2 size,bool next, chronoTime time);	// 爆発情報書き込み用
 

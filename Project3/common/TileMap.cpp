@@ -157,7 +157,7 @@ void TileMap::Update(void)
 {
 	for (auto &data : layerVec_)
 	{
-		if (data.name != "Char")
+		if (data.name != "Char" && data.name != "Item")
 		{
 			DrawMap(data);
 		}
@@ -221,6 +221,29 @@ std::vector<Vector2> TileMap::GetCharChipPos()
 				if (data == 4)
 				{
 					chipPos.emplace_back(Vector2{cnt % div.x, cnt / div.x });
+				}
+				cnt++;
+			}
+		}
+	}
+	return chipPos;
+}
+
+std::vector<Vector2> TileMap::GetItemChipPos()
+{
+	std::vector<Vector2> chipPos{};
+	for (auto& layer : layerVec_)
+	{
+		if (layer.name == "Item")
+		{
+			int cnt = 0;
+			Vector2 div{ layer.width ,layer.heigth };
+
+			for (auto data : layer.chipData)
+			{
+				if (data != 0)
+				{
+					chipPos.emplace_back(Vector2{ cnt % div.x, cnt / div.x });
 				}
 				cnt++;
 			}

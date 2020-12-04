@@ -14,6 +14,7 @@ int Player::lostCnt_ = 0;
 
 Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(scene),layerData_(layer)
 {
+	lpNetWork.AddRevList(revMutex_, revList_);
 	pos_ = pos;
 	vel_ = { 4,4 };
 	rad_ = 0;
@@ -59,7 +60,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(sc
 	}
 	else
 	{
-		if (id_ == id)
+		if (id_ == lpNetWork.GetPlayerID())
 		{
 			netFunc_ = std::bind(&Player::UpdateDef,this);
 			InitFunc();
@@ -370,6 +371,19 @@ bool Player::UpdateRev()
 				TimeData timeData{};
 				timeData.iData[0] = data[5].iData;
 				timeData.iData[1] = data[6].iData;
+
+				if (data[0].iData / 5 > lpNetWork.GetPlayerMax())
+				{
+					TRACE("エラー:ownerID : %d\n", data[0].iData / 5);
+					break;
+				}
+
+				if (data[1].iData / 5 > lpNetWork.GetPlayerMax())
+				{
+					TRACE("エラー:myID : %d\n", data[1].iData / 5);
+					break;
+				}
+
 
 				dynamic_cast<GameScene&>(scene_).SetBomb(data[0].iData, data[1].iData, sendPos,timeData.time, data[4].iData,false);
 			}

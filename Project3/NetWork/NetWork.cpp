@@ -56,12 +56,25 @@ bool NetWork::Update(void)
 	int writePos = 0;
 	while (ProcessMessage() == 0)
 	{
+		auto lostHandle = GetLostNetWork();
+
+		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
+		{
+			if (lostHandle == list->handle_)
+			{
+				TRACE("切断されたハンドル削除\n");
+				handlelist_.erase(list);
+				playerMax_--;
+				TRACE("-max :%d,", playerMax_);
+				break;
+			}
+		}
+
 		if (!state_->Update() || !handlelist_.size())
 		{
 			// 使ったものをリセットする
 			//state_.reset();
 			recvStanby_ = false;
-			continue;
 		}
 		else
 		{
@@ -213,9 +226,9 @@ bool NetWork::GetStartCntFlg(void)
 	return startCntFlg_;
 }
 
-void NetWork::SetPlayerMax(int max)
+void NetWork::AddPlayerMax()
 {
-	playerMax_ = max;
+	playerMax_++;
 }
 
 const int NetWork::GetPlayerMax(void) const
@@ -578,12 +591,17 @@ void NetWork::InitFunc(void)
 				return false;
 			}
 
-			if (packet[0].iData / 5 <= static_cast<int>(revDataList_.size()))
+			int id = packet[0].iData / 5;
+
+			if (id < static_cast<int>(revDataList_.size()))
 			{
-				// if (packet[0].iData > 0)
+				if (id <= playerMax_)
 				{
-					std::lock_guard<std::mutex> lock(revDataList_[packet[0].iData / 5].first);
-					revDataList_[packet[0].iData / 5].second.emplace_back(data, packet);
+					// if (packet[0].iData > 0)
+					{
+						std::lock_guard<std::mutex> lock(revDataList_[id].first);
+						revDataList_[id].second.emplace_back(data, packet);
+					}
 				}
 			}
 		}
@@ -609,9 +627,19 @@ void NetWork::InitFunc(void)
 
 	auto id = [&](MesH& data, UnionVec& packet)
 	{
-		playerID_ = packet[0].iData;
-		playerMax_ = packet[1].iData;
-		state_->SetPlayerID(playerID_);
+		// 一回だけ設定
+		if (packet[0].iData % 5 == 0)
+		{
+			if (playerID_ == -1)
+			{
+				playerID_ = packet[0].iData;
+				playerMax_ = packet[1].iData;
+				state_->SetPlayerID(playerID_);
+			}
+		}
+		TRACE("id : %d", playerID_);
+		TRACE("max : %d\n", playerMax_);
+
 		return true;
 	};
 
@@ -650,7 +678,8 @@ void NetWork::Init(void)
 	countDownFlg_ = false;
 	startCntFlg_ = false;
 	stanbyCnt_ = 0;
-
+	playerID_ = -1;
+	playerMax_ = 0;
 	// バイト長の読み込み
 	std::ifstream ifs("init/setting.txt");
 	if (ifs.fail())

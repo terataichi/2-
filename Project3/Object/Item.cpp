@@ -7,6 +7,8 @@ Item::Item(ItemType type, Vector2& pos)
     pos_ = pos;
     state_ = STATE::Non;
     moveCnt_ = 0;
+    InitFunc();
+    sinPosY_ = 0;
 }
 
 Item::~Item()
@@ -22,7 +24,12 @@ bool Item::Update(void)
 void Item::Draw(void)
 {
     auto image = lpImageMng.GetHandle("Image/map.png", { 4,3 }, { 32,32 })[8 + static_cast<int>(itemType_)];
-    DrawGraph(pos_.x, pos_.y + sinPosY_, image, true);
+    DrawGraph(pos_.x, pos_.y - sinPosY_, image, true);
+}
+
+bool Item::UpdateDef()
+{
+    return false;
 }
 
 void Item::InitFunc(void)
@@ -38,7 +45,7 @@ void Item::InitFunc(void)
     auto run = [&]() 
     {
         moveCnt_++;
-        sinPosY_ = static_cast<int>(pos_.y - 10.0f * cosf((moveCnt_ * 30.0f) * 0.015f));			// サインカーブ
+        //sinPosY_ = static_cast<int>(pos_.y - 5.0f * cosf((moveCnt_ * 30.0f) * 0.0005f));			// サインカーブ
     };
 
     stateUpdate_.try_emplace(STATE::Non, non);

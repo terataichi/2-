@@ -82,46 +82,43 @@ void GameScene::Init(void)
     if (mode != NetWorkMode::OFFLINE)
     {
         int max = lpNetWork.GetPlayerMax();
-        int playerCnt = 1;
+        int playerCnt = 0;
         for (auto& charData : tileMap_.GetCharChipPos())
         {
-            if (playerCnt <= max)
+            if (playerCnt <= max - 1)
             {
                 Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-                objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(),lpNetWork.GetPlayerID()));
+                objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(),playerCnt * 5));
                 playerCnt++;
             }
         }
     }
     else
     {
+        int playerCnt = 0;
         for (auto& charData : tileMap_.GetCharChipPos())
         {
             Vector2 pos{ charData.x * tileMap_.GetMapData().tileWidth,charData.y * tileMap_.GetMapData().tileHeight };
-            objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(), lpNetWork.GetPlayerID()));
+            objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(), playerCnt * 5));
+            playerCnt++;
         }
     }
 
-    // アイテムの生成
-
-    //for (auto data : layer.chipData)
-    //{
-    //    if (data == 4)
-    //    {
-    //        chipPos.emplace_back(Vector2{ cnt % div.x, cnt / div.x });
-    //    }
-    //}
+    //// アイテムの生成
     //auto chipData = tileMap_.GetLayerData("Item").chipData;
     //Vector2 div{ 32,32 };
-    //int cnt = 0;
+
+    //auto posVec = tileMap_.GetItemChipPos();
+    //int posCnt = 0;
+
     //for (auto& chip : chipData)
     //{
     //    if (chip != 0)
     //    {
-    //        Vector2 pos{ chip * tileMap_.GetMapData().tileWidth,chip.y * tileMap_.GetMapData().tileHeight };
-    //        objList_.emplace_back(std::make_shared<Item>(chip, ));
+    //        Vector2 pos{ posVec[posCnt].x * tileMap_.GetMapData().tileWidth, posVec[posCnt].y * tileMap_.GetMapData().tileHeight };
+    //        objList_.emplace_back(std::make_shared<Item>(static_cast<ItemType>(chip % 9), pos));
+    //        posCnt++;
     //    }
-    //    cnt++;
     //}
 
 

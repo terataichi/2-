@@ -14,7 +14,7 @@ public:
 	//ActiveState CheckPreparation(void);
 	bool CheckConnect(void) override;
 private:
-	int connectCnt_;
+	//int connectCnt_;
 	bool initFlg_;
 };
 
