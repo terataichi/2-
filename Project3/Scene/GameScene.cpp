@@ -30,6 +30,10 @@ void GameScene::DrawOwnScene(void)
     SetDrawScreen(drawScreen_);
     tileMap_.Update();
 
+    // z順にソート
+    objList_.sort([](sharedObj& obj1, sharedObj& obj2)
+        {return obj1->zOrder() > obj2->zOrder(); });
+
     for (auto& obj : objList_)
     {
         if (obj->Alive())
@@ -104,23 +108,22 @@ void GameScene::Init(void)
         }
     }
 
-    //// アイテムの生成
-    //auto chipData = tileMap_.GetLayerData("Item").chipData;
-    //Vector2 div{ 32,32 };
+    // アイテムの生成
+    auto chipData = tileMap_.GetLayerData("Item").chipData;
+    Vector2 div{ 32,32 };
 
-    //auto posVec = tileMap_.GetItemChipPos();
-    //int posCnt = 0;
+    auto posVec = tileMap_.GetItemChipPos();
+    int posCnt = 0;
 
-    //for (auto& chip : chipData)
-    //{
-    //    if (chip != 0)
-    //    {
-    //        Vector2 pos{ posVec[posCnt].x * tileMap_.GetMapData().tileWidth, posVec[posCnt].y * tileMap_.GetMapData().tileHeight };
-    //        objList_.emplace_back(std::make_shared<Item>(static_cast<ItemType>(chip % 9), pos));
-    //        posCnt++;
-    //    }
-    //}
-
+    for (auto& chip : chipData)
+    {
+        if (chip != 0)
+        {
+            Vector2 pos{ posVec[posCnt].x * tileMap_.GetMapData().tileWidth, posVec[posCnt].y * tileMap_.GetMapData().tileHeight };
+            objList_.emplace_back(std::make_shared<Item>(static_cast<ItemType>(chip % 9), pos, *this));
+            posCnt++;
+        }
+    }
 
     averageCount_ = 0;
     fpsCount_ = 0;
@@ -147,7 +150,7 @@ bool GameScene::SetBomb(int& ownerID, int& myID, Vector2& pos, chronoTime& chron
         lpNetWork.SendMes(MesType::SET_BOMB, UnionVec{ data[0],data[1],data[2],data[3],data[4],data[5], data[6] });
     }
  
-    objList_.emplace_back(std::make_shared<Bomb>(myID, pos, chronoTime, *this));
+    objList_.emplace_back(std::make_shared<Bomb>(myID, pos, chronoTime,length, *this));
 
     return true;
 }
@@ -182,6 +185,31 @@ bool GameScene::CheckHitFlame(int chipPos)
         return true;
     }
     return false;
+}
+
+bool GameScene::CheckBlock(int chipPos)
+{
+    return tileMap_.GetLayerData("Obj").chipData[chipPos];
+}
+
+int GameScene::CheckHitItem(int chipPos)
+{
+    for (auto& list : objList_)
+    {
+        if (list->ObjType() == ObjectType::Item)
+        {
+            int itemPos = (list->pos().y / 32) * 21 + (list->pos().x / 32);
+            if (itemPos == chipPos)
+            {
+                list->SetAlive(false);
+                
+                auto type = dynamic_cast<Item&>(*list).GetItemType();
+                return static_cast<int>(type);
+            }
+        }
+    }
+
+    return -1;
 }
 
 void GameScene::SetBombMap(int chipPos, bool flg)

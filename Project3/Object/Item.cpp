@@ -1,7 +1,8 @@
 #include "Item.h"
 #include "../common/ImageMng.h"
+#include "../Scene/GameScene.h"
 
-Item::Item(ItemType type, Vector2& pos)
+Item::Item(ItemType type, Vector2& pos, BaseScene& baseScene):scene_(baseScene)
 {
     itemType_ = type;
     pos_ = pos;
@@ -9,6 +10,7 @@ Item::Item(ItemType type, Vector2& pos)
     moveCnt_ = 0;
     InitFunc();
     sinPosY_ = 0;
+    zOrder_ = 2;
 }
 
 Item::~Item()
@@ -17,8 +19,13 @@ Item::~Item()
 
 bool Item::Update(void)
 {
+    if (!alive_)
+    {
+        return false;
+    }
+
     stateUpdate_[state_]();
-    return false;
+    return true;
 }
 
 void Item::Draw(void)
@@ -36,14 +43,31 @@ void Item::InitFunc(void)
 {
     auto non = [&]() 
     {
+        // ブロックが壊れているか　＆　炎がなくなっているか
+        int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+        auto flame = dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos);
+        auto wall = dynamic_cast<GameScene&>(scene_).CheckBlock(chipPos);
+
+        if (!flame && !wall)
         {
             state_ = STATE::Run;
         }
     };
 
-    
     auto run = [&]() 
     {
+        int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+
+        if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
+        {
+
+            UnionData data[1]{};
+            data[0].iData = id_;
+
+            lpNetWork.SendMesAll(MesType::DETH, UnionVec{ data[0] }, 0);
+            alive_ = false;
+        }
+
         moveCnt_++;
         //sinPosY_ = static_cast<int>(pos_.y - 5.0f * cosf((moveCnt_ * 30.0f) * 0.0005f));			// サインカーブ
     };

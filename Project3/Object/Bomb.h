@@ -11,7 +11,7 @@ class Bomb :
     public Object
 {
 public:
-	Bomb(int& id, Vector2& pos,chronoTime& time, BaseScene& scene);
+	Bomb(int& id, Vector2& pos,chronoTime& time,int length, BaseScene& scene);
 	~Bomb();
 
 	bool Update()override;
@@ -31,5 +31,6 @@ private:
 	chronoTime startTime_;
 
 	int dethCnt_;
+	int lengrh_;
 };
 

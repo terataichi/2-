@@ -10,6 +10,10 @@
 #include "Object.h"
 #include "../Scene/BaseScene.h"
 
+#define LENGTH_MAX 6
+#define BOMB_MAX 4
+#define SPEED_MAX 8
+
 using MoveFuncInput = std::function<bool(TrgData, bool)>;
 
 using MoveFuncAuto = std::function<bool(DIR, bool)>;
@@ -41,7 +45,7 @@ public:
 	static int lostCnt_;
 	ObjectType ObjType() override { return ObjectType::Player; };
 private:
-
+	void ItemInitFunc(void);
 	void InitFunc(void);											// ファンクションの初期化
 
 	std::list<int> bombList_;										// 使えるボムリスト
@@ -56,12 +60,14 @@ private:
 
 	BaseScene& scene_;												// ゲームシーンアクセス用
 
+	std::map<ItemType, std::function<void(void)>> itemUpdate;
 	std::list<MoveFuncInput>inputMoveList_;
 
 	std::list<MoveFuncAuto>autoMoveList_;
 
 	LayerVec& layerData_;
 
+	int bombCnt_;
 	int length_;													// ボムに情報を送るのに必要
 };
 

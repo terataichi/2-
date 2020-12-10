@@ -9,6 +9,7 @@ Object::Object():id_(count)
 	dir_ = DIR::DOWN;
 	state_ = STATE::Non;
 	animCnt_ = 0;
+	zOrder_ = 0;
 }
 
 void Object::PickData(MesType type,UnionVec& vec)
@@ -29,6 +30,11 @@ void Object::PickData(MesType type,UnionVec& vec)
 
 void Object::AnimStateInit(void)
 {
+}
+
+void Object::SetAlive(bool flg)
+{
+	alive_ = flg;
 }
 
 bool Object::CheckData(MesType type)

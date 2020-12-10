@@ -3,27 +3,21 @@
 #include <map>
 #include "Object.h"
 #include "../common/Vector2.h"
-
-enum class ItemType
-{
-    FireUp,                     // 火力アップ
-    AddBomb,                    // ボム追加
-    RemoCon,                    // リモコン
-    SpeedUp                     // スピードアップ
-};
+#include "../Scene/BaseScene.h"
 
 class Item :
     public Object
 {
 public:
-    Item(ItemType type, Vector2& pos);
+    Item(ItemType type, Vector2& pos, BaseScene& baseScene);
     ~Item();
 
     bool Update(void)override;
     void Draw(void)override;
 
     bool UpdateDef();
-    ObjectType ObjType() { return ObjectType::Item; };
+    ObjectType ObjType(void) { return ObjectType::Item; };
+    ItemType GetItemType(void) { return itemType_; };
 private:
     void InitFunc(void);
 
@@ -33,5 +27,7 @@ private:
 
     int moveCnt_;
     int sinPosY_;
+
+    BaseScene& scene_;												// ゲームシーンアクセス用
 };
 

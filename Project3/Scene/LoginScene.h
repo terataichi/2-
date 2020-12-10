@@ -7,13 +7,18 @@
 #include "../common/Vector2.h"
 #include "../Input/InputState.h"
 #include "../NetWork/NetWorkState.h"
+#include "../NetWork/NetWork.h"
+
+#define SELECT_IP_MAX_X 3
+#define SELECT_IP_MAX_Y 4
 
 enum class UpdateMode
 {
 	SetNetWork,
-	SetHostIP,
+	SetLastHostIP,
 	StartInit,
 	Play,
+	SelectHostIP
 };
 
 enum class ChipLayer
@@ -38,12 +43,23 @@ public:
 	void DrawOwnScene()override;
 
 private:
+
+	void InitFunc(void);
+
 	bool PlayUpdate(void);
 	// 状態別アップデートの呼び出し先
-	std::map<UpdateMode, std::function<bool(void)>> func_;
+	std::map<UpdateMode, std::function<bool(void)>> funcUpdate_;
+	std::map<UpdateMode, std::function<void(void)>> funcDraw_;
 	bool SetNetWorkMode(void);
-	bool SetHostIP(void);
+	int SelectNetWorkMode(void);										// ネットワーク選択用
+	bool SetLastHostIP(void);
+	bool SetHostIP(std::string hostIPAddress);
+	bool SelectHostIP(void);
 	bool StartInit(void);
+
+	void DrawSetNetWork(void);
+	void DrawSetHostIP(void);
+
 
 	int screen_size_x_;
 	int screen_size_y_;
@@ -55,14 +71,21 @@ private:
 	int speed_;
 	float rad_;
 
-	bool wasHost_;											// 前回のホストに接続したいかどうか管理用
+	bool wasHost_;														// 前回のホストに接続したいかどうか管理用
 	std::unique_ptr<InputState> input_;
 
 	std::shared_ptr<TileMap> tileMap_;
 
 	bool flg_ = false;
 
-	//std::map<std::string, ChipLayer> chipLayer_;
-	//std::map<ChipLayer, std::vector<int>>chipData_;
+	int netWorkModeMaxSize_;											// 前回のIPがあるかどうかでサイズが変わる
+	int netWorkModeTarget_;												// どのモードを選択しようとしているか												
+
+	int selectIpTargetNum_;												// ターゲット計算用
+	Vector2 selectIpTarget_;
+	std::array<std::string, 12> targetNum_;								// ターゲットの場所によって文字が入っている		
+
+	std::string hostIPAddress_;
+	ArrayIP myIP_;
 };
 

@@ -16,7 +16,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(sc
 {
 	lpNetWork.AddRevList(revMutex_, revList_);
 	pos_ = pos;
-	vel_ = { 4,4 };
+	vel_ = { 2,2 };
 	rad_ = 0;
 	dir_ = DIR::DOWN;
 	animCnt_ = 0;
@@ -27,10 +27,11 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(sc
 	dirMap_.try_emplace(DIR::LEFT, Vector2{ -1,0 });
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
 	dirMap_.try_emplace(DIR::UP, Vector2{ 0,-1 });
-
 	input_ = std::make_unique<KeyState>();
 
 	input_->SetUp(0);
+
+	bombCnt_ = 1;
 
 	nextDir_[0] = DIR::DOWN;
 	nextDir_[1] = DIR::LEFT;
@@ -41,10 +42,10 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(sc
 	int modeID = lpNetWork.GetNetWorkMode() != NetWorkMode::HOST ? 1 : 0;
 
 	// É{ÉÄÉäÉXÉgÇÃèâä˙âª
-	for (int id = id_ + 1; id < id_ + UNIT_ID_BASE; id++)
-	{
-		bombList_.emplace_back(id);
-	}
+
+	bombList_.emplace_back(id_ + bombCnt_);
+	
+	ItemInitFunc();
 
 	if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
 	{
@@ -71,6 +72,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(sc
 		}
 	}
 
+	zOrder_ = 0;
 }
 
 Player::~Player()
@@ -79,6 +81,14 @@ Player::~Player()
 
 bool Player::Update()
 {
+	int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+	int type = dynamic_cast<GameScene&>(scene_).CheckHitItem(chipPos);
+
+	if (type != -1)
+	{
+		itemUpdate[static_cast<ItemType>(type)]();
+	}
+
 	// IDï èàóù
 	return 	netFunc_();
 }
@@ -437,6 +447,45 @@ int Player::CheckBomb()
 	return id;
 }
 
+void Player::ItemInitFunc(void)
+{
+	auto fireUp = [&]()
+	{
+		if (length_ < LENGTH_MAX)
+		{
+			length_++;
+		}
+	};
+
+	auto remoCon = [&]()
+	{
+
+	};
+
+	auto speedUp = [&]()
+	{
+		if (vel_.x < SPEED_MAX)
+		{
+			vel_.x = vel_.x << 1;
+			vel_.y = vel_.y << 1;
+		}
+	};
+
+	auto addBomb = [&]()
+	{
+		if (bombCnt_ < BOMB_MAX)
+		{
+			bombCnt_++;
+			bombList_.emplace_back(id_ + bombCnt_);
+		}
+	};
+
+	itemUpdate.try_emplace(ItemType::FireUp, fireUp);
+	itemUpdate.try_emplace(ItemType::RemoCon, remoCon);
+	itemUpdate.try_emplace(ItemType::SpeedUp, speedUp);
+	itemUpdate.try_emplace(ItemType::AddBomb, addBomb);
+}
+
 void Player::InitFunc(void)
 {
 	// ï‚ê≥
@@ -542,8 +591,4 @@ void Player::InitFunc(void)
 	inputMoveList_.emplace_back(inputRight);
 	inputMoveList_.emplace_back(inputUp);	
 	inputMoveList_.emplace_back(inputDown);
-
-
-	// ------------ Auto ----------------------------------------------
-
 }

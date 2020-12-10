@@ -15,6 +15,14 @@ enum class STATE
 	Deth,
 };
 
+enum class ItemType
+{
+	FireUp,                     // 火力アップ
+	AddBomb,                    // ボム追加
+	RemoCon,                    // リモコン
+	SpeedUp                     // スピードアップ
+};
+
 enum class ObjectType
 {
 	Non,
@@ -32,9 +40,11 @@ public:
 	Object();
 	virtual ~Object() = default;
 
+	const Vector2& pos(void) { return pos_; ; }
+	const int zOrder(void) { return zOrder_; };
 	const int ID(void) { return id_; };
 	bool Alive(void) { return alive_; };
-
+	void SetAlive(bool flg);
 	bool CheckData(MesType type);
 	virtual bool Update() = 0;
 	virtual void Draw(void) = 0;
@@ -64,6 +74,7 @@ protected:
 
 	std::map<STATE, std::vector<int>>animState_;				// アニメーション別ベクター
 
+	int zOrder_;												// 各オブジェクト描画順ソート用
 	int animCnt_;
 };
 

@@ -7,7 +7,7 @@
 #include "Player.h"
 #include "../FlameGenerator.h"
 
-Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(scene)
+Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, int length, BaseScene& scene) :scene_(scene)
 {
     pos_ = pos;
     id_ = id;
@@ -17,6 +17,9 @@ Bomb::Bomb(int& id, Vector2& pos, chronoTime& time, BaseScene& scene) :scene_(sc
     dethCnt_ = 0;
     startTime_ = time;
     dynamic_cast<GameScene&>(scene_).SetBombMap((pos_.y / 32) * 21 + (pos_.x / 32), true);
+    lengrh_ = length;
+    zOrder_ = 1;
+
     AnimStateInit();
 }
 
@@ -42,8 +45,8 @@ bool Bomb::Update()
         {
             state_ = STATE::Deth;
             alive_ = false;
-            int tmplength = 3;
-            dynamic_cast<GameScene&>(scene_).FlameGenerate(tmplength, pos_);
+
+            dynamic_cast<GameScene&>(scene_).FlameGenerate(lengrh_, pos_);
             dynamic_cast<GameScene&>(scene_).SetBombMap(chipPos, false);
         }
     }

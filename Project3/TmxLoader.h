@@ -2,8 +2,8 @@
 #include <map>
 
 // rappidXml
-#include "../TileMap/rapidxml.hpp"
-#include "../TileMap/rapidxml_utils.hpp"
+#include "TileMap/rapidxml.hpp"
+#include "TileMap/rapidxml_utils.hpp"
 
 #define TMX_VERSION "1.4"
 

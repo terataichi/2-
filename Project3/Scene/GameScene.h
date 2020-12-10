@@ -31,6 +31,8 @@ public:
     sharedObj GetObjectList(int id);                                                             // オブジェリストから要素の取り出し
     void FlameGenerate(int& length, Vector2& pos);                                               // フレーム生成
     bool CheckHitFlame(int chipPos);                                                             // 爆風との当たり判定用
+    bool CheckBlock(int chipPos);
+    int CheckHitItem(int chipPos);
 
     void SetBombMap(int chipPos, bool flg);
     const std::vector<bool> GetBombMap(void);
