@@ -8,6 +8,7 @@
 #include "../common/ImageMng.h"
 #include "../Scene/SceneMng.h"
 #include "../Input/PadState.h"
+#include "../Input/KeyState.h"
 #include "../Input/INPUT_ID.h"
 #include "../common/TileMap.h"
 #include "GameScene.h"
@@ -61,7 +62,7 @@ LoginScene::~LoginScene()
 void LoginScene::Init(void)
 {
 	GetDrawScreenSize(&screen_size_x_, &screen_size_y_);
-	input_ = std::make_unique<PadState>();
+	input_ = std::make_unique<KeyState>();
 	input_->SetUp(0);
 	wasHost_ = false;
 	pos_ = { 100,100 };
@@ -125,11 +126,11 @@ void LoginScene::DrawOwnScene()
 		chronoTime now = std::chrono::system_clock::now();
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
 
-		DrawFormatString(size.x, size.y, 0xffffff, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
+		DrawFormatString(500, 500, 0xffffff, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
 	}
 	else
 	{
-		DrawFormatString(size.x, size.y, 0xffffff, "待機中");
+		DrawFormatString(500, 500, 0xf, "待機中");
 	}
 }
 
@@ -278,16 +279,19 @@ void LoginScene::DrawSetNetWork(void)
 	DrawBox(0, 0, lpSceneMng.screenSize_.x, lpSceneMng.screenSize_.y, 0xffffff, true);
 
 	int x = 200;
-	if (!ifs.fail())
-	{
-		std::string ip;
-		getline(ifs, ip);
-		DrawRotaGraph(x + 50, 400, 1, 0, lpImageMng.GetHandle("lasthost")[0], true);
-	}
 	DrawRotaGraph(x, 100, 1, 0, lpImageMng.GetHandle("host")[0], true);
 	DrawRotaGraph(x, 200, 1, 0, lpImageMng.GetHandle("guest")[0], true);
 	DrawRotaGraph(x, 300, 1, 0, lpImageMng.GetHandle("offline")[0], true);
 
+	if (!ifs.fail())
+	{
+		std::string ip;
+		getline(ifs, ip);
+		DrawFormatString(x + 250, 400, 0xf, ip.c_str());
+		DrawRotaGraph(x + 50, 400, 1, 0, lpImageMng.GetHandle("lasthost")[0], true);
+	}
+
+	// 選択しようとしている場所を示してあげる
 	DrawRotaGraph(50, 100 + netWorkModeTarget_ * 100, 1, 0, lpImageMng.GetHandle("ten")[0], true);
 
 	//std::string a = "モードを選択してください。\n 0 : ホスト,\n 1 : ゲスト,\n" + str + " 3 : オフライン\n";
@@ -421,7 +425,9 @@ void LoginScene::DrawSetHostIP(void)
 			offset.x + size.x + targetPos.x,
 			offset.y + (size.y * 3) + size.y - targetPos.y,
 			0xf, false);
-	selectIpTargetNum_;
+
+	DrawFormatString(200, 100, 0xf, hostIPAddress_.c_str());
+	//selectIpTargetNum_;
 }
 
 bool LoginScene::StartInit(void)
