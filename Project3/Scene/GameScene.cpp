@@ -22,23 +22,40 @@ GameScene::~GameScene()
 uniqueBase GameScene::Update(uniqueBase scene)
 {
     stateUpdate_[gameState_]();
+    tileMap_.Update();
     return scene;
 }
 
 void GameScene::DrawOwnScene(void)
 {
     SetDrawScreen(drawScreen_);
-    tileMap_.Update();
+
+    tileMap_.DrawMap(tileMap_.GetLayerData("Bg"));
 
     // z‡‚Éƒ\[ƒg
     objList_.sort([](sharedObj& obj1, sharedObj& obj2)
         {return obj1->zOrder() > obj2->zOrder(); });
+    for (auto& obj : objList_)
+    {
+        if (obj->ObjType() != ObjectType::Player)
+        {
+            if (obj->Alive())
+            {
+                obj->Draw();
+            }
+        }
+    }
+
+    tileMap_.DrawMap(tileMap_.GetLayerData("Obj"));
 
     for (auto& obj : objList_)
     {
-        if (obj->Alive())
+        if (obj->ObjType() == ObjectType::Player)
         {
-            obj->Draw();
+            if (obj->Alive())
+            {
+                obj->Draw();
+            }
         }
     }
 

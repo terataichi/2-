@@ -155,13 +155,13 @@ bool TileMap::SendTmxData(void)
 
 void TileMap::Update(void)
 {
-	for (auto &data : layerVec_)
-	{
-		if (data.name != "Char" && data.name != "Item")
-		{
-			DrawMap(data);
-		}
-	}
+	//for (auto &data : layerVec_)
+	//{
+	//	if (data.name != "Char" && data.name != "Item")
+	//	{
+	//		DrawMap(data);
+	//	}
+	//}
 
 	// ”š”­I‚í‚Á‚½‚çfalse ‚Å‹A‚Á‚Ä‚­‚é
 	flameList_.erase(std::remove_if(flameList_.begin(), flameList_.end(),

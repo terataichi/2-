@@ -75,8 +75,8 @@ public:
 	const std::vector<bool>GetBombMap(void)const;
 
 	void AddFlameGenerate(int& length, Vector2& pos);	// 爆風生成
-private:
 	bool DrawMap(LayerData layerData);					// マップの描画
+private:
 
 	// 読み込んだTMXファイルの情報保存用
 	TmxLoader loader_;

@@ -72,7 +72,7 @@ void LoginScene::Init(void)
 	selectIpTarget_ = { 0 ,0 };
 	// tileMap_.SendTmxData();
 
-	targetNum_[0] = "n";
+	targetNum_[0] = "c";
 	targetNum_[1] = "0";
 	targetNum_[2] = ".";
 	targetNum_[3] = "1";
@@ -117,37 +117,18 @@ void LoginScene::DrawOwnScene()
 
 	// 各アップデートの描画
 	funcDraw_[updateMode_]();
-
-	auto size = lpSceneMng.screenSize_ / 2;
-	if (lpNetWork.GetCountDownFlg())
-	{
-		auto startTime = lpNetWork.GetStartTime();
-
-		chronoTime now = std::chrono::system_clock::now();
-		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
-
-		DrawFormatString(500, 500, 0xffffff, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
-	}
-	else
-	{
-		DrawFormatString(500, 500, 0xf, "待機中");
-	}
 }
 
 void LoginScene::InitFunc(void)
 {
 	auto play = [&]() {};
 
-	auto startInit = [&]() 
-	{
-	
-	};
 	
 	funcDraw_[UpdateMode::SetLastHostIP] = std::bind(&LoginScene::DrawSetHostIP, this);
 	funcDraw_[UpdateMode::SelectHostIP] = std::bind(&LoginScene::DrawSetHostIP, this);
 	funcDraw_[UpdateMode::SetNetWork] = std::bind(&LoginScene::DrawSetNetWork, this);
 	funcDraw_.try_emplace(UpdateMode::Play, play);
-	funcDraw_.try_emplace(UpdateMode::StartInit, startInit);
+	funcDraw_.try_emplace(UpdateMode::StartInit, std::bind(&LoginScene::DrawStartInit, this));
 }
 
 bool LoginScene::PlayUpdate(void)
@@ -342,8 +323,6 @@ bool LoginScene::SetHostIP(std::string hostIPAddress)
 	hostIP.d3 = GetIPNum();
 	hostIP.d4 = GetIPNum();
 
-	//TRACE("%d.%d.%d.%d", hostIP.d1, hostIP.d2, hostIP.d3, hostIP.d4);
-
 	if (lpNetWork.ConnectHost(hostIP))
 	{
 		// ファイルへの書き込み
@@ -353,7 +332,13 @@ bool LoginScene::SetHostIP(std::string hostIPAddress)
 		ofs << hostIPAddress_;
 
 		updateMode_ = UpdateMode::StartInit;
+		return true;
 	}
+
+	// 一定時間内に接続できなかったのでもう一度接続させる
+	TRACE("もう一度入力するか、再接続してください\n");
+	updateMode_ = UpdateMode::SelectHostIP;
+
 	return true;
 }
 
@@ -396,7 +381,7 @@ bool LoginScene::SelectHostIP(void)
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ATTACK))
 	{
 		int target = selectIpTargetNum_;
-		if (targetNum_[target] == "n")
+		if (targetNum_[target] == "c")
 		{
 			hostIPAddress_.clear();
 			return true;
@@ -426,8 +411,27 @@ void LoginScene::DrawSetHostIP(void)
 			offset.y + (size.y * 3) + size.y - targetPos.y,
 			0xf, false);
 
+
 	DrawFormatString(200, 100, 0xf, hostIPAddress_.c_str());
 	//selectIpTargetNum_;
+}
+
+void LoginScene::DrawStartInit(void)
+{
+	auto size = lpSceneMng.screenSize_ / 2;
+	if (lpNetWork.GetCountDownFlg())
+	{
+		auto startTime = lpNetWork.GetStartTime();
+
+		chronoTime now = std::chrono::system_clock::now();
+		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+
+		DrawFormatString(500, 500, 0xffffff, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
+	}
+	else
+	{
+		DrawFormatString(500, 500, 0xf, "待機中");
+	}
 }
 
 bool LoginScene::StartInit(void)

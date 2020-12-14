@@ -66,7 +66,6 @@ bool HostState::CheckConnect(void)
 
 	if (lpNetWork.GetCountDownFlg() && !initFlg_)
 	{
-	
 		chronoTime now = std::chrono::system_clock::now();
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - lpNetWork.GetStartTime()).count();
 		if ((COUNT_DOWN_MAX - time) / 1000 <= 0)

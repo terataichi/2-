@@ -14,6 +14,9 @@
 #define BOMB_MAX 4
 #define SPEED_MAX 8
 
+#define CHIP_SIZE 32
+#define CHIP_RADIUS CHIP_SIZE / 2
+
 using MoveFuncInput = std::function<bool(TrgData, bool)>;
 
 using MoveFuncAuto = std::function<bool(DIR, bool)>;

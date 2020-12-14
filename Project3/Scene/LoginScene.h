@@ -59,7 +59,7 @@ private:
 
 	void DrawSetNetWork(void);
 	void DrawSetHostIP(void);
-
+	void DrawStartInit(void);
 
 	int screen_size_x_;
 	int screen_size_y_;
@@ -75,8 +75,6 @@ private:
 	std::unique_ptr<InputState> input_;
 
 	std::shared_ptr<TileMap> tileMap_;
-
-	bool flg_ = false;
 
 	int netWorkModeMaxSize_;											// 前回のIPがあるかどうかでサイズが変わる
 	int netWorkModeTarget_;												// どのモードを選択しようとしているか												

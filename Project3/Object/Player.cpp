@@ -81,7 +81,7 @@ Player::~Player()
 
 bool Player::Update()
 {
-	int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+	int chipPos = (pos_.y / CHIP_SIZE) * 21 + (pos_.x / CHIP_SIZE);
 	int type = dynamic_cast<GameScene&>(scene_).CheckHitItem(chipPos);
 
 	if (type != -1)
@@ -107,16 +107,16 @@ void Player::Draw()
 
 	DrawGraph(pos_.x, pos_.y - 30, handle[((animNun +(tmpCnt % 2)) * 5) + static_cast<int>(dir_)], true);
 
-	DrawBox(pos_.x, pos_.y, pos_.x + 32, pos_.y + 32, 0xffff, false);
+	DrawBox(pos_.x, pos_.y, pos_.x + CHIP_SIZE, pos_.y + CHIP_SIZE, 0xffff, false);
 	animCnt_++;
 }
 
 bool Player::CheckWallAuto()
 {
 	auto bombMap = dynamic_cast<GameScene&>(scene_).GetBombMap();
-	if (pos_.x % 32 == 0)
+	if (pos_.x % CHIP_SIZE == 0)
 	{
-		if (pos_.y % 32 == 0)
+		if (pos_.y % CHIP_SIZE == 0)
 		{
 			for (auto& layer : layerData_)
 			{
@@ -125,7 +125,7 @@ bool Player::CheckWallAuto()
 					int count = 0;
 					while (count < 4)
 					{
-						Vector2 size{ (pos_.x / 32),(pos_.y / 32) };
+						Vector2 size{ (pos_.x / CHIP_SIZE),(pos_.y / CHIP_SIZE) };
 						size += dirMap_[dir_];
 						int num = ((size.x) + (size.y) * layer.width);
 
@@ -164,16 +164,16 @@ bool Player::CheckWallInput(DIR dir)
 			switch (dir)
 			{
 			case DIR::LEFT:
-				size = { pos_.x - vel_.x, pos_.y + 16 };
+				size = { pos_.x - vel_.x, pos_.y + CHIP_RADIUS };
 				break;
 			case DIR::UP:
-				size = { pos_.x + 16, pos_.y - vel_.y};
+				size = { pos_.x + CHIP_RADIUS, pos_.y - vel_.y};
 				break;
 			case DIR::RIGHT:
-				size = { pos_.x + 32,pos_.y + 16 };
+				size = { pos_.x + CHIP_SIZE,pos_.y + CHIP_RADIUS };
 				break;
 			case DIR::DOWN:
-				size = { pos_.x + 16,pos_.y + 32 };
+				size = { pos_.x + CHIP_RADIUS,pos_.y + CHIP_SIZE };
 				break;
 			default:
 				assert(!"エラー：PLAYERDIR");
@@ -209,22 +209,22 @@ bool Player::CheckMoveBomb(DIR dir)
 	switch (dir)
 	{
 	case DIR::LEFT:
-		size = { pos_.x - vel_.x, pos_.y + 16 };
+		size = { pos_.x - vel_.x, pos_.y + CHIP_RADIUS };
 		break;
 	case DIR::UP:
-		size = { pos_.x + 16, pos_.y - vel_.y };
+		size = { pos_.x + CHIP_RADIUS, pos_.y - vel_.y };
 		break;
 	case DIR::RIGHT:
-		size = { pos_.x + 32,pos_.y + 16 };
+		size = { pos_.x + CHIP_SIZE,pos_.y + CHIP_RADIUS };
 		break;
 	case DIR::DOWN:
-		size = { pos_.x + 16,pos_.y + 32 };
+		size = { pos_.x + CHIP_RADIUS,pos_.y + CHIP_SIZE };
 		break;
 	default:
 		assert(!"エラー：PLAYERDIR");
 		break;
 	}
-	size /= 32;
+	size /= CHIP_SIZE;
 
 	// チップの番号に変換
 	int num = size.x + size.y * 21;
@@ -275,8 +275,8 @@ bool Player::UpdateDef()
 			try
 			{
 				chronoTime time = std::chrono::system_clock::now();
-				Vector2 pos{ (pos_.x + 16) / 32 ,(pos_.y + 16) / 32 };
-				pos = { pos.x * 32,pos.y * 32 };
+				Vector2 pos{ (pos_.x + CHIP_RADIUS) / CHIP_SIZE ,(pos_.y + CHIP_RADIUS) / CHIP_SIZE };
+				pos = { pos.x * CHIP_SIZE,pos.y * CHIP_SIZE };
 				dynamic_cast<GameScene&>(scene_).SetBomb(id_, no,pos ,time, length_,true);
 			}
 			catch (...)
@@ -286,7 +286,7 @@ bool Player::UpdateDef()
 		}
 	}
 
-	int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+	int chipPos = (pos_.y / CHIP_SIZE) * 21 + (pos_.x / CHIP_SIZE);
 
 	if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
 	{
@@ -325,7 +325,7 @@ bool Player::UpdateAuto()
 		state_ = STATE::Non;
 	}
 
-	int chipPos = (pos_.y / 32) * 21 + (pos_.x / 32);
+	int chipPos = (pos_.y / CHIP_SIZE) * 21 + (pos_.x / CHIP_SIZE);
 	if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
 	{
 
@@ -374,8 +374,8 @@ bool Player::UpdateRev()
 		if (data.size())
 		{
 			Vector2 pos{ data[2].iData,data[3].iData };
-			Vector2 sendPos{ (pos.x) / 32 ,(pos.y) / 32 };
-			sendPos = { sendPos.x * 32,sendPos.y * 32 };
+			Vector2 sendPos{ (pos.x) / CHIP_SIZE ,(pos.y) / CHIP_SIZE };
+			sendPos = { sendPos.x * CHIP_SIZE,sendPos.y * CHIP_SIZE };
 			try
 			{
 				TimeData timeData{};
@@ -491,9 +491,9 @@ void Player::InitFunc(void)
 	// 補正
 	auto correction = [&](int remainder, int& pos)
 	{
-		if (remainder >= 16)
+		if (remainder >= CHIP_RADIUS)
 		{
-			pos += 32 - remainder;
+			pos += CHIP_SIZE - remainder;
 		}
 		else
 		{
@@ -513,7 +513,7 @@ void Player::InitFunc(void)
 			{
 				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
-					correction((pos_.y) % 32, pos_.y);
+					correction((pos_.y) % CHIP_SIZE, pos_.y);
 					pos_.x -= vel_.x;
 					return true;
 				}
@@ -534,7 +534,7 @@ void Player::InitFunc(void)
 			{
 				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
-					correction((pos_.y) % 32, pos_.y);
+					correction((pos_.y) % CHIP_SIZE, pos_.y);
 					pos_.x += vel_.x;
 					return true;
 				}
@@ -555,7 +555,7 @@ void Player::InitFunc(void)
 			{
 				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
-					correction((pos_.x) % 32, pos_.x);
+					correction((pos_.x) % CHIP_SIZE, pos_.x);
 					pos_.y -= vel_.y;
 					return true;
 				}
@@ -576,7 +576,7 @@ void Player::InitFunc(void)
 			{
 				if (CheckWallInput(dir_) && CheckMoveBomb(dir_))
 				{
-					correction((pos_.x) % 32, pos_.x);
+					correction((pos_.x) % CHIP_SIZE, pos_.x);
 					pos_.y += vel_.y;
 					return true;
 				}
