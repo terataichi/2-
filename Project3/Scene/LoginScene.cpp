@@ -418,7 +418,10 @@ void LoginScene::DrawSetHostIP(void)
 
 void LoginScene::DrawStartInit(void)
 {
-	auto size = lpSceneMng.screenSize_ / 2;
+	auto size = lpSceneMng.screenSize_;
+
+	DrawBox(0, 0, size.x, size.y, 0xffffff, true);
+
 	if (lpNetWork.GetCountDownFlg())
 	{
 		auto startTime = lpNetWork.GetStartTime();
@@ -426,11 +429,11 @@ void LoginScene::DrawStartInit(void)
 		chronoTime now = std::chrono::system_clock::now();
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
 
-		DrawFormatString(500, 500, 0xffffff, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
+		DrawFormatString(size.x / 2, size.y / 2, 0xf, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
 	}
 	else
 	{
-		DrawFormatString(500, 500, 0xf, "待機中");
+		DrawFormatString(size.x / 2, size.y / 2, 0xf, "待機中");
 	}
 }
 
