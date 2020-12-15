@@ -43,14 +43,17 @@ private:
     std::chrono::system_clock::time_point  now_;
     std::chrono::system_clock::time_point  end_;
 
-    std::map<GameState, std::function<void(void)>> stateUpdate_;                                // 状態別アップデート
+    std::map<GameState, std::function<bool(void)>> stateUpdate_;                                // 状態別アップデート
     GameState gameState_;
 
     int fpsCount_;
     int fps_;
 
     int averageCount_;
-
+    int playerCnt_;                                                                             // 残りプレイヤー数
+    std::list<int> deathList_;
     std::list<sharedObj> objList_;                                                            // ｵﾌﾞｼﾞｪｸﾄリスト
+    UnionVec resultData_;
+
 };
 

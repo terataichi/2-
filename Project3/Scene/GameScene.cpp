@@ -1,6 +1,8 @@
 #include "GameScene.h"
 #include <algorithm>
 #include <DxLib.h>
+#include "CrossOverScene.h"
+#include "ResultScene.h"
 #include "../_debug/_DebugConOut.h"
 #include "../NetWork/NetWork.h"
 #include "../Object/Player.h"
@@ -21,6 +23,10 @@ GameScene::~GameScene()
 
 uniqueBase GameScene::Update(uniqueBase scene)
 {
+    if (resultData_.size())
+    {
+        return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<ResultScene>(resultData_));
+    }
     stateUpdate_[gameState_]();
     tileMap_.Update();
     return scene;
@@ -131,7 +137,7 @@ void GameScene::Init(void)
 
     auto posVec = tileMap_.GetItemChipPos();
     int posCnt = 0;
-
+    playerCnt_ = lpNetWork.GetPlayerMax();
     for (auto& chip : chipData)
     {
         if (chip != 0)
@@ -140,6 +146,11 @@ void GameScene::Init(void)
             objList_.emplace_back(std::make_shared<Item>(static_cast<ItemType>(chip % 9), pos, *this));
             posCnt++;
         }
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+        deathList_.emplace_front(-1);
     }
 
     averageCount_ = 0;
@@ -259,10 +270,60 @@ void GameScene::InitFunc()
             if (obj->Alive())
             {
                 obj->Update();
+                if (!obj->Alive() && obj->ObjType() == ObjectType::Player)
+                {
+                    deathList_.emplace_front(obj->ID());
+                    playerCnt_--;
+                }
             }
         }
+        if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
+        {
+            auto flg = true;
+            for (auto& flame : tileMap_.GetFlameMap())
+            {
+                flg &= (flame.startTime.time_since_epoch().count() == 0);
+            }
 
-        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) {return !obj->Alive() && (obj->ObjType() != ObjectType::Player); }), objList_.end());
+            if (playerCnt_ <= 1 && flg)
+            {
+                for (auto& obj : objList_)
+                {
+                    if (obj->Alive())
+                    {
+                        if (obj->ObjType() == ObjectType::Player)
+                        {
+                            deathList_.emplace_front(obj->ID());
+                        }
+                    }
+                }
+                UnionData data[5]{};
+                int i = 0;
+                for (auto list : deathList_)
+                {
+                    data[i].iData = list;
+                    i++;
+                    if (i >= 5)
+                    {
+                        break;
+                    }
+                }
+               
+                resultData_ = UnionVec{ data[0],data[1],data[2],data[3],data[4] };
+                lpNetWork.SendMesAll(MesType::RESULT, resultData_, -1);
+                return false;
+            }
+        }
+        if (lpNetWork.GetNetWorkMode() == NetWorkMode::GUEST)
+        {
+            resultData_ = lpNetWork.GetResultData();
+        }
+
+        // éÄÇÒÇ≈ÇÈÇ‚Ç¬çÌèú
+        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) 
+            {return !obj->Alive() && (obj->ObjType() != ObjectType::Player); }), objList_.end());
+        return true;
+
     };
 
     auto waitUpdate = [&]()
@@ -281,6 +342,7 @@ void GameScene::InitFunc()
             }
             DrawFormatString(size.x, size.y, 0xffffff, "écÇËÅF%dïb", (COUNT_START_MAX - time) / 1000);
         }
+        return true;
     };
 
     stateUpdate_.try_emplace(GameState::Wait, waitUpdate);

@@ -30,6 +30,7 @@ enum class MesType:unsigned char
 	POS,							// 座標
 	SET_BOMB,						// インスタンスするボムの情報
 	DETH,							// 死亡
+	RESULT,							// リザルト
 	LOST,							// 切断時に生成
 	MAX
 };
@@ -124,7 +125,7 @@ public:
 	void AddPlayerMax();
 	const int GetPlayerMax(void)const;
 	const int GetPlayerID(void)const;
-
+	const UnionVec& GetResultData(void)const;
 	void AddHandleList(PlayerHandle intp);
 	listIntP& GetHandleList(void);
 
@@ -155,6 +156,7 @@ private:
 
 	int tmxSize_;															// Tmxファイルサイズ保存用変数 
 	UnionVec revBox_;
+	UnionVec resultData_;
 
 	std::vector<std::pair<std::mutex&,RevDataListP&>> revDataList_;			// IDに対する受け取ったデータ
 

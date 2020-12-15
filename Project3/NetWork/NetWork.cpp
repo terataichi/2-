@@ -95,7 +95,7 @@ bool NetWork::Update(void)
 
 				if (revDataList_.size())
 				{
-					std::lock_guard<std::mutex> lock(revDataList_[0].first);
+					std::lock_guard<std::mutex> lock(revDataList_[list->id_ / 5].first);
 					UnionData data;
 					data.iData = list->id_;
 					UnionVec packet{ data };
@@ -239,6 +239,11 @@ const int NetWork::GetPlayerMax(void) const
 const int NetWork::GetPlayerID(void) const
 {
 	return playerID_;
+}
+
+const UnionVec& NetWork::GetResultData(void) const
+{
+	return resultData_;
 }
 
 void NetWork::AddHandleList(PlayerHandle intp)
@@ -655,6 +660,15 @@ void NetWork::InitFunc(void)
 		return true;
 	};
 
+	auto result = [&](MesH& data, UnionVec& packet)
+	{
+		if (packet.size() == 5)
+		{
+			resultData_ = packet;
+		}
+		return true;
+	};
+
 	revUpdate_[0] = non;
 	revUpdate_[1] = countDown;
 	revUpdate_[2] = id;
@@ -666,7 +680,8 @@ void NetWork::InitFunc(void)
 	revUpdate_[8] = addList;
 	revUpdate_[9] = addList;
 	revUpdate_[10] = addList;
-	revUpdate_[11] = addList;
+	revUpdate_[11] = result;
+	revUpdate_[12] = addList;
 }
 
 void NetWork::Init(void)
