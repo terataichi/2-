@@ -701,12 +701,17 @@ void NetWork::Init(void)
 	tmxSize_ = 0;
 	ip_ = ArrayIP{};
 	sendLength_ = 0;
+	state_.reset();
 	countDownFlg_ = false;
 	startCntFlg_ = false;
 	stanbyCnt_ = 0;
 	playerID_ = -1;
 	playerMax_ = 0;
+	revDataList_.clear();
+	resultData_.clear();
+	revBox_.clear();
 	endFlg_ = false;
+	handlelist_.clear();
 	// ƒoƒCƒg’·‚Ì“Ç‚İ‚İ
 	std::ifstream ifs("init/setting.txt");
 	if (ifs.fail())
