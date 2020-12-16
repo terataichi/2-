@@ -1,15 +1,14 @@
 #include "Object.h"
-int Object::count = 0;
 
-Object::Object():id_(count)
+Object::Object()
 {
 	rad_ = 0;
 	alive_ = true;
-	count += UNIT_ID_BASE;
 	dir_ = DIR::DOWN;
 	state_ = STATE::Non;
 	animCnt_ = 0;
 	zOrder_ = 0;
+	id_ = 0;
 }
 
 void Object::PickData(MesType type,UnionVec& vec)

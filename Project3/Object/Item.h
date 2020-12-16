@@ -9,7 +9,7 @@ class Item :
     public Object
 {
 public:
-    Item(ItemType type, Vector2& pos, BaseScene& baseScene);
+    Item(int& id,ItemType type, Vector2& pos, BaseScene& baseScene);
     ~Item();
 
     bool Update(void)override;

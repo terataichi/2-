@@ -2,7 +2,7 @@
 #include "../common/ImageMng.h"
 #include "../Scene/GameScene.h"
 
-Item::Item(ItemType type, Vector2& pos, BaseScene& baseScene):scene_(baseScene)
+Item::Item(int& id ,ItemType type, Vector2& pos, BaseScene& baseScene):scene_(baseScene)
 {
     itemType_ = type;
     pos_ = pos;
@@ -11,6 +11,7 @@ Item::Item(ItemType type, Vector2& pos, BaseScene& baseScene):scene_(baseScene)
     InitFunc();
     sinPosY_ = 0;
     zOrder_ = 2;
+    id_ = id;
 }
 
 Item::~Item()

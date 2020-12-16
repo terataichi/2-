@@ -82,7 +82,7 @@ bool NetWork::Update(void)
 		}
 	}
 
-	while (ProcessMessage() == 0 && handlelist_.size())
+	while (ProcessMessage() == 0 && handlelist_.size() && !endFlg_)
 	{
 		auto lostHandle = GetLostNetWork();
 
@@ -161,6 +161,8 @@ bool NetWork::Update(void)
 		if (handlelist_.size())
 		{
 			CloseNetWork();
+			Init();
+			InitFunc();
 		}
 	}
 
@@ -169,8 +171,10 @@ bool NetWork::Update(void)
 
 bool NetWork::CloseNetWork(void)
 {
-	DxLib::CloseNetWork(handlelist_.front().handle_);
-	return true;
+	for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
+	{
+		DxLib::CloseNetWork(list->handle_);
+	}	return true;
 }
 
 ActiveState NetWork::GetActive(void)
@@ -194,6 +198,12 @@ void NetWork::SendStart(void)
 bool NetWork::CheckNetWork()
 {
 	return state_->CheckNetWork();
+}
+
+bool NetWork::EndNetWork(void)
+{
+	endFlg_ = true;
+	return endFlg_;
 }
 
 chronoTime NetWork::GetStartTime(void)
@@ -265,8 +275,8 @@ bool NetWork::AddRevList(std::mutex& mtx, RevDataListP& data)
 
 void NetWork::RunUpDate(void)
 {
-	update = std::thread(&NetWork::Update, this);
-	update.detach();
+	update_ = std::thread(&NetWork::Update, this);
+	update_.detach();
 }
 
 void NetWork::SetHeader(UnionHeader& header, UnionVec& packet)
@@ -435,9 +445,9 @@ NetWork::NetWork()
 
 NetWork::~NetWork()
 {
-	if (update.joinable())
+	if (update_.joinable())
 	{
-		update.join();
+		update_.join();
 	}
 }
 
@@ -696,6 +706,7 @@ void NetWork::Init(void)
 	stanbyCnt_ = 0;
 	playerID_ = -1;
 	playerMax_ = 0;
+	endFlg_ = false;
 	// ÉoÉCÉgí∑ÇÃì«Ç›çûÇ›
 	std::ifstream ifs("init/setting.txt");
 	if (ifs.fail())

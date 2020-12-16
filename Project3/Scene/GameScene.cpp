@@ -119,6 +119,7 @@ void GameScene::Init(void)
                 playerCnt++;
             }
         }
+        playerCnt_ = playerCnt;
     }
     else
     {
@@ -129,6 +130,7 @@ void GameScene::Init(void)
             objList_.emplace_back(std::make_shared<Player>(pos, *this, tileMap_.GetLayerVec(), playerCnt * 5));
             playerCnt++;
         }
+        playerCnt_ = playerCnt;
     }
 
     // アイテムの生成
@@ -137,13 +139,14 @@ void GameScene::Init(void)
 
     auto posVec = tileMap_.GetItemChipPos();
     int posCnt = 0;
-    playerCnt_ = lpNetWork.GetPlayerMax();
+
     for (auto& chip : chipData)
     {
         if (chip != 0)
         {
             Vector2 pos{ posVec[posCnt].x * tileMap_.GetMapData().tileWidth, posVec[posCnt].y * tileMap_.GetMapData().tileHeight };
-            objList_.emplace_back(std::make_shared<Item>(static_cast<ItemType>(chip % 9), pos, *this));
+            int id = 1000;
+            objList_.emplace_back(std::make_shared<Item>(id, static_cast<ItemType>(chip % 9), pos, *this));
             posCnt++;
         }
     }
@@ -277,41 +280,44 @@ void GameScene::InitFunc()
                 }
             }
         }
-        if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
+        if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST || lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
         {
-            auto flg = true;
-            for (auto& flame : tileMap_.GetFlameMap())
+            if (playerCnt_ <= 1)
             {
-                flg &= (flame.startTime.time_since_epoch().count() == 0);
-            }
-
-            if (playerCnt_ <= 1 && flg)
-            {
-                for (auto& obj : objList_)
+                // 爆発処理が終わっているかどうか
+                auto endFlame = true;
+                for (auto& flame : tileMap_.GetFlameMap())
                 {
-                    if (obj->Alive())
+                    endFlame &= (flame.startTime.time_since_epoch().count() == 0);
+                }
+                if (endFlame)
+                {
+                    for (auto& obj : objList_)
                     {
-                        if (obj->ObjType() == ObjectType::Player)
+                        if (obj->Alive())
                         {
-                            deathList_.emplace_front(obj->ID());
+                            if (obj->ObjType() == ObjectType::Player)
+                            {
+                                deathList_.emplace_front(obj->ID());
+                            }
                         }
                     }
-                }
-                UnionData data[5]{};
-                int i = 0;
-                for (auto list : deathList_)
-                {
-                    data[i].iData = list;
-                    i++;
-                    if (i >= 5)
+                    UnionData data[5]{};
+                    int i = 0;
+                    for (auto list : deathList_)
                     {
-                        break;
+                        data[i].iData = list;
+                        i++;
+                        if (i >= 5)
+                        {
+                            break;
+                        }
                     }
+
+                    resultData_ = UnionVec{ data[0],data[1],data[2],data[3],data[4] };
+                    lpNetWork.SendMesAll(MesType::RESULT, resultData_, -1);
+                    return false;
                 }
-               
-                resultData_ = UnionVec{ data[0],data[1],data[2],data[3],data[4] };
-                lpNetWork.SendMesAll(MesType::RESULT, resultData_, -1);
-                return false;
             }
         }
         if (lpNetWork.GetNetWorkMode() == NetWorkMode::GUEST)

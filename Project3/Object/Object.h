@@ -65,7 +65,6 @@ protected:
 	Vector2 pos_;
 	float rad_;
 	Vector2 vel_;
-	static int count;
 	int id_;
 	bool alive_;
 

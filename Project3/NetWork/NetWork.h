@@ -116,6 +116,8 @@ public:
 
 	bool CheckNetWork();
 
+	bool EndNetWork(void);
+
 	chronoTime GetStartTime(void);											// 接続待ち開始時間取得用
 	void SetStartTime(chronoTime time);
 	bool GetCountDownFlg(void);												//
@@ -170,7 +172,7 @@ private:
 	std::chrono::system_clock::time_point  start_;
 	std::chrono::system_clock::time_point  end_;
 
-	std::thread update;
+	std::thread update_;
 
 	unsigned int sendLength_;												// 送信バイト長(イントで割る)
 
@@ -181,6 +183,7 @@ private:
 	bool startCntFlg_;
 	listIntP handlelist_;
 
+	bool endFlg_;															// ネットワークを切断していいか
 	int stanbyCnt_;
 
 	std::map<MesType, int> mesTypeSize_;

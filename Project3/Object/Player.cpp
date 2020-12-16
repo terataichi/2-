@@ -28,7 +28,7 @@ Player::Player(Vector2& pos, BaseScene& scene,LayerVec& layer, int id):scene_(sc
 	dirMap_.try_emplace(DIR::RIGHT, Vector2{ 1,0 });
 	dirMap_.try_emplace(DIR::UP, Vector2{ 0,-1 });
 	input_ = std::make_unique<KeyState>();
-
+	id_ = id;
 	input_->SetUp(0);
 
 	bombCnt_ = 1;

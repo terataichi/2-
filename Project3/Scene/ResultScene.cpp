@@ -1,5 +1,7 @@
 #include "ResultScene.h"
 #include "CrossOverScene.h"
+#include "LoginScene.h"
+#include "../NetWork/NetWork.h"
 #include <DxLib.h>
 #include <string>
 #include <sstream>
@@ -7,6 +9,7 @@
 ResultScene::ResultScene(UnionVec& resultData)
 {
     resultData_ = resultData;
+    lpNetWork.EndNetWork();
     DrawOwnScene();
 }
 
@@ -18,7 +21,7 @@ uniqueBase ResultScene::Update(uniqueBase scene)
 {
     if (CheckHitKey(KEY_INPUT_SPACE))
     {
-
+        return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<LoginScene>());
     }
     DrawOwnScene();
     return scene;
