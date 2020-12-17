@@ -40,6 +40,8 @@ private:
     void InitFunc();
     TileMap tileMap_;                                                                            // タイルマップ情報格納
 
+    bool SetResultData();
+
     std::chrono::system_clock::time_point  now_;
     std::chrono::system_clock::time_point  end_;
 

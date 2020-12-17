@@ -280,54 +280,39 @@ void GameScene::InitFunc()
                 }
             }
         }
-        if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST || lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
+        // Ž€‚ñ‚Å‚é‚â‚Âíœ
+        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj)
+            {return !obj->Alive() && (obj->ObjType() != ObjectType::Player); }), objList_.end());
+
+        if (lpNetWork.GetNetWorkMode() == NetWorkMode::HOST)
+        {  
+            if (playerCnt_ <= 1 || lpNetWork.GetPlayerMax() <= 1)
+            {
+                SetResultData();
+            }
+        }
+        else if (lpNetWork.GetNetWorkMode() == NetWorkMode::GUEST)
+        {
+            if (lpNetWork.GetPlayerMax() <= 1)
+            {
+                SetResultData();
+            }
+            else
+            {
+                resultData_ = lpNetWork.GetResultData();
+            }
+        }
+        else if (lpNetWork.GetNetWorkMode() == NetWorkMode::OFFLINE)
         {
             if (playerCnt_ <= 1)
             {
-                // ”š”­ˆ—‚ªI‚í‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©
-                auto endFlame = true;
-                for (auto& flame : tileMap_.GetFlameMap())
-                {
-                    endFlame &= (flame.startTime.time_since_epoch().count() == 0);
-                }
-                if (endFlame)
-                {
-                    for (auto& obj : objList_)
-                    {
-                        if (obj->Alive())
-                        {
-                            if (obj->ObjType() == ObjectType::Player)
-                            {
-                                deathList_.emplace_front(obj->ID());
-                            }
-                        }
-                    }
-                    UnionData data[5]{};
-                    int i = 0;
-                    for (auto list : deathList_)
-                    {
-                        data[i].iData = list;
-                        i++;
-                        if (i >= 5)
-                        {
-                            break;
-                        }
-                    }
-
-                    resultData_ = UnionVec{ data[0],data[1],data[2],data[3],data[4] };
-                    lpNetWork.SendMesAll(MesType::RESULT, resultData_, -1);
-                    return false;
-                }
+                SetResultData();
             }
         }
-        if (lpNetWork.GetNetWorkMode() == NetWorkMode::GUEST)
+        else
         {
-            resultData_ = lpNetWork.GetResultData();
+            TRACE("ˆÙíŒŸ’m\n");
         }
-
-        // Ž€‚ñ‚Å‚é‚â‚Âíœ
-        objList_.erase(std::remove_if(objList_.begin(), objList_.end(), [&](sharedObj& obj) 
-            {return !obj->Alive() && (obj->ObjType() != ObjectType::Player); }), objList_.end());
         return true;
 
     };
@@ -353,4 +338,43 @@ void GameScene::InitFunc()
 
     stateUpdate_.try_emplace(GameState::Wait, waitUpdate);
     stateUpdate_.try_emplace(GameState::Play, playUpdate);
+}
+
+bool GameScene::SetResultData()
+{
+    // ”š”­ˆ—‚ªI‚í‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©
+    auto endFlame = true;
+    for (auto& flame : tileMap_.GetFlameMap())
+    {
+        endFlame &= (flame.startTime.time_since_epoch().count() == 0);
+    }
+    if (endFlame)
+    {
+        for (auto& obj : objList_)
+        {
+            if (obj->Alive())
+            {
+                if (obj->ObjType() == ObjectType::Player)
+                {
+                    deathList_.emplace_front(obj->ID());
+                }
+            }
+        }
+        UnionData data[5]{};
+        int i = 0;
+        for (auto list : deathList_)
+        {
+            data[i].iData = list;
+            i++;
+            if (i >= 5)
+            {
+                break;
+            }
+        }
+
+        resultData_ = UnionVec{ data[0],data[1],data[2],data[3],data[4] };
+        lpNetWork.SendMesAll(MesType::RESULT, resultData_, -1);
+        return false;
+    }
+    return true;
 }

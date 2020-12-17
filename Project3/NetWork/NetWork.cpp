@@ -41,6 +41,11 @@ bool NetWork::SetNetWorkMode(NetWorkMode mode)
 
 NetWorkMode NetWork::GetNetWorkMode(void)
 {
+	if(!state_)
+	{
+		return NetWorkMode::OFFLINE;
+	}
+
 	return state_->GetMode();
 }
 
@@ -82,7 +87,7 @@ bool NetWork::Update(void)
 		}
 	}
 
-	while (ProcessMessage() == 0 && handlelist_.size() && !endFlg_)
+	while (ProcessMessage() == 0 && !endFlg_)
 	{
 		auto lostHandle = GetLostNetWork();
 
@@ -93,15 +98,15 @@ bool NetWork::Update(void)
 			{
 				TRACE("切断されたハンドル削除\n");
 
-				if (revDataList_.size())
-				{
-					std::lock_guard<std::mutex> lock(revDataList_[list->id_ / 5].first);
-					UnionData data;
-					data.iData = list->id_;
-					UnionVec packet{ data };
-					SendMesAll(MesType::LOST, packet, 0);
-					revDataList_[list->id_ / 5].second.emplace_back(MesH{ MesType::LOST,0,0,0 }, packet);
-				}
+
+				//std::lock_guard<std::mutex> lock(revDataList_[list->id_ / 5].first);
+				UnionData data;
+				data.iData = list->id_;
+				UnionVec packet{ data };
+				//SendMesAll(MesType::LOST, packet, 0);
+				//revDataList_[list->id_ / 5].second.emplace_back(MesH{ MesType::LOST,0,0,0 }, packet);
+				MesH mesh{ MesType::LOST,0,0,0 };
+				AddList(mesh, packet);
 				handlelist_.erase(list);
 				playerMax_--;
 				break;
@@ -155,11 +160,13 @@ bool NetWork::Update(void)
 	}
 
 	// オフライン以外だったら切断するよ
-	if (state_->GetMode() != NetWorkMode::OFFLINE)
+	if (state_)
 	{
-		TRACE("オンラインを終了します\n");
-		if (handlelist_.size())
+		if (state_->GetMode() != NetWorkMode::OFFLINE)
 		{
+			TRACE("オンラインを終了します\n");
+
+			TRACE("初期化処理\n");
 			CloseNetWork();
 			Init();
 			InitFunc();
@@ -171,9 +178,9 @@ bool NetWork::Update(void)
 
 bool NetWork::CloseNetWork(void)
 {
-	for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
+	for (const auto& list : handlelist_)
 	{
-		DxLib::CloseNetWork(list->handle_);
+		DxLib::CloseNetWork(list.handle_);
 	}	return true;
 }
 
@@ -650,7 +657,7 @@ void NetWork::InitFunc(void)
 			{
 				playerID_ = packet[0].iData;
 				playerMax_ = packet[1].iData;
-				state_->SetPlayerID(playerID_);
+				//state_->SetPlayerID(playerID_);
 			}
 		}
 		TRACE("id : %d", playerID_);
@@ -745,4 +752,36 @@ void NetWork::Init(void)
 	mesTypeSize_.try_emplace(MesType::TMX_SIZE, 1);
 	mesTypeSize_.try_emplace(MesType::TMX_DATA, 179);
 
+}
+
+bool NetWork::AddList(MesH& data, UnionVec& packet)
+{
+	if (packet.size())
+	{
+		if (data.type == MesType::LOST)
+		{
+			TRACE("誰かが切断\n");
+		}
+
+		if (mesTypeSize_[data.type] != packet.size())
+		{
+			TRACE("ボマー見つけた\n");
+			return false;
+		}
+
+		int id = packet[0].iData / 5;
+
+		if (id < static_cast<int>(revDataList_.size()))
+		{
+			if (id <= playerMax_)
+			{
+				// if (packet[0].iData > 0)
+				{
+					std::lock_guard<std::mutex> lock(revDataList_[id].first);
+					revDataList_[id].second.emplace_back(data, packet);
+				}
+			}
+		}
+	}
+	return true;
 }

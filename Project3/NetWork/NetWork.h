@@ -152,6 +152,7 @@ private:
 
 	void InitFunc(void);													// ファンクション初期化用
 	void Init(void);
+	bool AddList(MesH& data, UnionVec& packet);
 
 	static std::unique_ptr<NetWork, NetWorkDeleter> sInstance_;
 

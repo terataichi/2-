@@ -81,9 +81,10 @@ Player::~Player()
 
 bool Player::Update()
 {
-	int chipPos = (pos_.y / CHIP_SIZE) * 21 + (pos_.x / CHIP_SIZE);
+	int chipPos = ((pos_.y + CHIP_RADIUS) / CHIP_SIZE) * 21 + ((pos_.x + CHIP_RADIUS) / CHIP_SIZE);
 	int type = dynamic_cast<GameScene&>(scene_).CheckHitItem(chipPos);
 
+	// Å|ÇP
 	if (type != -1)
 	{
 		itemUpdate[static_cast<ItemType>(type)]();
@@ -286,7 +287,7 @@ bool Player::UpdateDef()
 		}
 	}
 
-	int chipPos = (pos_.y / CHIP_SIZE) * 21 + (pos_.x / CHIP_SIZE);
+	int chipPos = ((pos_.y + CHIP_RADIUS) / CHIP_SIZE) * 21 + ((pos_.x + CHIP_RADIUS) / CHIP_SIZE);
 
 	if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
 	{
@@ -325,7 +326,7 @@ bool Player::UpdateAuto()
 		state_ = STATE::Non;
 	}
 
-	int chipPos = (pos_.y / CHIP_SIZE) * 21 + (pos_.x / CHIP_SIZE);
+	int chipPos = ((pos_.y + CHIP_RADIUS) / CHIP_SIZE) * 21 + ((pos_.x + CHIP_RADIUS) / CHIP_SIZE);
 	if (dynamic_cast<GameScene&>(scene_).CheckHitFlame(chipPos))
 	{
 

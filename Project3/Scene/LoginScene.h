@@ -72,7 +72,8 @@ private:
 	float rad_;
 
 	bool wasHost_;														// 前回のホストに接続したいかどうか管理用
-	std::unique_ptr<InputState> input_;
+	std::unique_ptr<InputState> input_;									// キー入力用
+	std::unique_ptr<InputState> numPad_;								// ナムパッド用
 
 	std::shared_ptr<TileMap> tileMap_;
 

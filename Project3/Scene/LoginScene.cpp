@@ -64,6 +64,10 @@ void LoginScene::Init(void)
 	GetDrawScreenSize(&screen_size_x_, &screen_size_y_);
 	input_ = std::make_unique<KeyState>();
 	input_->SetUp(0);
+
+	numPad_ = std::make_unique<KeyState>();
+	numPad_->SetUp(1);
+
 	wasHost_ = false;
 	pos_ = { 100,100 };
 	speed_ = 10;
@@ -123,7 +127,6 @@ void LoginScene::InitFunc(void)
 {
 	auto play = [&]() {};
 
-	
 	funcDraw_[UpdateMode::SetLastHostIP] = std::bind(&LoginScene::DrawSetHostIP, this);
 	funcDraw_[UpdateMode::SelectHostIP] = std::bind(&LoginScene::DrawSetHostIP, this);
 	funcDraw_[UpdateMode::SetNetWork] = std::bind(&LoginScene::DrawSetNetWork, this);
@@ -344,6 +347,32 @@ bool LoginScene::SetHostIP(std::string hostIPAddress)
 
 bool LoginScene::SelectHostIP(void)
 {
+	(*numPad_)();
+
+	auto addIP = [&](const int& target)
+	{
+		if (targetNum_[target] == "c")
+		{
+			hostIPAddress_.clear();
+			return;
+		}
+		hostIPAddress_ += targetNum_[target];
+	};
+
+	auto numPad = [&](INPUT_ID id, int targetNum)
+	{
+		if (numPad_->GetTrgOnePush(id))
+		{
+			selectIpTargetNum_ = targetNum;
+			selectIpTarget_.y = targetNum / 3;
+			selectIpTarget_.x = targetNum % 3;
+			addIP(selectIpTargetNum_);
+			return true;
+		}
+		return false;
+	};
+
+	// ダーゲットの移動処理
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_DOWN))
 	{
 		if (selectIpTargetNum_ - SELECT_IP_MAX_X >= 0)
@@ -360,7 +389,6 @@ bool LoginScene::SelectHostIP(void)
 			selectIpTarget_.y++;
 		}
 	}
-
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_RIGHT))
 	{
 		if (selectIpTargetNum_ + 1 <= (selectIpTarget_.y * SELECT_IP_MAX_X) + SELECT_IP_MAX_X - 1)
@@ -378,22 +406,31 @@ bool LoginScene::SelectHostIP(void)
 		}
 	}
 
+	// ip追加処理
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ATTACK))
 	{
-		int target = selectIpTargetNum_;
-		if (targetNum_[target] == "c")
-		{
-			hostIPAddress_.clear();
-			return true;
-		}
-		hostIPAddress_ += targetNum_[target];
+		addIP(selectIpTargetNum_);
 	}
 
-	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ROTA_R))
+	// ip追加処理(numPad)
+	numPad(INPUT_ID::BUTTON_NUM_0, 1);
+	numPad(INPUT_ID::BUTTON_NUM_DOT, 2);
+	numPad(INPUT_ID::BUTTON_NUM_1, 3);
+	numPad(INPUT_ID::BUTTON_NUM_2, 4);
+	numPad(INPUT_ID::BUTTON_NUM_3, 5);
+	numPad(INPUT_ID::BUTTON_NUM_4, 6);
+	numPad(INPUT_ID::BUTTON_NUM_5, 7);
+	numPad(INPUT_ID::BUTTON_NUM_6, 8);
+	numPad(INPUT_ID::BUTTON_NUM_7, 9);
+	numPad(INPUT_ID::BUTTON_NUM_8, 10);
+	numPad(INPUT_ID::BUTTON_NUM_9, 11);
+
+
+	// 確定させる
+	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ROTA_R) || numPad_->GetTrgOnePush(INPUT_ID::BUTTON_NUM_ENTER))
 	{
 		SetHostIP(hostIPAddress_);
 	}
-
 	return true;
 }
 
