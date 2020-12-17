@@ -67,7 +67,7 @@ private:
 	std::list<MoveFuncInput>inputMoveList_;
 
 	std::list<MoveFuncAuto>autoMoveList_;
-
+	
 	LayerVec& layerData_;
 
 	int bombCnt_;
