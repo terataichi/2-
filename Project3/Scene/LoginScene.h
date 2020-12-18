@@ -12,6 +12,8 @@
 #define SELECT_IP_MAX_X 3
 #define SELECT_IP_MAX_Y 4
 
+#define IPMAX 15
+
 enum class UpdateMode
 {
 	SetNetWork,
@@ -86,5 +88,7 @@ private:
 
 	std::string hostIPAddress_;
 	ArrayIP myIP_;
+
+	bool timeOver_;
 };
 

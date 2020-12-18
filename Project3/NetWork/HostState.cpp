@@ -68,7 +68,7 @@ bool HostState::CheckConnect(void)
 	{
 		chronoTime now = std::chrono::system_clock::now();
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - lpNetWork.GetStartTime()).count();
-		if ((COUNT_DOWN_MAX - time) / 1000 <= 0)
+		if ((COUNT_DOWN_MAX - time) / 1000 < 0)
 		{
 			lpNetWork.AddPlayerMax();
 			active_ = ActiveState::Init;
@@ -85,6 +85,7 @@ bool HostState::CheckConnect(void)
 				list.id_ = cnt * 5;
 				idData[0].iData = list.id_;
 				cnt--;
+				TRACE("ID‚Ì‘—M\n");
 				lpNetWork.SendMes(MesType::ID, UnionVec{ idData[0] ,idData[1] }, list.handle_);
 			}
 			// Ú‘±‚³‚ê‚Ä‚é‚Ì‚Å‚±‚êˆÈãÚ‘±‚³‚ê‚È‚¢‚æ‚¤‚ÉŽ~‚ß‚é
@@ -93,6 +94,11 @@ bool HostState::CheckConnect(void)
 		}
 	}
 
+	// ‰Šú‰»î•ñ‚ª‚·‚Å‚É‘—‚Á‚ ‚é‚©‚ç
+	if (initFlg_)
+	{
+		return true;
+	}
 
 	return false;
 }

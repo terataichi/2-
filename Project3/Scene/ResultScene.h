@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "BaseScene.h"
 #include "../NetWork/NetWork.h"
 
@@ -11,7 +12,7 @@ public:
 	/// インスタンス時にリザルトのデータを渡す
 	/// </summary>
 	/// <param name="resultData"></param>
-	ResultScene(UnionVec& resultData);
+	ResultScene(std::vector<int>& resultData);
 
 	~ResultScene();
 
@@ -19,6 +20,6 @@ public:
 	void DrawOwnScene(void)override;
 	void Init(void)override;
 private:
-	UnionVec resultData_;
+	std::vector<int> resultData_;
 };
 

@@ -75,7 +75,9 @@ bool NetWork::Update(void)
 			}
 		}
 
-		if (!state_->Update() || !handlelist_.size())
+		bool update = state_->Update();
+
+		if (!update || !handlelist_.size())
 		{
 			// 使ったものをリセットする
 			//state_.reset();
@@ -84,6 +86,23 @@ bool NetWork::Update(void)
 		else
 		{
 			break;
+		}
+
+		// 待ち時間切断処理
+		if (update)
+		{
+			chronoTime now = std::chrono::system_clock::now();
+			auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - GetStartTime()).count();
+
+			// 時間切れ
+			if (abs((COUNT_DOWN_MAX - time) / 1000) >= 10)
+			{
+				// endFlg_ = true;
+				state_->SetActive(ActiveState::Play);
+				startCntFlg_ = true;
+				lpNetWork.SetStartTime(lpSceneMng.GetTime());
+				break;
+			}
 		}
 	}
 
@@ -187,6 +206,11 @@ bool NetWork::CloseNetWork(void)
 ActiveState NetWork::GetActive(void)
 {
 	return state_->GetActive();
+}
+
+void NetWork::SetActive(ActiveState state)
+{
+	state_->SetActive(state);
 }
 
 void NetWork::SendStanby(void)

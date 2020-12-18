@@ -98,6 +98,7 @@ public:
 	bool SetNetWorkMode(NetWorkMode mode);									// ネットワークモードの設定
 	NetWorkMode GetNetWorkMode(void);										// ネットワークモードの取得
 	ActiveState GetActive(void);											// 接続先のステータス確認用
+	void SetActive(ActiveState state);
 
 	void SetHeader(UnionHeader& header, UnionVec& vec);						// ヘッダー部をくっつける
 	bool SendMes(MesType header,UnionVec data);								// 送信

@@ -65,6 +65,7 @@ void LoginScene::Init(void)
 	input_ = std::make_unique<KeyState>();
 	input_->SetUp(0);
 
+	timeOver_ = false;
 	numPad_ = std::make_unique<KeyState>();
 	numPad_->SetUp(1);
 
@@ -88,7 +89,6 @@ void LoginScene::Init(void)
 	targetNum_[9] = "7";
 	targetNum_[10] = "8";
 	targetNum_[11] = "9";
-
 
 	InitFunc();
 	DrawOwnScene();
@@ -356,6 +356,13 @@ bool LoginScene::SelectHostIP(void)
 			hostIPAddress_.clear();
 			return;
 		}
+		if (hostIPAddress_.length() >= IPMAX)
+		{
+			hostIPAddress_.pop_back();
+			hostIPAddress_ += targetNum_[target];
+			return;
+		}
+
 		hostIPAddress_ += targetNum_[target];
 	};
 
@@ -426,6 +433,14 @@ bool LoginScene::SelectHostIP(void)
 	numPad(INPUT_ID::BUTTON_NUM_9, 11);
 
 
+	if (numPad_->GetTrgOnePush(INPUT_ID::BUTTON_NUM_MINUS))
+	{
+		// サイズチェック
+		if (hostIPAddress_.length() > 0)
+		{
+			hostIPAddress_.pop_back();
+		}
+	}
 	// 確定させる
 	if (input_->GetTrgOnePush(INPUT_ID::BUTTON_ROTA_R) || numPad_->GetTrgOnePush(INPUT_ID::BUTTON_NUM_ENTER))
 	{
@@ -466,7 +481,21 @@ void LoginScene::DrawStartInit(void)
 		chronoTime now = std::chrono::system_clock::now();
 		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
 
-		DrawFormatString(size.x / 2, size.y / 2, 0xf, "残り：%d秒", (COUNT_DOWN_MAX - time) / 1000);
+		int countDown = abs((COUNT_DOWN_MAX - time) / 1000);
+		if (!timeOver_)
+		{
+			timeOver_ = countDown == 0 ? true : false;
+
+			DrawFormatString(size.x / 2, size.y / 2, 0xf, "残り：%d秒", countDown);
+		}
+		else
+		{
+			DrawFormatString(size.x / 2, size.y / 2, 0xf, "待ち時間オーバー：%d秒", countDown);
+			if (countDown > 10)
+			{
+				lpNetWork.SetActive(ActiveState::Play);
+			}
+		}
 	}
 	else
 	{

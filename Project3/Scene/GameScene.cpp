@@ -25,7 +25,14 @@ uniqueBase GameScene::Update(uniqueBase scene)
 {
     if (resultData_.size())
     {
-        return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<ResultScene>(resultData_));
+        std::vector<int>idData{};
+
+        for (auto& id : resultData_)
+        {
+            idData.emplace_back(id.iData);
+        }
+
+        return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<ResultScene>(idData));
     }
     stateUpdate_[gameState_]();
     tileMap_.Update();
@@ -275,8 +282,11 @@ void GameScene::InitFunc()
                 obj->Update();
                 if (!obj->Alive() && obj->ObjType() == ObjectType::Player)
                 {
-                    deathList_.emplace_front(obj->ID());
-                    playerCnt_--;
+                    if (playerCnt_ > 0)
+                    {
+                        deathList_.emplace_front(obj->ID());
+                        playerCnt_--;
+                    }
                 }
             }
         }
