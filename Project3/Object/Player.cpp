@@ -359,9 +359,16 @@ bool Player::UpdateRev()
 
 		if (data.size())
 		{
-			pos_.x = data[1].iData;
-			pos_.y = data[2].iData;
-			dir_ = static_cast<DIR>(data[3].iData);
+			// スクリーンより大きかったり小さかったりする座標が送られてきたらはじく
+			if (data[1].iData >= CHIP_SIZE &&
+				data[2].iData >= CHIP_SIZE &&
+				data[1].iData <= lpSceneMng.screenSize_.x - CHIP_SIZE &&
+				data[2].iData <= lpSceneMng.screenSize_.y - CHIP_SIZE)
+			{
+				pos_.x = data[1].iData;
+				pos_.y = data[2].iData;
+				dir_ = static_cast<DIR>(data[3].iData);
+			}
 		}
 		lost = true;     
 	}

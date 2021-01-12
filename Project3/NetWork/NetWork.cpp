@@ -2,6 +2,7 @@
 #include "HostState.h"
 #include "GestState.h"
 #include <DxLib.h>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -85,7 +86,7 @@ bool NetWork::Update(void)
 	while (ProcessMessage() == 0 && handlelist_.size() && !endFlg_)
 	{
 		auto lostHandle = GetLostNetWork();
-
+		int lengthCnt = 0;
 		// データの長さチェック
 		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 		{
@@ -123,32 +124,63 @@ bool NetWork::Update(void)
 				// データがある場合
 				if (revHeader.length)
 				{
-					tmpPacket.resize(tmpPacket.size() + revHeader.length);
+					if (tmpPacket.max_size() > static_cast<size_t>(tmpPacket.size() + revHeader.length))
+					{
+						tmpPacket.resize(tmpPacket.size() + revHeader.length);
 
-					// データの受け取り
-					NetWorkRecv(list->handle_, &tmpPacket[writePos], sizeof(int) * revHeader.length);
-					writePos = tmpPacket.size();
+						// データの受け取り
+						NetWorkRecv(list->handle_, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+						writePos = tmpPacket.size();
+					}
+					else
+					{
+						TRACE("データサイズが大きすぎます\n");
+					}
 				}
-
 				// まだデータが残ってる場合
 				if (revHeader.next)
 				{
+					lengthCnt++;
+					// TRACE("%d\n", lengthCnt);
 					continue;
 				}
+				lengthCnt = 0;
 
 				// 
-				SendMesAll(revHeader.type, tmpPacket, list->handle_);
 
+				if (revHeader.length < 500 && revHeader.length >= 0)
+				{
 
-				if (static_cast<int>(revHeader.type) >= static_cast<int>(MesType::NON) && 
-					static_cast<int>(revHeader.type) <= static_cast<int>(MesType::MAX))
-				{
-					unsigned int type = static_cast<int>(revHeader.type) - static_cast<int>(MesType::NON);
-					revUpdate_[type](revHeader, tmpPacket);
-				}
-				else
-				{
-					TRACE("メッセージタイプが変 ID : %d\n", list->id_);
+					if (static_cast<int>(revHeader.type) >= static_cast<int>(MesType::NON) &&
+						static_cast<int>(revHeader.type) <= static_cast<int>(MesType::MAX))
+					{
+						if (revHeader.type == MesType::POS)
+						{
+							if (revHeader.length == 6)
+							{
+								SendMesAll(revHeader.type, tmpPacket, list->handle_);
+
+								unsigned int type = static_cast<int>(revHeader.type) - static_cast<int>(MesType::NON);
+								revUpdate_[type](revHeader, tmpPacket);
+							}
+							else
+							{
+								TRACE("pos\n");
+							}
+						}
+						else
+						{
+							SendMesAll(revHeader.type, tmpPacket, list->handle_);
+
+							unsigned int type = static_cast<int>(revHeader.type) - static_cast<int>(MesType::NON);
+							revUpdate_[type](revHeader, tmpPacket);
+						}
+
+					}
+					else
+					{
+						TRACE("メッセージタイプが変 ID : %d\n", list->id_);
+					}
 				}
 			}
 		}
@@ -490,6 +522,12 @@ void NetWork::InitFunc(void)
 	// ---- ゲスト ---
 	auto stanby = [&](MesH& data, UnionVec& packet)
 	{
+		if (loadStage_ > 0)
+		{
+			TRACE("ｽﾃｰｼﾞ情報が%d回送られてきてます\n",loadStage_);
+			return false;
+		}
+		loadStage_++;
 		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
 
 		std::ifstream ifs("TileMap/Stage01_FileData.dat", std::ios::in | std::ios::binary);					// ヘッダー読み込み用
@@ -571,7 +609,7 @@ void NetWork::InitFunc(void)
 				}
 			}
 		}
-		ifs.close();
+
 		return true;
 	};
 
@@ -616,7 +654,22 @@ void NetWork::InitFunc(void)
 					// if (packet[0].iData > 0)
 					{
 						std::lock_guard<std::mutex> lock(revDataList_[id].first);
-						revDataList_[id].second.emplace_back(data, packet);
+						auto a = (revDataList_[id].second.size() + packet.size());
+						auto b = revDataList_[id].second.max_size();
+
+						if (packet.size() > 5000)
+						{
+							int unko = 0;
+						}
+
+						if (b > a && a > 0)
+						{
+							revDataList_[id].second.emplace_back(data, packet);
+						}
+						else
+						{
+							int unchi = 0;
+						}
 					}
 				}
 			}
@@ -667,6 +720,14 @@ void NetWork::InitFunc(void)
 
 		startCntFlg_ = true;
 		countDownTime_ = timeData.time;
+
+		chronoTime now = std::chrono::system_clock::now();
+		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - countDownTime_).count();
+		auto tmp = (COUNT_START_MAX - time) / 1000;
+		if (tmp < 0)
+		{
+			countDownTime_ = lpSceneMng.GetTime();
+		}
 		return true;
 	};
 
@@ -712,6 +773,7 @@ void NetWork::Init(void)
 	revBox_.clear();
 	endFlg_ = false;
 	handlelist_.clear();
+	loadStage_ = 0;
 	// バイト長の読み込み
 	std::ifstream ifs("init/setting.txt");
 	if (ifs.fail())
