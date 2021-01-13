@@ -41,7 +41,8 @@ public:
 private:
 	bool LoadTsx(std::string fileName);
 
-	std::string version_;											// 現在のファイルのVersionを定義して格納しておく
+	std::map<std::string, int>version_;
+	//std::string version_;											// 現在のファイルのVersionを定義して格納しておく
 	std::string tmxFileName_;										// Tmxファイル名保存
 	std::string tsxFileName_;										// Tsxファイル名保存
 	std::string ImageName_;											// タイルの画像取得

@@ -4,7 +4,9 @@
 
 TmxLoader::TmxLoader()
 {
-    version_ = TMX_VERSION;
+    version_.try_emplace("1.4", 1);
+    version_.try_emplace("1.4.1", 1);
+    version_.try_emplace("1.4.2", 1);
 }
 
 TmxLoader::~TmxLoader()
@@ -20,7 +22,7 @@ bool TmxLoader::LoadTmx(std::string fileName)
     root_node = doc.first_node("map");
 
     // バージョンチェック
-    if (root_node->first_attribute("version")->value() != version_) {
+    if (version_.count(root_node->first_attribute("version")->value()) == 0) {
         std::cout << "バージョンが違います" << std::endl;
         return false;
     }
@@ -102,7 +104,7 @@ bool TmxLoader::LoadTsx(std::string fileName)
     rapidxml::xml_node<>* root_node = doc.first_node("tileset");
 
     // バージョンチェック
-    if (root_node->first_attribute("version")->value() != version_) {
+    if (version_.count(root_node->first_attribute("version")->value()) == 0) {
         std::cout << "バージョンが違います" << std::endl;
         return false;
     }

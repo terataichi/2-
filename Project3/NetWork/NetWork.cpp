@@ -2,6 +2,7 @@
 #include "HostState.h"
 #include "GestState.h"
 #include <DxLib.h>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -109,7 +110,7 @@ bool NetWork::Update(void)
 	while (ProcessMessage() == 0 && !endFlg_)
 	{
 		auto lostHandle = GetLostNetWork();
-
+		int lengthCnt = 0;
 		// データの長さチェック
 		for (auto list = handlelist_.begin(); list != handlelist_.end(); list++)
 		{
@@ -144,31 +145,47 @@ bool NetWork::Update(void)
 				// ヘッダー部の受信
 				NetWorkRecv(list->handle_, &revHeader, sizeof(MesH));
 
-				// データがある場合
-				if (revHeader.length)
+				if (static_cast<int>(revHeader.type) > static_cast<int>(MesType::NON) &&
+					static_cast<int>(revHeader.type) < static_cast<int>(MesType::MAX))
 				{
-					tmpPacket.resize(tmpPacket.size() + revHeader.length);
+					// データがある場合
+					if (revHeader.length)
+					{
+						if (revHeader.length > 0 && revHeader.length <= 500)
+						{
+							tmpPacket.resize(tmpPacket.size() + revHeader.length);
 
-					// データの受け取り
-					NetWorkRecv(list->handle_, &tmpPacket[writePos], sizeof(int) * revHeader.length);
-					writePos = tmpPacket.size();
-				}
+							// データの受け取り
+							NetWorkRecv(list->handle_, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+							writePos = tmpPacket.size();
+						}
+						else
+						{
+							//if (revHeader.length >= 500)
+							//{
+							//	int karauchi = 0;
+							//	TRACE("ﾃﾞｰﾀ空うち\n");
+							//	// 空うち
+							//	NetWorkRecv(list->handle_, &tmpPacket[writePos], sizeof(int) * revHeader.length);
+							//}
+							TRACE("データサイズが大きすぎます\n");
+						}
+					}
+					// まだデータが残ってる場合
+					if (revHeader.next)
+					{
+						lengthCnt++;
+						// TRACE("%d\n", lengthCnt);
+						continue;
+					}
+					lengthCnt = 0;
 
-				// まだデータが残ってる場合
-				if (revHeader.next)
-				{
-					continue;
-				}
+					// 
+					SendMesAll(revHeader.type, tmpPacket, list->handle_);
 
-				// 
-				SendMesAll(revHeader.type, tmpPacket, list->handle_);
-
-
-				if (static_cast<int>(revHeader.type) >= static_cast<int>(MesType::NON) && 
-					static_cast<int>(revHeader.type) <= static_cast<int>(MesType::MAX))
-				{
 					unsigned int type = static_cast<int>(revHeader.type) - static_cast<int>(MesType::NON);
 					revUpdate_[type](revHeader, tmpPacket);
+
 				}
 				else
 				{
@@ -521,6 +538,12 @@ void NetWork::InitFunc(void)
 	// ---- ゲスト ---
 	auto stanby = [&](MesH& data, UnionVec& packet)
 	{
+		if (loadStage_ > 0)
+		{
+			TRACE("ｽﾃｰｼﾞ情報が%d回送られてきてます\n",loadStage_);
+			return false;
+		}
+		loadStage_++;
 		std::ofstream ofs("TileMap/SendData.tmx", std::ios::out);			// 書き込み用
 
 		std::ifstream ifs("TileMap/Stage01_FileData.dat", std::ios::in | std::ios::binary);					// ヘッダー読み込み用
@@ -602,12 +625,16 @@ void NetWork::InitFunc(void)
 				}
 			}
 		}
-		ifs.close();
+
 		return true;
 	};
 
 	auto tmx_Size = [&](MesH& data, UnionVec& packet)
 	{
+		if (!packet.size())
+		{
+			return false;
+		}
 		// 縦かけ横かけレイヤー数
 		tmxSize_ = packet[0].cData[0] * packet[0].cData[1] * packet[0].cData[2];
 		revBox_.resize(tmxSize_);
@@ -619,6 +646,10 @@ void NetWork::InitFunc(void)
 
 	auto  tmx_Data = [&](MesH& data, UnionVec& packet)
 	{
+		if (!packet.size())
+		{
+			return false;
+		}
 		revBox_ = packet;
 		return true;
 	};
@@ -636,6 +667,33 @@ void NetWork::InitFunc(void)
 			{
 				TRACE("ボマー見つけた\n");
 				return false;
+			}
+
+			if (!(data.length > 0))
+			{
+				TRACE("Lengthの範囲異常%d\n",data.length);
+				return false;
+			}
+
+			if (!(data.length < 500))
+			{
+				TRACE("Lengthの範囲異常%d\n", data.length);
+				return false;
+			}
+
+			// タイプの範囲チェックは受け取る前にしてる
+			if (data.type == MesType::POS)
+			{
+				if (data.length != 4)
+				{
+					TRACE("PosのLength異常:%d\n",data.length);
+					return false;
+				}
+			}
+
+			if (data.type == MesType::SET_BOMB)
+			{
+				int unchi = 0;
 			}
 
 			int id = packet[0].iData / 5;
@@ -663,6 +721,12 @@ void NetWork::InitFunc(void)
 
 	auto countDown = [&](MesH& data, UnionVec& packet) 
 	{
+		if (!packet.size())
+		{
+			TRACE("countDownサイズなし\n");
+			return false;
+		}
+
 		TimeData timeData{};
 		timeData.iData[0] = packet[0].iData;
 		timeData.iData[1] = packet[1].iData;
@@ -674,6 +738,10 @@ void NetWork::InitFunc(void)
 
 	auto id = [&](MesH& data, UnionVec& packet)
 	{
+		if (!packet.size())
+		{
+			return false;
+		}
 		// 一回だけ設定
 		if (packet[0].iData % 5 == 0)
 		{
@@ -692,20 +760,43 @@ void NetWork::InitFunc(void)
 
 	auto startTime = [&](MesH& data, UnionVec& packet)
 	{
+
+		if (!packet.size())
+		{
+			return false;
+		}
+
 		TimeData timeData{};
 		timeData.iData[0] = packet[0].iData;
 		timeData.iData[1] = packet[1].iData;
 
 		startCntFlg_ = true;
 		countDownTime_ = timeData.time;
+
+		chronoTime now = std::chrono::system_clock::now();
+		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(now - countDownTime_).count();
+		auto tmp = (COUNT_START_MAX - time) / 1000;
+		if (tmp < 0)
+		{
+			countDownTime_ = lpSceneMng.GetTime();
+		}
 		return true;
 	};
 
 	auto result = [&](MesH& data, UnionVec& packet)
 	{
+		TRACE("リザルト:");
 		if (packet.size() == 5)
 		{
-			resultData_ = packet;
+			if (!resultData_.size())
+			{
+				resultData_ = packet;
+			}
+		}
+		else
+		{
+			TRACE("サイズエラー\n");
+			return false;
 		}
 		return true;
 	};
@@ -743,6 +834,7 @@ void NetWork::Init(void)
 	revBox_.clear();
 	endFlg_ = false;
 	handlelist_.clear();
+	loadStage_ = 0;
 	// バイト長の読み込み
 	std::ifstream ifs("init/setting.txt");
 	if (ifs.fail())

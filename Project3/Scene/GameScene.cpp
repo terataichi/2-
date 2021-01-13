@@ -106,7 +106,7 @@ void GameScene::Init(void)
     }
     else if (mode == NetWorkMode::GUEST)
     {
-        if (!tileMap_.LoadTmx("TileMap/SendData.tmx"))
+         if (!tileMap_.LoadTmx("TileMap/SendData.tmx"))
         {
             TRACE("TMXファイルが開けません\n");
             return;

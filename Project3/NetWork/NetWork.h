@@ -183,6 +183,7 @@ private:
 	chronoTime countDownTime_;
 	bool countDownFlg_;														// カウントダウンが開始されているか
 	bool startCntFlg_;
+	int loadStage_;															// ｽﾃｰｼﾞの情報は一度しか送られてきてほしくない
 	listIntP handlelist_;
 
 	bool endFlg_;															// ネットワークを切断していいか

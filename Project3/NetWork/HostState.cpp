@@ -22,17 +22,6 @@ HostState::~HostState()
 {
 }
 
-//ActiveState HostState::CheckPreparation(void)
-//{
-//	bool flg;
-//	flg = PreparationListenNetWork(portNum_) == 0 ? true : false;
-//
-//	// Ú‘±‘Ò‚¿ó‘Ô‚É‚·‚é
-//	if (flg) return ActiveState::Wait;
-//
-//	return ActiveState::Non;
-//}
-
 bool HostState::CheckConnect(void)
 {
 	if (lpNetWork.GetStartCntFlg())
