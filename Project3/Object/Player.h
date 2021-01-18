@@ -72,5 +72,6 @@ private:
 
 	int bombCnt_;
 	int length_;													// ƒ{ƒ€‚Éî•ñ‚ğ‘—‚é‚Ì‚É•K—v
+	bool endFlg = false;
 };
 

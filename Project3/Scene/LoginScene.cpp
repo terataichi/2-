@@ -13,6 +13,7 @@
 #include "../common/TileMap.h"
 #include "GameScene.h"
 #include "CrossOverScene.h"
+#include "StarScene.h"
 
 //#include "../TMXParser-master/include/TMXParser.h"
 
@@ -100,7 +101,7 @@ uniqueBase LoginScene::Update(uniqueBase scene)
 	// ネットワークのアップデート
 	if (!funcUpdate_[updateMode_]())
 	{
-		return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<GameScene>());
+		return std::make_unique<StarScene>(std::move(scene), std::make_unique<GameScene>());
 	}
 	DrawOwnScene();
 	return scene;

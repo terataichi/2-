@@ -167,6 +167,8 @@
     <ClCompile Include="Scene\SceneMng.cpp" />
     <ClCompile Include="Scene\LoginScene.cpp" />
     <ClCompile Include="common\TileMap.cpp" />
+    <ClCompile Include="Scene\StarScene.cpp" />
+    <ClCompile Include="Object\Star.cpp" />
     <ClCompile Include="TmxLoader.cpp" />
     <ClCompile Include="Scene\TransitionScene.cpp" />
     <ClCompile Include="_debug\_DebugConOut.cpp" />
@@ -196,6 +198,8 @@
     <ClInclude Include="Scene\SceneMng.h" />
     <ClInclude Include="Scene\LoginScene.h" />
     <ClInclude Include="common\TileMap.h" />
+    <ClInclude Include="Scene\StarScene.h" />
+    <ClInclude Include="Object\Star.h" />
     <ClInclude Include="TileMap\rapidxml.hpp" />
     <ClInclude Include="TileMap\rapidxml_iterators.hpp" />
     <ClInclude Include="TileMap\rapidxml_print.hpp" />

@@ -33,7 +33,7 @@ ResultScene::ResultScene(std::vector<int>& resultData)
                 (*id) < -1 ||
                 (*id) % 5 != 0)
             {
-                cnt++;
+                //cnt++;
                 return cnt;
             }
             cnt++;

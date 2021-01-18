@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <DxLib.h>
 #include "CrossOverScene.h"
+#include "StarScene.h"
 #include "ResultScene.h"
 #include "../_debug/_DebugConOut.h"
 #include "../NetWork/NetWork.h"
@@ -32,7 +33,7 @@ uniqueBase GameScene::Update(uniqueBase scene)
             idData.emplace_back(id.iData);
         }
 
-        return std::make_unique<CrossOverScene>(std::move(scene), std::make_unique<ResultScene>(idData));
+        return std::make_unique<StarScene>(std::move(scene), std::make_unique<ResultScene>(idData));
     }
     stateUpdate_[gameState_]();
     tileMap_.Update();

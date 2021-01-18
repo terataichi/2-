@@ -90,6 +90,11 @@ bool Player::Update()
 		itemUpdate[static_cast<ItemType>(type)]();
 	}
 
+	if (endFlg)
+	{
+		alive_ = false;
+	}
+
 	// ID別処理
 	return 	netFunc_();
 }
@@ -98,17 +103,34 @@ void Player::Draw()
 {
 	VecInt handle = lpImageMng.GetHandle("Image/bomberman.png", { 5,4 }, { 32,51 });
 
-	auto tmpCnt = (animCnt_ / 10);
 
-	int animNun = 0;
-	if (state_ == STATE::Run)
+	if (state_ == STATE::Deth)
 	{
-		animNun = 2;
+		if (animCnt_ >= 30)
+		{
+			endFlg = true;
+			return;
+		}
+		auto tmpCnt = (animCnt_ / 10) * 5;
+
+		DrawGraph(pos_.x, pos_.y - 30, handle[4 + tmpCnt], true);
+
+	}
+	else
+	{
+		auto tmpCnt = (animCnt_ / 10);
+
+		int animNun = 0;
+		if (state_ == STATE::Run)
+		{
+			animNun = 2;
+		}
+
+		DrawGraph(pos_.x, pos_.y - 30, handle[((animNun + (tmpCnt % 2)) * 5) + static_cast<int>(dir_)], true);
+
+		//DrawBox(pos_.x, pos_.y, pos_.x + CHIP_SIZE, pos_.y + CHIP_SIZE, 0xffff, false);
 	}
 
-	DrawGraph(pos_.x, pos_.y - 30, handle[((animNun +(tmpCnt % 2)) * 5) + static_cast<int>(dir_)], true);
-
-	DrawBox(pos_.x, pos_.y, pos_.x + CHIP_SIZE, pos_.y + CHIP_SIZE, 0xffff, false);
 	animCnt_++;
 }
 
@@ -244,6 +266,11 @@ bool Player::UpdateDef()
 		return false;
 	}
 
+	if (state_ == STATE::Deth)
+	{
+		return true;
+	}
+
 	// 入力のアップデート
 	(*input_)();
 
@@ -262,7 +289,7 @@ bool Player::UpdateDef()
 	}
 
 	// 何も入力されなかった
-	if (!animFlg)
+	if (!animFlg && state_ != STATE::Deth)
 	{
 		state_ = STATE::Non;
 	}
@@ -296,7 +323,8 @@ bool Player::UpdateDef()
 		data[0].iData = id_;
 
 		lpNetWork.SendMesAll(MesType::DETH, UnionVec{ data[0]}, 0);
-		alive_ = false;
+		animCnt_ = 0;
+		state_ = STATE::Deth;
 	}
 	else
 	{
@@ -315,6 +343,16 @@ bool Player::UpdateDef()
 
 bool Player::UpdateAuto()
 {
+	if (!alive_)
+	{
+		return false;
+	}
+
+	if (state_ == STATE::Deth)
+	{
+		return true;
+	}
+
 	//CheckMoveBombAuto();
 	if (CheckWallAuto())
 	{
@@ -334,7 +372,8 @@ bool Player::UpdateAuto()
 		data[0].iData = id_;
 
 		lpNetWork.SendMes(MesType::DETH, UnionVec{ data[0] });
-		alive_ = false;
+		animCnt_ = 0;
+		state_ = STATE::Deth;
 	}
 	else
 	{
@@ -352,7 +391,18 @@ bool Player::UpdateAuto()
 
 bool Player::UpdateRev()
 {
+	if (!alive_)
+	{
+		return false;
+	}
+
+	if (state_ == STATE::Deth)
+	{
+		return true;
+	}
+
 	bool lost = false;
+	state_ = STATE::Run;
 	while (CheckData(MesType::POS))
 	{
 		UnionVec data{};
@@ -423,7 +473,8 @@ bool Player::UpdateRev()
 		UnionVec data{};
 		PickData(MesType::DETH, data);
 
-		alive_ = false;
+		animCnt_ = 0;
+		state_ = STATE::Deth;
 		lost = true;
 	}
 
